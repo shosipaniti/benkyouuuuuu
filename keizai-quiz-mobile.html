@@ -483,6 +483,11 @@ button:disabled {
         <input id="searchInput" type="search" placeholder="語句・答えで検索">
 
         <div class="filter-group">
+          <h2>問題区分</h2>
+          <div id="kindFilters" class="chip-list"></div>
+        </div>
+
+        <div class="filter-group">
           <h2>範囲</h2>
           <div id="sourceFilters" class="chip-list"></div>
         </div>
@@ -1281,7 +1286,545 @@ window.QUESTION_DATA = [
 ];
     </script>
     <script>
-const questions = window.QUESTION_DATA || [];
+window.PREDICTED_QUESTION_DATA = [
+  {
+    "id": "pred-1-1",
+    "source": "予想 第1回",
+    "category": "prediction",
+    "number": 1,
+    "prompt": "価格と価値の違いについて、経済学でいう「価値」に最も近い説明を選びなさい。",
+    "answer": "その物に対して現時点で支払ってもよいと考える上限の金額",
+    "type": "single",
+    "choices": [
+      "売り手が店頭で表示する金額",
+      "その物に対して現時点で支払ってもよいと考える上限の金額",
+      "生産者が負担した原材料費",
+      "市場で実際に支払われた税額"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-1-2",
+    "source": "予想 第1回",
+    "category": "prediction",
+    "number": 2,
+    "prompt": "合意に基づく交換が成立すると、売り手と買い手にはどのようなことが起こるか。適切なものを選びなさい。",
+    "answer": "双方が交換前より得をする",
+    "type": "single",
+    "choices": [
+      "買い手だけが得をする",
+      "売り手だけが得をする",
+      "双方が交換前より得をする",
+      "必ずどちらかが損をする"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-1-3",
+    "source": "予想 第1回",
+    "category": "prediction",
+    "number": 3,
+    "prompt": "消費者余剰・生産者余剰・総余剰の説明として正しい組み合わせを選びなさい。",
+    "answer": "① = 支払意思額 − 価格 / ② = 価格 − 費用 / ③ = 消費者余剰 + 生産者余剰",
+    "type": "matching",
+    "choices": [
+      "a: 支払意思額 − 価格",
+      "b: 価格 − 費用",
+      "c: 消費者余剰 + 生産者余剰",
+      "d: 費用 − 価格"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-1-4",
+    "source": "予想 第1回",
+    "category": "prediction",
+    "number": 4,
+    "prompt": "完全競争市場の条件として当てはまらないものを選びなさい。",
+    "answer": "売り手が一社だけで価格を自由に決められる",
+    "type": "single",
+    "choices": [
+      "売り手と買い手が多数存在する",
+      "財産権や契約の履行が保障されている",
+      "取引費用が十分に低い",
+      "売り手が一社だけで価格を自由に決められる"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-1-5",
+    "source": "予想 第1回",
+    "category": "prediction",
+    "number": 5,
+    "prompt": "需要曲線と供給曲線について、①から③に当てはまる語句を選びなさい。\n需要曲線は①の行動を表し、通常は②である。供給曲線は③の行動を表す。",
+    "answer": "① = 消費者 / ② = 右下がり / ③ = 生産者",
+    "type": "matching",
+    "choices": [
+      "a: 消費者",
+      "b: 生産者",
+      "c: 右下がり",
+      "d: 右上がり"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-1-6",
+    "source": "予想 第1回",
+    "category": "prediction",
+    "number": 6,
+    "prompt": "所得が増えて、ある財をどの価格でも多く買うようになる場合、その財の需要曲線はどちらにシフトするか。",
+    "answer": "右",
+    "type": "single",
+    "choices": [
+      "右",
+      "左",
+      "変化しない",
+      "供給曲線になる"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-2-1",
+    "source": "予想 第2回",
+    "category": "prediction",
+    "number": 1,
+    "prompt": "需要曲線の高さは何を表しているか。最も適切なものを選びなさい。",
+    "answer": "消費者の支払意思額",
+    "type": "single",
+    "choices": [
+      "消費者の支払意思額",
+      "生産者の固定費",
+      "政府の税収",
+      "企業の広告費"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-2-2",
+    "source": "予想 第2回",
+    "category": "prediction",
+    "number": 2,
+    "prompt": "機会費用の説明として最も適切なものを選びなさい。",
+    "answer": "ある選択で失われるものを他の用途に使ったとき最大限得られる満足度を金銭換算したもの",
+    "type": "single",
+    "choices": [
+      "財布から実際に出ていった金額だけ",
+      "ある選択で失われるものを他の用途に使ったとき最大限得られる満足度を金銭換算したもの",
+      "政府が市場に課す税金",
+      "価格から消費者余剰を引いたもの"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-2-3",
+    "source": "予想 第2回",
+    "category": "prediction",
+    "number": 3,
+    "prompt": "供給曲線の高さは何を表しているか。最も適切なものを選びなさい。",
+    "answer": "生産者の機会費用",
+    "type": "single",
+    "choices": [
+      "消費者の価値",
+      "生産者の機会費用",
+      "均衡取引量",
+      "消費税率"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-2-4",
+    "source": "予想 第2回",
+    "category": "prediction",
+    "number": 4,
+    "prompt": "完全競争市場で自由な取引が行われ、市場均衡点で取引されるとき、総余剰はどうなるか。",
+    "answer": "最大になる",
+    "type": "single",
+    "choices": [
+      "最大になる",
+      "必ずゼロになる",
+      "生産者余剰だけがなくなる",
+      "需要曲線が消える"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-2-5",
+    "source": "予想 第2回",
+    "category": "prediction",
+    "number": 5,
+    "prompt": "均衡価格よりも低い価格で上限規制を導入すると何が発生しやすいか。",
+    "answer": "超過需要",
+    "type": "single",
+    "choices": [
+      "超過需要",
+      "超過供給",
+      "自然独占",
+      "逆選択"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-2-6",
+    "source": "予想 第2回",
+    "category": "prediction",
+    "number": 6,
+    "prompt": "政府の介入で取引量が均衡取引量からずれ、失われた余剰を何というか。",
+    "answer": "死荷重",
+    "type": "text",
+    "choices": [
+
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-3-1",
+    "source": "予想 第3回",
+    "category": "prediction",
+    "number": 1,
+    "prompt": "市場の失敗に含まれるものをすべて選びなさい。",
+    "answer": "不完全競争 / 外部性 / 公共財 / 情報の非対称性",
+    "type": "multiple",
+    "choices": [
+      "不完全競争",
+      "外部性",
+      "公共財",
+      "情報の非対称性",
+      "完全競争"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-3-2",
+    "source": "予想 第3回",
+    "category": "prediction",
+    "number": 2,
+    "prompt": "独占企業が市場支配力を持つ主な理由として、最も適切なものを選びなさい。",
+    "answer": "参入障壁があるから",
+    "type": "single",
+    "choices": [
+      "参入障壁があるから",
+      "消費者が多数いるから",
+      "市場価格を受け入れるから",
+      "需要曲線が存在しないから"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-3-3",
+    "source": "予想 第3回",
+    "category": "prediction",
+    "number": 3,
+    "prompt": "独占企業について、①から③に当てはまる語句を選びなさい。\n独占企業は①を持ち、②曲線を知っていると仮定される。また独占企業には③曲線が存在しない。",
+    "answer": "① = 市場支配力 / ② = 市場全体の需要 / ③ = 供給",
+    "type": "matching",
+    "choices": [
+      "a: 市場支配力",
+      "b: 市場全体の需要",
+      "c: 供給",
+      "d: 外部費用"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-3-4",
+    "source": "予想 第3回",
+    "category": "prediction",
+    "number": 4,
+    "prompt": "品質に関する情報の非対称性が契約前から存在し、質の悪いものが市場に残りやすくなる問題を何というか。",
+    "answer": "逆選択",
+    "type": "text",
+    "choices": [
+
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-3-5",
+    "source": "予想 第3回",
+    "category": "prediction",
+    "number": 5,
+    "prompt": "情報の非対称性への対策について正しい組み合わせを選びなさい。",
+    "answer": "① = シグナリング / ② = スクリーニング / ③ = モニタリング",
+    "type": "matching",
+    "choices": [
+      "a: シグナリング",
+      "b: スクリーニング",
+      "c: モニタリング",
+      "d: カルテル"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-3-6",
+    "source": "予想 第3回",
+    "category": "prediction",
+    "number": 6,
+    "prompt": "契約後の行動に関する情報の非対称性によって、依頼された側が望ましくない行動をとる問題を何というか。",
+    "answer": "モラルハザード",
+    "type": "text",
+    "choices": [
+
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-4-1",
+    "source": "予想 第4回",
+    "category": "prediction",
+    "number": 1,
+    "prompt": "外部性の説明として最も適切なものを選びなさい。",
+    "answer": "ある経済主体の活動が市場を通さずに別の経済主体の環境に影響を与えること",
+    "type": "single",
+    "choices": [
+      "ある経済主体の活動が市場を通さずに別の経済主体の環境に影響を与えること",
+      "市場で価格が必ず均衡すること",
+      "売り手が多数存在すること",
+      "政府が必ず財を直接生産すること"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-4-2",
+    "source": "予想 第4回",
+    "category": "prediction",
+    "number": 2,
+    "prompt": "私的費用・外部費用・社会的費用について正しい組み合わせを選びなさい。",
+    "answer": "① = 私的費用 / ② = 外部費用 / ③ = 社会的費用",
+    "type": "matching",
+    "choices": [
+      "a: 私的費用",
+      "b: 外部費用",
+      "c: 社会的費用",
+      "d: 消費者余剰"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-4-3",
+    "source": "予想 第4回",
+    "category": "prediction",
+    "number": 3,
+    "prompt": "負の外部性がある市場では、企業が私的限界費用だけを考えると生産量は社会的に望ましい水準と比べてどうなるか。",
+    "answer": "過大になる",
+    "type": "single",
+    "choices": [
+      "過大になる",
+      "過小になる",
+      "必ずゼロになる",
+      "需要曲線と一致する"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-4-4",
+    "source": "予想 第4回",
+    "category": "prediction",
+    "number": 4,
+    "prompt": "外部性に対する課税と補助金の名称として正しい組み合わせを選びなさい。",
+    "answer": "① = ピグー税 / ② = ピグー補助金",
+    "type": "matching",
+    "choices": [
+      "a: ピグー税",
+      "b: ピグー補助金",
+      "c: フリーライダー",
+      "d: 春闘"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-4-5",
+    "source": "予想 第4回",
+    "category": "prediction",
+    "number": 5,
+    "prompt": "公共財の性質として正しい組み合わせを選びなさい。",
+    "answer": "① = 非排除性 / ② = 非競合性",
+    "type": "matching",
+    "choices": [
+      "a: 非排除性",
+      "b: 非競合性",
+      "c: 価格支配力",
+      "d: 機会費用"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-4-6",
+    "source": "予想 第4回",
+    "category": "prediction",
+    "number": 6,
+    "prompt": "共有資源（コモンズ）の性質として正しいものを選びなさい。",
+    "answer": "非排除性があり、競合性がある",
+    "type": "single",
+    "choices": [
+      "排除可能で非競合性がある",
+      "非排除性があり、競合性がある",
+      "排除可能で競合性がある",
+      "非排除性があり、非競合性がある"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-5-1",
+    "source": "予想 第5回",
+    "category": "prediction",
+    "number": 1,
+    "prompt": "取引費用に含まれるものをすべて選びなさい。",
+    "answer": "取引相手を探す費用 / 移動や時間の費用 / 契約を締結する費用",
+    "type": "multiple",
+    "choices": [
+      "取引相手を探す費用",
+      "移動や時間の費用",
+      "契約を締結する費用",
+      "完全競争市場で最大化された総余剰"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-5-2",
+    "source": "予想 第5回",
+    "category": "prediction",
+    "number": 2,
+    "prompt": "労働力率の説明として正しいものを選びなさい。",
+    "answer": "15歳以上人口に占める労働力の割合",
+    "type": "single",
+    "choices": [
+      "15歳以上人口に占める労働力の割合",
+      "企業数に占める大企業の割合",
+      "賃金に占める税金の割合",
+      "労働者一人当たりの付加価値"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-5-3",
+    "source": "予想 第5回",
+    "category": "prediction",
+    "number": 3,
+    "prompt": "労働市場について正しい組み合わせを選びなさい。\n需要曲線は①の行動を表し、供給曲線は②の行動を表す。賃金が上がると労働需要量は③し、労働供給量は④する。",
+    "answer": "① = 企業 / ② = 労働者 / ③ = 減少 / ④ = 増加",
+    "type": "matching",
+    "choices": [
+      "a: 企業",
+      "b: 労働者",
+      "c: 減少",
+      "d: 増加"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-5-4",
+    "source": "予想 第5回",
+    "category": "prediction",
+    "number": 4,
+    "prompt": "現金給与額の支払総額を①賃金、名目賃金から物価上昇分を除いたものを②賃金という。",
+    "answer": "① = 名目 / ② = 実質",
+    "type": "matching",
+    "choices": [
+      "a: 名目",
+      "b: 実質",
+      "c: 最低",
+      "d: 効率"
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-5-5",
+    "source": "予想 第5回",
+    "category": "prediction",
+    "number": 5,
+    "prompt": "生産活動によって得られた付加価値のうち、労働者が受け取った割合を示す指標を何というか。",
+    "answer": "労働分配率",
+    "type": "text",
+    "choices": [
+
+    ],
+    "images": [
+
+    ]
+  },
+  {
+    "id": "pred-5-6",
+    "source": "予想 第5回",
+    "category": "prediction",
+    "number": 6,
+    "prompt": "労働者が受け入れる最低の金額より高い賃金を支払い、努力水準や離職率に影響を与える考え方を何というか。",
+    "answer": "効率賃金仮説",
+    "type": "text",
+    "choices": [
+
+    ],
+    "images": [
+
+    ]
+  }
+];
+    </script>
+    <script>
+const quizQuestions = (window.QUESTION_DATA || []).map((question) => ({
+  category: "quiz",
+  ...question
+}));
+const predictedQuestions = (window.PREDICTED_QUESTION_DATA || []).map((question) => ({
+  category: "prediction",
+  ...question
+}));
+const questions = [...quizQuestions, ...predictedQuestions];
 const storageKey = "economics-quiz-progress-v1";
 
 const typeLabels = {
@@ -1292,7 +1835,13 @@ const typeLabels = {
   free: "自由記述"
 };
 
+const categoryLabels = {
+  quiz: "小テスト問題",
+  prediction: "予想問題"
+};
+
 const state = {
+  kind: "all",
   source: "all",
   type: "all",
   status: "all",
@@ -1309,6 +1858,7 @@ const els = {
   totalCount: document.getElementById("totalCount"),
   knownCount: document.getElementById("knownCount"),
   reviewCount: document.getElementById("reviewCount"),
+  kindFilters: document.getElementById("kindFilters"),
   sourceFilters: document.getElementById("sourceFilters"),
   typeFilters: document.getElementById("typeFilters"),
   statusFilters: document.getElementById("statusFilters"),
@@ -1432,7 +1982,8 @@ function filteredQuestions() {
     .filter((question) => {
       const status = state.progress[question.id] || "new";
       const text = `${question.prompt} ${question.answer} ${question.source}`.toLowerCase();
-      return (state.source === "all" || question.source === state.source)
+      return (state.kind === "all" || question.category === state.kind)
+        && (state.source === "all" || question.source === state.source)
         && (state.type === "all" || question.type === state.type)
         && (state.status === "all" || status === state.status)
         && (!query || text.includes(query));
@@ -1449,9 +2000,30 @@ function makeButton(label, active, onClick) {
 }
 
 function renderFilters() {
+  const categories = [
+    ["all", "すべて"],
+    ["quiz", "小テスト問題"],
+    ["prediction", "予想問題"]
+  ];
+  els.kindFilters.replaceChildren(
+    ...categories.map(([value, label]) =>
+      makeButton(label, state.kind === value, () => {
+        state.kind = value;
+        state.source = "all";
+        state.index = 0;
+        state.revealed = false;
+        render();
+      })
+    )
+  );
+
+  const sources = unique(questions
+    .filter((question) => state.kind === "all" || question.category === state.kind)
+    .map((q) => q.source));
+
   els.sourceFilters.replaceChildren(
     makeButton("すべて", state.source === "all", () => setFilter("source", "all")),
-    ...unique(questions.map((q) => q.source)).map((source) =>
+    ...sources.map((source) =>
       makeButton(source, state.source === source, () => setFilter("source", source))
     )
   );
@@ -1516,7 +2088,7 @@ function renderQuiz(items) {
   const response = getResponse(question);
 
   els.cardSource.textContent = question.source;
-  els.cardType.textContent = typeLabels[question.type] || question.type;
+  els.cardType.textContent = `${categoryLabels[question.category]} / ${typeLabels[question.type] || question.type}`;
   els.cardPosition.textContent = `${state.index + 1} / ${items.length}`;
   els.questionText.textContent = question.prompt;
   els.answerText.textContent = question.answer || "解答なし";
@@ -1647,7 +2219,7 @@ function renderList(items) {
     detail.className = "list-item";
 
     const summary = document.createElement("summary");
-    summary.textContent = `${question.source} / ${typeLabels[question.type] || question.type} / ${question.prompt.split("\n")[0]}`;
+    summary.textContent = `${categoryLabels[question.category]} / ${question.source} / ${typeLabels[question.type] || question.type} / ${question.prompt.split("\n")[0]}`;
     detail.appendChild(summary);
 
     question.images.forEach((src) => {

@@ -1,4 +1,12 @@
-const questions = window.QUESTION_DATA || [];
+const quizQuestions = (window.QUESTION_DATA || []).map((question) => ({
+  category: "quiz",
+  ...question
+}));
+const predictedQuestions = (window.PREDICTED_QUESTION_DATA || []).map((question) => ({
+  category: "prediction",
+  ...question
+}));
+const questions = [...quizQuestions, ...predictedQuestions];
 const storageKey = "economics-quiz-progress-v1";
 
 const typeLabels = {
@@ -9,7 +17,13 @@ const typeLabels = {
   free: "自由記述"
 };
 
+const categoryLabels = {
+  quiz: "小テスト問題",
+  prediction: "予想問題"
+};
+
 const state = {
+  kind: "all",
   source: "all",
   type: "all",
   status: "all",
@@ -26,6 +40,7 @@ const els = {
   totalCount: document.getElementById("totalCount"),
   knownCount: document.getElementById("knownCount"),
   reviewCount: document.getElementById("reviewCount"),
+  kindFilters: document.getElementById("kindFilters"),
   sourceFilters: document.getElementById("sourceFilters"),
   typeFilters: document.getElementById("typeFilters"),
   statusFilters: document.getElementById("statusFilters"),
@@ -149,7 +164,8 @@ function filteredQuestions() {
     .filter((question) => {
       const status = state.progress[question.id] || "new";
       const text = `${question.prompt} ${question.answer} ${question.source}`.toLowerCase();
-      return (state.source === "all" || question.source === state.source)
+      return (state.kind === "all" || question.category === state.kind)
+        && (state.source === "all" || question.source === state.source)
         && (state.type === "all" || question.type === state.type)
         && (state.status === "all" || status === state.status)
         && (!query || text.includes(query));
@@ -166,9 +182,30 @@ function makeButton(label, active, onClick) {
 }
 
 function renderFilters() {
+  const categories = [
+    ["all", "すべて"],
+    ["quiz", "小テスト問題"],
+    ["prediction", "予想問題"]
+  ];
+  els.kindFilters.replaceChildren(
+    ...categories.map(([value, label]) =>
+      makeButton(label, state.kind === value, () => {
+        state.kind = value;
+        state.source = "all";
+        state.index = 0;
+        state.revealed = false;
+        render();
+      })
+    )
+  );
+
+  const sources = unique(questions
+    .filter((question) => state.kind === "all" || question.category === state.kind)
+    .map((q) => q.source));
+
   els.sourceFilters.replaceChildren(
     makeButton("すべて", state.source === "all", () => setFilter("source", "all")),
-    ...unique(questions.map((q) => q.source)).map((source) =>
+    ...sources.map((source) =>
       makeButton(source, state.source === source, () => setFilter("source", source))
     )
   );
@@ -233,7 +270,7 @@ function renderQuiz(items) {
   const response = getResponse(question);
 
   els.cardSource.textContent = question.source;
-  els.cardType.textContent = typeLabels[question.type] || question.type;
+  els.cardType.textContent = `${categoryLabels[question.category]} / ${typeLabels[question.type] || question.type}`;
   els.cardPosition.textContent = `${state.index + 1} / ${items.length}`;
   els.questionText.textContent = question.prompt;
   els.answerText.textContent = question.answer || "解答なし";
@@ -364,7 +401,7 @@ function renderList(items) {
     detail.className = "list-item";
 
     const summary = document.createElement("summary");
-    summary.textContent = `${question.source} / ${typeLabels[question.type] || question.type} / ${question.prompt.split("\n")[0]}`;
+    summary.textContent = `${categoryLabels[question.category]} / ${question.source} / ${typeLabels[question.type] || question.type} / ${question.prompt.split("\n")[0]}`;
     detail.appendChild(summary);
 
     question.images.forEach((src) => {
