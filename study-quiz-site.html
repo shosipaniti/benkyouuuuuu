@@ -501,17 +501,6 @@
           <p id="importStatus" class="import-status" aria-live="polite"></p>
         </section>
 
-        <section class="import-panel" aria-label="カテゴリ名編集">
-          <p class="filter-title">カテゴリ名を編集</p>
-          <label for="quizCategoryName">小テスト側の名前</label>
-          <input id="quizCategoryName" type="text">
-          <label for="predictionCategoryName">予想問題側の名前</label>
-          <input id="predictionCategoryName" type="text">
-          <button id="saveCategoryNamesButton" type="button">カテゴリ名を保存</button>
-          <button id="resetCategoryNamesButton" type="button">カテゴリ名を戻す</button>
-          <p id="categoryStatus" class="import-status" aria-live="polite"></p>
-        </section>
-
         <div id="dataStatus" class="data-status" hidden></div>
       </aside>
 
@@ -543,6 +532,25 @@
         </section>
 
         <section id="listView" class="list hidden">
+          <section class="editor-panel" aria-label="カテゴリ名編集">
+            <p class="filter-title">カテゴリ名を編集</p>
+            <div class="editor-grid">
+              <div>
+                <label for="quizCategoryName">小テスト側の名前</label>
+                <input id="quizCategoryName" type="text">
+              </div>
+              <div>
+                <label for="predictionCategoryName">予想問題側の名前</label>
+                <input id="predictionCategoryName" type="text">
+              </div>
+            </div>
+            <div class="editor-actions">
+              <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ名を保存</button>
+              <button id="resetCategoryNamesButton" type="button">カテゴリ名を戻す</button>
+            </div>
+            <p id="categoryStatus" class="import-status" aria-live="polite"></p>
+          </section>
+
           <section id="editorPanel" class="editor-panel hidden" aria-label="問題編集">
             <div class="editor-grid">
               <div>
