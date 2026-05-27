@@ -1,0 +1,5 @@
+id,source,category,number,prompt,answer,type,choices,images
+sample-001,英語 第1回,quiz,1,apple の意味は？,りんご,single,りんご/みかん/本/走る,
+sample-002,英語 第1回,quiz,2,次のうち果物をすべて選びなさい。,りんご / みかん,multiple,りんご/みかん/本/走る,
+sample-003,経済 第1回,prediction,1,需要曲線は誰の行動を表すか。,消費者,text,,
+sample-004,経済 第1回,prediction,2,①と②に当てはまる語句を選びなさい。,① = 消費者 / ② = 生産者,matching,a: 消費者/b: 生産者/c: 政府,

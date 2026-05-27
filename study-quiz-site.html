@@ -140,7 +140,8 @@
       }
 
       input,
-      select {
+      select,
+      textarea {
         width: 100%;
         min-height: 42px;
         border: 1px solid var(--line);
@@ -150,9 +151,42 @@
         padding: 8px 10px;
       }
 
+      textarea {
+        min-height: 92px;
+        resize: vertical;
+      }
+
       .filter {
         margin-top: 18px;
       }
+
+      .import-panel {
+        display: grid;
+        gap: 10px;
+        margin-top: 20px;
+        border-top: 1px solid var(--line);
+        padding-top: 18px;
+      }
+
+      .import-panel button {
+        width: 100%;
+      }
+
+      .helper {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+        line-height: 1.5;
+      }
+
+      .import-status {
+        margin: 0;
+        color: var(--accent);
+        font-size: 0.84rem;
+        font-weight: 700;
+        min-height: 1.4em;
+      }
+
 
       .toolbar {
         display: flex;
@@ -414,6 +448,21 @@
           <select id="statusFilter"></select>
         </div>
 
+        <section class="import-panel" aria-label="問題データ追加">
+          <p class="filter-title">ファイルから追加</p>
+          <input id="fileInput" type="file" accept=".json,.js,.csv,.md,.markdown,.txt,.html,.htm" multiple>
+          <label for="importCategory">追加先</label>
+          <select id="importCategory">
+            <option value="quiz">小テスト問題</option>
+            <option value="prediction">予想問題</option>
+          </select>
+          <textarea id="pasteInput" placeholder="ここに Q: 問題 / A: 答え の形式や、CSV・Markdown表を貼り付けても追加できます"></textarea>
+          <button id="pasteButton" type="button">貼り付け内容を追加</button>
+          <button id="clearImportedButton" type="button">追加データを削除</button>
+          <p class="helper">JSON、CSV、Markdown表、HTML、TXTに対応。PDFは本文をコピーして貼り付けると読み取れます。</p>
+          <p id="importStatus" class="import-status" aria-live="polite"></p>
+        </section>
+
         <div id="dataStatus" class="data-status" hidden></div>
       </aside>
 
@@ -455,11 +504,13 @@
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
       const categoryLabels = { quiz: "小テスト問題", prediction: "予想問題" };
       const storageKey = "study-quiz-standalone-progress-v1";
+      const importedStorageKey = "study-quiz-standalone-imported-v1";
 
       const quizQuestions = normalize(window.QUESTION_DATA || [], "quiz");
       const predictedQuestions = normalize(window.PREDICTED_QUESTION_DATA || [], "prediction");
-      const allQuestions = [...quizQuestions, ...predictedQuestions];
-      const validationIssues = validate(allQuestions);
+      let importedQuestions = loadImportedQuestions();
+      let allQuestions = [...quizQuestions, ...predictedQuestions, ...importedQuestions];
+      let validationIssues = validate(allQuestions);
 
       const state = {
         category: "all",
@@ -484,6 +535,12 @@
         sourceFilter: document.getElementById("sourceFilter"),
         typeFilter: document.getElementById("typeFilter"),
         statusFilter: document.getElementById("statusFilter"),
+        fileInput: document.getElementById("fileInput"),
+        importCategory: document.getElementById("importCategory"),
+        pasteInput: document.getElementById("pasteInput"),
+        pasteButton: document.getElementById("pasteButton"),
+        clearImportedButton: document.getElementById("clearImportedButton"),
+        importStatus: document.getElementById("importStatus"),
         dataStatus: document.getElementById("dataStatus"),
         quizMode: document.getElementById("quizMode"),
         listMode: document.getElementById("listMode"),
@@ -529,6 +586,266 @@
 
       function saveProgress() {
         localStorage.setItem(storageKey, JSON.stringify(state.progress));
+      }
+
+      function loadImportedQuestions() {
+        try {
+          return normalize(JSON.parse(localStorage.getItem(importedStorageKey)) || [], "quiz");
+        } catch {
+          return [];
+        }
+      }
+
+      function saveImportedQuestions() {
+        localStorage.setItem(importedStorageKey, JSON.stringify(importedQuestions));
+      }
+
+      function refreshQuestionData() {
+        allQuestions = [...quizQuestions, ...predictedQuestions, ...importedQuestions];
+        validationIssues = validate(allQuestions);
+        state.order = allQuestions.map((_, index) => index);
+        if (state.index >= filtered().length) state.index = 0;
+      }
+
+      function makeImportedId(fileName, index) {
+        const base = fileName
+          .replace(/\.[^.]+$/, "")
+          .replace(/[^\p{L}\p{N}]+/gu, "-")
+          .replace(/^-|-$/g, "")
+          .toLowerCase() || "import";
+        return `import-${base}-${Date.now()}-${index + 1}`;
+      }
+
+      function splitList(value) {
+        if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+        return String(value || "")
+          .split(/\s*(?:\/|\||、|,)\s*/)
+          .map((item) => item.trim())
+          .filter(Boolean);
+      }
+
+      function questionFromRow(row, index, fileName, category) {
+        const prompt = row.prompt || row.question || row.問題 || row.問題文 || row.q || "";
+        const answer = row.answer || row.正解 || row.答え || row.a || "";
+        const choices = row.choices || row.選択肢 || row.options || "";
+        const images = row.images || row.画像 || "";
+        const type = row.type || row.形式 || (choices ? "single" : "text");
+
+        return normalize([{
+          id: row.id || makeImportedId(fileName, index),
+          source: row.source || row.範囲 || row.出典 || fileName.replace(/\.[^.]+$/, ""),
+          category: row.category || category,
+          number: Number(row.number || row.番号 || index + 1),
+          prompt,
+          answer,
+          type,
+          choices: splitList(choices),
+          images: splitList(images)
+        }], category)[0];
+      }
+
+      function parseCsv(text) {
+        const rows = [];
+        let current = "";
+        let row = [];
+        let quoted = false;
+
+        for (let i = 0; i < text.length; i += 1) {
+          const char = text[i];
+          const next = text[i + 1];
+
+          if (char === '"' && quoted && next === '"') {
+            current += '"';
+            i += 1;
+          } else if (char === '"') {
+            quoted = !quoted;
+          } else if (char === "," && !quoted) {
+            row.push(current);
+            current = "";
+          } else if ((char === "\n" || char === "\r") && !quoted) {
+            if (char === "\r" && next === "\n") i += 1;
+            row.push(current);
+            if (row.some((cell) => cell.trim())) rows.push(row);
+            row = [];
+            current = "";
+          } else {
+            current += char;
+          }
+        }
+
+        row.push(current);
+        if (row.some((cell) => cell.trim())) rows.push(row);
+        return rows;
+      }
+
+      function parseCsvQuestions(text, fileName, category) {
+        const rows = parseCsv(text);
+        if (rows.length < 2) return [];
+        const headers = rows[0].map((header) => header.trim());
+        return rows.slice(1).map((cells, index) => {
+          const row = {};
+          headers.forEach((header, cellIndex) => {
+            row[header] = cells[cellIndex] || "";
+          });
+          return questionFromRow(row, index, fileName, category);
+        });
+      }
+
+      function parseMarkdownTableQuestions(text, fileName, category) {
+        const tableRows = text
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter((line) => line.startsWith("|") && line.endsWith("|"))
+          .map((line) => line.slice(1, -1).split("|").map((cell) => cell.trim()));
+
+        if (tableRows.length < 2) return [];
+        const headers = tableRows[0];
+        const body = tableRows.slice(1).filter((row) => !row.every((cell) => /^:?-{3,}:?$/.test(cell)));
+        return body.map((cells, index) => {
+          const row = {};
+          headers.forEach((header, cellIndex) => {
+            row[header] = cells[cellIndex] || "";
+          });
+          return questionFromRow(row, index, fileName, category);
+        });
+      }
+
+      function stripHtml(text) {
+        return text
+          .replace(/<script[\s\S]*?<\/script>/gi, " ")
+          .replace(/<style[\s\S]*?<\/style>/gi, " ")
+          .replace(/<br\s*\/?>/gi, "\n")
+          .replace(/<\/p>|<\/div>|<\/li>|<\/h[1-6]>/gi, "\n")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/\n{3,}/g, "\n\n");
+      }
+
+      function parseQaTextQuestions(text, fileName, category) {
+        const source = fileName.replace(/\.[^.]+$/, "");
+        const blocks = text.split(/\n\s*\n/).map((block) => block.trim()).filter(Boolean);
+        const questions = [];
+
+        blocks.forEach((block) => {
+          const qMatch = block.match(/(?:^|\n)\s*(?:Q|問題|問)[:：]\s*([\s\S]*?)(?=\n\s*(?:A|答え|解答|正解)[:：]|$)/i);
+          const aMatch = block.match(/(?:^|\n)\s*(?:A|答え|解答|正解)[:：]\s*([\s\S]*)/i);
+          if (qMatch && aMatch) {
+            questions.push({
+              prompt: qMatch[1].trim(),
+              answer: aMatch[1].trim(),
+              type: "text",
+              choices: []
+            });
+          }
+        });
+
+        if (!questions.length) {
+          text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).forEach((line) => {
+            const blank = line.match(/(.+?)[（(]\s*([^)）]+)\s*[)）](.*)/);
+            if (blank) {
+              questions.push({
+                prompt: `${blank[1]}（　）${blank[3]}`,
+                answer: blank[2],
+                type: "text",
+                choices: []
+              });
+            }
+          });
+        }
+
+        return questions.map((question, index) => normalize([{
+          id: makeImportedId(fileName, index),
+          source,
+          category,
+          number: index + 1,
+          images: [],
+          ...question
+        }], category)[0]);
+      }
+
+      function extractArrayFromJs(text, name) {
+        const marker = `window.${name}`;
+        const start = text.indexOf(marker);
+        if (start === -1) return null;
+        const eq = text.indexOf("=", start);
+        const arrayStart = text.indexOf("[", eq);
+        if (eq === -1 || arrayStart === -1) return null;
+
+        let depth = 0;
+        let inString = false;
+        let quote = "";
+        let escaped = false;
+
+        for (let i = arrayStart; i < text.length; i += 1) {
+          const char = text[i];
+          if (inString) {
+            if (escaped) escaped = false;
+            else if (char === "\\") escaped = true;
+            else if (char === quote) inString = false;
+          } else if (char === '"' || char === "'") {
+            inString = true;
+            quote = char;
+          } else if (char === "[") {
+            depth += 1;
+          } else if (char === "]") {
+            depth -= 1;
+            if (depth === 0) return text.slice(arrayStart, i + 1);
+          }
+        }
+
+        return null;
+      }
+
+      function parseQuestionFile(text, fileName, category) {
+        const lower = fileName.toLowerCase();
+        const cleanedText = lower.endsWith(".html") || lower.endsWith(".htm") ? stripHtml(text) : text;
+
+        if (lower.endsWith(".json")) {
+          const parsed = JSON.parse(text);
+          const items = Array.isArray(parsed) ? parsed : parsed.questions || parsed.data || [];
+          return normalize(items, category);
+        }
+
+        if (lower.endsWith(".js")) {
+          const arrayText = extractArrayFromJs(text, "QUESTION_DATA") || extractArrayFromJs(text, "PREDICTED_QUESTION_DATA");
+          if (!arrayText) return [];
+          return normalize(JSON.parse(arrayText), category);
+        }
+
+        if (lower.endsWith(".csv")) return parseCsvQuestions(text, fileName, category);
+
+        const tableQuestions = parseMarkdownTableQuestions(cleanedText, fileName, category);
+        if (tableQuestions.length) return tableQuestions;
+
+        return parseQaTextQuestions(cleanedText, fileName, category);
+      }
+
+      function addImportedQuestions(questions, label) {
+        const normalized = normalize(questions, el.importCategory.value)
+          .filter((question) => String(question.prompt).trim() && String(question.answer).trim());
+
+        importedQuestions = [...importedQuestions, ...normalized];
+        saveImportedQuestions();
+        refreshQuestionData();
+        state.category = "all";
+        state.source = "all";
+        state.index = 0;
+        state.revealed = false;
+        el.importStatus.textContent = `${label}: ${normalized.length}問を追加しました。`;
+        render();
+      }
+
+      async function importFiles(files) {
+        let added = [];
+        for (const file of files) {
+          const text = await file.text();
+          added = [...added, ...parseQuestionFile(text, file.name, el.importCategory.value)];
+        }
+        addImportedQuestions(added, `${files.length}ファイル`);
+        el.fileInput.value = "";
       }
 
       function parseMatchingAnswer(answer) {
@@ -693,9 +1010,25 @@
 
       function renderQuiz(items) {
         if (!items.length) {
-          el.quizCard.innerHTML = '<p class="question">条件に合う問題がありません。</p>';
+          el.meta.replaceChildren();
+          el.images.replaceChildren();
+          el.prompt.textContent = "条件に合う問題がありません。";
+          el.choices.replaceChildren();
+          el.feedback.className = "feedback hidden";
+          el.answer.className = "answer hidden";
+          el.answerButton.disabled = true;
+          el.knownButton.disabled = true;
+          el.reviewButton.disabled = true;
+          el.prevButton.disabled = true;
+          el.nextButton.disabled = true;
           return;
         }
+
+        el.answerButton.disabled = false;
+        el.knownButton.disabled = false;
+        el.reviewButton.disabled = false;
+        el.prevButton.disabled = false;
+        el.nextButton.disabled = false;
 
         if (state.index >= items.length) state.index = 0;
         const question = items[state.index];
@@ -877,6 +1210,34 @@
       }
 
       el.searchInput.addEventListener("input", (event) => updateFilter("query", event.target.value));
+      el.fileInput.addEventListener("change", (event) => {
+        importFiles([...event.target.files]).catch((error) => {
+          el.importStatus.textContent = `読み込みに失敗しました: ${error.message}`;
+        });
+      });
+      el.pasteButton.addEventListener("click", () => {
+        try {
+          const text = el.pasteInput.value.trim();
+          if (!text) {
+            el.importStatus.textContent = "貼り付け欄が空です。";
+            return;
+          }
+          const questions = parseQuestionFile(text, "貼り付けデータ.txt", el.importCategory.value);
+          addImportedQuestions(questions, "貼り付け");
+          el.pasteInput.value = "";
+        } catch (error) {
+          el.importStatus.textContent = `読み込みに失敗しました: ${error.message}`;
+        }
+      });
+      el.clearImportedButton.addEventListener("click", () => {
+        importedQuestions = [];
+        saveImportedQuestions();
+        refreshQuestionData();
+        state.index = 0;
+        state.revealed = false;
+        el.importStatus.textContent = "追加データを削除しました。";
+        render();
+      });
       el.categoryFilter.addEventListener("change", (event) => {
         state.source = "all";
         updateFilter("category", event.target.value);
