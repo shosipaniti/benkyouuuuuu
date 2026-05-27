@@ -368,6 +368,15 @@
         min-width: 110px;
       }
 
+      .list-tools {
+        display: grid;
+        gap: 10px;
+      }
+
+      .list-tools > button {
+        justify-self: start;
+      }
+
       .actions {
         display: grid;
         grid-template-columns: 42px minmax(112px, 1fr) minmax(70px, auto) minmax(92px, auto) minmax(82px, auto) 42px;
@@ -532,65 +541,25 @@
         </section>
 
         <section id="listView" class="list hidden">
-          <section class="editor-panel" aria-label="カテゴリ名編集">
-            <p class="filter-title">カテゴリ名を編集</p>
-            <div class="editor-grid">
-              <div>
-                <label for="quizCategoryName">小テスト側の名前</label>
-                <input id="quizCategoryName" type="text">
+          <section class="list-tools" aria-label="一覧編集">
+            <button id="toggleCategoryEditorButton" type="button">カテゴリ名を編集</button>
+            <section id="categoryEditorPanel" class="editor-panel hidden" aria-label="カテゴリ名編集">
+              <div class="editor-grid">
+                <div id="quizCategoryField">
+                  <label for="quizCategoryName">小テスト側の名前</label>
+                  <input id="quizCategoryName" type="text">
+                </div>
+                <div id="predictionCategoryField">
+                  <label for="predictionCategoryName">予想問題側の名前</label>
+                  <input id="predictionCategoryName" type="text">
+                </div>
               </div>
-              <div>
-                <label for="predictionCategoryName">予想問題側の名前</label>
-                <input id="predictionCategoryName" type="text">
+              <div class="editor-actions">
+                <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ名を保存</button>
+                <button id="resetCategoryNamesButton" type="button">カテゴリ名を戻す</button>
               </div>
-            </div>
-            <div class="editor-actions">
-              <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ名を保存</button>
-              <button id="resetCategoryNamesButton" type="button">カテゴリ名を戻す</button>
-            </div>
-            <p id="categoryStatus" class="import-status" aria-live="polite"></p>
-          </section>
-
-          <section id="editorPanel" class="editor-panel hidden" aria-label="問題編集">
-            <div class="editor-grid">
-              <div>
-                <label for="editSource">範囲</label>
-                <input id="editSource" type="text">
-              </div>
-              <div>
-                <label for="editCategory">カテゴリ</label>
-                <select id="editCategory"></select>
-              </div>
-              <div>
-                <label for="editType">形式</label>
-                <select id="editType"></select>
-              </div>
-              <div>
-                <label for="editNumber">番号</label>
-                <input id="editNumber" type="number" min="1">
-              </div>
-              <div class="editor-field-wide">
-                <label for="editPrompt">問題文</label>
-                <textarea id="editPrompt"></textarea>
-              </div>
-              <div class="editor-field-wide">
-                <label for="editAnswer">答え</label>
-                <textarea id="editAnswer"></textarea>
-              </div>
-              <div class="editor-field-wide">
-                <label for="editChoices">選択肢</label>
-                <textarea id="editChoices" placeholder="1行に1つずつ入力"></textarea>
-              </div>
-              <div class="editor-field-wide">
-                <label for="editImages">画像</label>
-                <textarea id="editImages" placeholder="assets/example.png のように1行に1つずつ入力"></textarea>
-              </div>
-            </div>
-            <div class="editor-actions">
-              <button id="saveQuestionButton" class="primary" type="button">問題を保存</button>
-              <button id="cancelEditButton" type="button">閉じる</button>
-              <button id="resetQuestionButton" type="button">元に戻す</button>
-            </div>
+              <p id="categoryStatus" class="import-status" aria-live="polite"></p>
+            </section>
           </section>
           <div id="listItems" class="list"></div>
         </section>
@@ -626,6 +595,7 @@
         index: 0,
         revealed: false,
         editingId: "",
+        categoryEditing: false,
         order: allQuestions.map((_, index) => index),
         responses: {},
         progress: loadProgress()
@@ -647,7 +617,11 @@
         pasteButton: document.getElementById("pasteButton"),
         clearImportedButton: document.getElementById("clearImportedButton"),
         importStatus: document.getElementById("importStatus"),
+        toggleCategoryEditorButton: document.getElementById("toggleCategoryEditorButton"),
+        categoryEditorPanel: document.getElementById("categoryEditorPanel"),
+        quizCategoryField: document.getElementById("quizCategoryField"),
         quizCategoryName: document.getElementById("quizCategoryName"),
+        predictionCategoryField: document.getElementById("predictionCategoryField"),
         predictionCategoryName: document.getElementById("predictionCategoryName"),
         saveCategoryNamesButton: document.getElementById("saveCategoryNamesButton"),
         resetCategoryNamesButton: document.getElementById("resetCategoryNamesButton"),
@@ -665,18 +639,6 @@
         choices: document.getElementById("choices"),
         feedback: document.getElementById("feedback"),
         answer: document.getElementById("answer"),
-        editorPanel: document.getElementById("editorPanel"),
-        editSource: document.getElementById("editSource"),
-        editCategory: document.getElementById("editCategory"),
-        editType: document.getElementById("editType"),
-        editNumber: document.getElementById("editNumber"),
-        editPrompt: document.getElementById("editPrompt"),
-        editAnswer: document.getElementById("editAnswer"),
-        editChoices: document.getElementById("editChoices"),
-        editImages: document.getElementById("editImages"),
-        saveQuestionButton: document.getElementById("saveQuestionButton"),
-        cancelEditButton: document.getElementById("cancelEditButton"),
-        resetQuestionButton: document.getElementById("resetQuestionButton"),
         answerButton: document.getElementById("answerButton"),
         knownButton: document.getElementById("knownButton"),
         reviewButton: document.getElementById("reviewButton"),
@@ -1249,13 +1211,6 @@
           ["prediction", categoryLabels.prediction]
         ]);
 
-        setOptions(el.editCategory, el.editCategory.value || "quiz", [
-          ["quiz", categoryLabels.quiz],
-          ["prediction", categoryLabels.prediction]
-        ]);
-
-        setOptions(el.editType, el.editType.value || "single", supportedTypes.map((type) => [type, typeLabels[type] || type]));
-
         const sourceQuestions = allQuestions.filter((question) => state.category === "all" || question.category === state.category);
         setOptions(el.sourceFilter, state.source, [
           ["all", "すべて"],
@@ -1276,6 +1231,10 @@
       }
 
       function renderCategoryNameInputs() {
+        el.categoryEditorPanel.classList.toggle("hidden", !state.categoryEditing || state.mode !== "list");
+        el.toggleCategoryEditorButton.textContent = state.categoryEditing ? "カテゴリ名編集を閉じる" : "カテゴリ名を編集";
+        el.quizCategoryField.classList.toggle("hidden", state.category === "prediction");
+        el.predictionCategoryField.classList.toggle("hidden", state.category === "quiz");
         el.quizCategoryName.value = categoryLabels.quiz;
         el.predictionCategoryName.value = categoryLabels.prediction;
       }
@@ -1364,66 +1323,135 @@
           .filter(Boolean);
       }
 
-      function renderEditor(question) {
-        if (state.mode !== "list" || !question || state.editingId !== question.id) {
-          el.editorPanel.classList.add("hidden");
-          return;
-        }
-
-        el.editorPanel.classList.remove("hidden");
-        el.editSource.value = question.source;
-        el.editCategory.value = question.category;
-        el.editType.value = question.type;
-        el.editNumber.value = question.number || 1;
-        el.editPrompt.value = question.prompt;
-        el.editAnswer.value = question.answer;
-        el.editChoices.value = listText(question.choices);
-        el.editImages.value = listText(question.images);
+      function makeLabeledControl(labelText, control) {
+        const wrapper = document.createElement("div");
+        const label = document.createElement("label");
+        label.textContent = labelText;
+        wrapper.append(label, control);
+        return wrapper;
       }
 
-      function editedQuestionFromFields(question) {
-        return normalize([{
-          ...question,
-          source: el.editSource.value.trim() || "未分類",
-          category: el.editCategory.value,
-          number: Number(el.editNumber.value || question.number || 1),
-          prompt: el.editPrompt.value.trim(),
-          answer: el.editAnswer.value.trim(),
-          type: el.editType.value,
-          choices: fieldList(el.editChoices.value),
-          images: fieldList(el.editImages.value)
-        }], el.editCategory.value)[0];
+      function createInput(value, type = "text") {
+        const input = document.createElement("input");
+        input.type = type;
+        input.value = value;
+        return input;
       }
 
-      function saveCurrentQuestionEdit() {
-        const question = allQuestions.find((item) => item.id === state.editingId);
-        if (!question) return;
-
-        const edited = editedQuestionFromFields(question);
-        questionEdits[question.id] = {
-          source: edited.source,
-          category: edited.category,
-          number: edited.number,
-          prompt: edited.prompt,
-          answer: edited.answer,
-          type: edited.type,
-          choices: edited.choices,
-          images: edited.images
-        };
-        saveQuestionEdits();
-        refreshQuestionData();
-        state.revealed = false;
-        delete state.responses[question.id];
-        render();
+      function createTextarea(value, placeholder = "") {
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.placeholder = placeholder;
+        return textarea;
       }
 
-      function resetCurrentQuestionEdit() {
-        if (!state.editingId) return;
-        delete questionEdits[state.editingId];
-        saveQuestionEdits();
-        refreshQuestionData();
-        state.revealed = false;
-        render();
+      function createSelect(entries, value) {
+        const select = document.createElement("select");
+        select.replaceChildren(...entries.map(([optionValue, label]) => option(optionValue, label)));
+        select.value = value;
+        return select;
+      }
+
+      function createInlineQuestionEditor(question) {
+        const section = document.createElement("section");
+        section.className = "editor-panel";
+
+        const grid = document.createElement("div");
+        grid.className = "editor-grid";
+
+        const source = createInput(question.source);
+        const category = createSelect([
+          ["quiz", categoryLabels.quiz],
+          ["prediction", categoryLabels.prediction]
+        ], question.category);
+        const type = createSelect(supportedTypes.map((item) => [item, typeLabels[item] || item]), question.type);
+        const number = createInput(question.number || 1, "number");
+        number.min = "1";
+        const prompt = createTextarea(question.prompt);
+        const answer = createTextarea(question.answer);
+        const choices = createTextarea(listText(question.choices), "1行に1つずつ入力");
+        const images = createTextarea(listText(question.images), "assets/example.png のように1行に1つずつ入力");
+
+        const promptField = makeLabeledControl("問題文", prompt);
+        promptField.className = "editor-field-wide";
+        const answerField = makeLabeledControl("答え", answer);
+        answerField.className = "editor-field-wide";
+        const choicesField = makeLabeledControl("選択肢", choices);
+        choicesField.className = "editor-field-wide";
+        const imagesField = makeLabeledControl("画像", images);
+        imagesField.className = "editor-field-wide";
+
+        grid.append(
+          makeLabeledControl("範囲", source),
+          makeLabeledControl("カテゴリ", category),
+          makeLabeledControl("形式", type),
+          makeLabeledControl("番号", number),
+          promptField,
+          answerField,
+          choicesField,
+          imagesField
+        );
+
+        const actions = document.createElement("div");
+        actions.className = "editor-actions";
+        const save = document.createElement("button");
+        save.type = "button";
+        save.className = "primary";
+        save.textContent = "問題を保存";
+        const cancel = document.createElement("button");
+        cancel.type = "button";
+        cancel.textContent = "閉じる";
+        const reset = document.createElement("button");
+        reset.type = "button";
+        reset.textContent = "元に戻す";
+
+        save.addEventListener("click", () => {
+          const edited = normalize([{
+            ...question,
+            source: source.value.trim() || "未分類",
+            category: category.value,
+            number: Number(number.value || question.number || 1),
+            prompt: prompt.value.trim(),
+            answer: answer.value.trim(),
+            type: type.value,
+            choices: fieldList(choices.value),
+            images: fieldList(images.value)
+          }], category.value)[0];
+          questionEdits[question.id] = {
+            source: edited.source,
+            category: edited.category,
+            number: edited.number,
+            prompt: edited.prompt,
+            answer: edited.answer,
+            type: edited.type,
+            choices: edited.choices,
+            images: edited.images
+          };
+          saveQuestionEdits();
+          refreshQuestionData();
+          state.editingId = question.id;
+          state.revealed = false;
+          delete state.responses[question.id];
+          render();
+        });
+
+        cancel.addEventListener("click", () => {
+          state.editingId = "";
+          render();
+        });
+
+        reset.addEventListener("click", () => {
+          delete questionEdits[question.id];
+          saveQuestionEdits();
+          refreshQuestionData();
+          state.editingId = "";
+          state.revealed = false;
+          render();
+        });
+
+        actions.append(save, cancel, reset);
+        section.append(grid, actions);
+        return section;
       }
 
       function renderInteraction(question, response) {
@@ -1527,15 +1555,15 @@
             button.textContent = answer.classList.contains("hidden") ? "答えを表示" : "答えを隠す";
           });
           editButton.addEventListener("click", () => {
-            state.editingId = question.id;
+            state.editingId = state.editingId === question.id ? "" : question.id;
             render();
           });
           card.append(title, prompt, button, editButton, answer);
+          if (state.editingId === question.id) {
+            card.appendChild(createInlineQuestionEditor(question));
+          }
           return card;
         }));
-
-        const question = allQuestions.find((item) => item.id === state.editingId);
-        renderEditor(question);
       }
 
       function move(delta) {
@@ -1563,6 +1591,7 @@
         const items = filtered();
         renderFilters();
         renderStatus(items);
+        renderCategoryNameInputs();
         el.quizView.classList.toggle("hidden", state.mode !== "quiz");
         el.listView.classList.toggle("hidden", state.mode !== "list");
         el.quizMode.classList.toggle("is-active", state.mode === "quiz");
@@ -1617,6 +1646,11 @@
         el.importStatus.textContent = "追加データを削除しました。";
         render();
       });
+      el.toggleCategoryEditorButton.addEventListener("click", () => {
+        state.categoryEditing = !state.categoryEditing;
+        el.categoryStatus.textContent = "";
+        render();
+      });
       el.saveCategoryNamesButton.addEventListener("click", () => {
         categoryLabels = {
           quiz: el.quizCategoryName.value.trim() || defaultCategoryLabels.quiz,
@@ -1629,7 +1663,6 @@
       el.resetCategoryNamesButton.addEventListener("click", () => {
         categoryLabels = { ...defaultCategoryLabels };
         saveCategoryLabels();
-        renderCategoryNameInputs();
         el.categoryStatus.textContent = "カテゴリ名を戻しました。";
         render();
       });
@@ -1654,12 +1687,6 @@
         state.revealed = !state.revealed;
         render();
       });
-      el.saveQuestionButton.addEventListener("click", saveCurrentQuestionEdit);
-      el.cancelEditButton.addEventListener("click", () => {
-        state.editingId = "";
-        render();
-      });
-      el.resetQuestionButton.addEventListener("click", resetCurrentQuestionEdit);
       el.knownButton.addEventListener("click", () => mark("known"));
       el.reviewButton.addEventListener("click", () => mark("review"));
 
@@ -1667,7 +1694,6 @@
         window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
       }
 
-      renderCategoryNameInputs();
       render();
     </script>
   </body>
