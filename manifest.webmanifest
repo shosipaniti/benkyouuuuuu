@@ -1,7 +1,7 @@
 {
-  "name": "学習クイズ 一問一答",
-  "short_name": "学習クイズ",
-  "description": "小テスト問題と予想問題を一問一答で復習できるオフライン対応アプリ",
+  "name": "経済 小テスト 一問一答",
+  "short_name": "経済小テスト",
+  "description": "経済の小テストを一問一答で復習できるオフライン対応アプリ",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
