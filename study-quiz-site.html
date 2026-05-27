@@ -324,6 +324,12 @@
         color: var(--bad);
       }
 
+      .feedback.neutral {
+        border: 1px solid #c8d8e9;
+        background: #f5f8fb;
+        color: #243346;
+      }
+
       .answer {
         border-left: 5px solid var(--orange);
         background: #fff7f0;
@@ -532,7 +538,7 @@
             <div id="answer" class="answer hidden"></div>
             <div class="actions">
               <button id="prevButton" class="icon" type="button" aria-label="前の問題">←</button>
-              <button id="answerButton" type="button">答えを見る</button>
+              <button id="answerButton" class="primary" type="button">答え合わせ</button>
               <button id="knownButton" class="mark" type="button">分かった</button>
               <button id="reviewButton" class="mark" type="button">復習</button>
               <button id="nextButton" class="icon" type="button" aria-label="次の問題">→</button>
@@ -1144,9 +1150,26 @@
         return a.length === b.length && a.every((item) => b.includes(item));
       }
 
+      function canCheckAnswer(question) {
+        const response = getResponse(question);
+        if (question.type === "single" || question.type === "multiple") return response.selected.length > 0;
+        if (question.type === "matching") {
+          return parseMatchingAnswer(question.answer).every((pair) => response.matching[pair.label]);
+        }
+        if (question.type === "text") return response.text.trim().length > 0;
+        return question.type === "free";
+      }
+
       function judge(question) {
         const response = getResponse(question);
         let correct = false;
+
+        if (question.type === "free" || String(question.answer).includes("保存された解答なし")) {
+          response.checked = true;
+          response.correct = null;
+          render();
+          return;
+        }
 
         if (question.type === "matching") {
           correct = parseMatchingAnswer(question.answer).every((pair) => response.matching[pair.label] === pair.value);
@@ -1293,14 +1316,16 @@
         el.prompt.textContent = question.prompt;
         renderInteraction(question, response);
 
-        el.feedback.className = `feedback ${response.correct ? "ok" : "bad"} ${response.checked ? "" : "hidden"}`;
-        el.feedback.innerHTML = response.checked
-          ? `<strong>${response.correct ? "正解" : "不正解"}</strong><span>${response.correct ? "その調子です。" : `正解: ${question.answer}`}</span>`
-          : "";
+        const feedbackClass = response.correct === null ? "neutral" : response.correct ? "ok" : "bad";
+        const feedbackTitle = response.correct === null ? "模範解答" : response.correct ? "正解" : "不正解";
+        const feedbackDetail = response.correct === null ? "答えを確認して、分かった・復習を選んでください。" : response.correct ? "その調子です。" : "正解を確認しましょう。";
+        el.feedback.className = `feedback ${feedbackClass} ${response.checked ? "" : "hidden"}`;
+        el.feedback.innerHTML = response.checked ? `<strong>${feedbackTitle}</strong><span>${feedbackDetail}</span>` : "";
 
-        el.answer.className = `answer ${state.revealed ? "" : "hidden"}`;
+        el.answer.className = `answer ${response.checked ? "" : "hidden"}`;
         el.answer.innerHTML = `<span>答え</span><strong>${question.answer || "解答なし"}</strong>`;
-        el.answerButton.textContent = state.revealed ? "答えを隠す" : "答えを見る";
+        el.answerButton.textContent = response.checked ? "もう一度答え合わせ" : "答え合わせ";
+        el.answerButton.disabled = !canCheckAnswer(question);
         el.knownButton.classList.toggle("is-active", progress === "known");
         el.reviewButton.classList.toggle("is-active", progress === "review");
       }
@@ -1475,7 +1500,6 @@
             });
             el.choices.appendChild(button);
           });
-          el.choices.appendChild(judgeButton(question, response.selected.length === 0));
           return;
         }
 
@@ -1504,8 +1528,6 @@
             row.append(label, options);
             el.choices.appendChild(row);
           });
-          const done = parseMatchingAnswer(question.answer).every((pair) => response.matching[pair.label]);
-          el.choices.appendChild(judgeButton(question, !done));
           return;
         }
 
@@ -1520,17 +1542,7 @@
         input.addEventListener("keydown", (event) => {
           if (event.key === "Enter" && response.text.trim()) judge(question);
         });
-        el.choices.append(input, judgeButton(question, !response.text.trim() || String(question.answer).includes("保存された解答なし")));
-      }
-
-      function judgeButton(question, disabled) {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "primary";
-        button.disabled = disabled;
-        button.textContent = "判定する";
-        button.addEventListener("click", () => judge(question));
-        return button;
+        el.choices.append(input);
       }
 
       function renderList(items) {
@@ -1543,7 +1555,7 @@
           prompt.textContent = question.prompt;
           const button = document.createElement("button");
           button.type = "button";
-          button.textContent = "答えを表示";
+          button.textContent = "答えを確認";
           const editButton = document.createElement("button");
           editButton.type = "button";
           editButton.textContent = "編集";
@@ -1552,7 +1564,7 @@
           answer.textContent = `答え: ${question.answer}`;
           button.addEventListener("click", () => {
             answer.classList.toggle("hidden");
-            button.textContent = answer.classList.contains("hidden") ? "答えを表示" : "答えを隠す";
+            button.textContent = answer.classList.contains("hidden") ? "答えを確認" : "答えを閉じる";
           });
           editButton.addEventListener("click", () => {
             state.editingId = state.editingId === question.id ? "" : question.id;
@@ -1684,8 +1696,9 @@
       el.prevButton.addEventListener("click", () => move(-1));
       el.nextButton.addEventListener("click", () => move(1));
       el.answerButton.addEventListener("click", () => {
-        state.revealed = !state.revealed;
-        render();
+        const question = filtered()[state.index];
+        if (!question || !canCheckAnswer(question)) return;
+        judge(question);
       });
       el.knownButton.addEventListener("click", () => mark("known"));
       el.reviewButton.addEventListener("click", () => mark("review"));
