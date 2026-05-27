@@ -432,10 +432,6 @@
           grid-template-columns: 42px 1fr 42px;
         }
 
-        #editButton {
-          grid-column: span 3;
-        }
-
         .actions .mark {
           grid-column: span 3;
         }
@@ -536,51 +532,9 @@
             <div id="choices" class="choices"></div>
             <div id="feedback" class="feedback hidden"></div>
             <div id="answer" class="answer hidden"></div>
-            <section id="editorPanel" class="editor-panel hidden" aria-label="問題編集">
-              <div class="editor-grid">
-                <div>
-                  <label for="editSource">範囲</label>
-                  <input id="editSource" type="text">
-                </div>
-                <div>
-                  <label for="editCategory">カテゴリ</label>
-                  <select id="editCategory"></select>
-                </div>
-                <div>
-                  <label for="editType">形式</label>
-                  <select id="editType"></select>
-                </div>
-                <div>
-                  <label for="editNumber">番号</label>
-                  <input id="editNumber" type="number" min="1">
-                </div>
-                <div class="editor-field-wide">
-                  <label for="editPrompt">問題文</label>
-                  <textarea id="editPrompt"></textarea>
-                </div>
-                <div class="editor-field-wide">
-                  <label for="editAnswer">答え</label>
-                  <textarea id="editAnswer"></textarea>
-                </div>
-                <div class="editor-field-wide">
-                  <label for="editChoices">選択肢</label>
-                  <textarea id="editChoices" placeholder="1行に1つずつ入力"></textarea>
-                </div>
-                <div class="editor-field-wide">
-                  <label for="editImages">画像</label>
-                  <textarea id="editImages" placeholder="assets/example.png のように1行に1つずつ入力"></textarea>
-                </div>
-              </div>
-              <div class="editor-actions">
-                <button id="saveQuestionButton" class="primary" type="button">問題を保存</button>
-                <button id="cancelEditButton" type="button">閉じる</button>
-                <button id="resetQuestionButton" type="button">元に戻す</button>
-              </div>
-            </section>
             <div class="actions">
               <button id="prevButton" class="icon" type="button" aria-label="前の問題">←</button>
               <button id="answerButton" type="button">答えを見る</button>
-              <button id="editButton" type="button">編集</button>
               <button id="knownButton" class="mark" type="button">分かった</button>
               <button id="reviewButton" class="mark" type="button">復習</button>
               <button id="nextButton" class="icon" type="button" aria-label="次の問題">→</button>
@@ -588,7 +542,50 @@
           </article>
         </section>
 
-        <section id="listView" class="list hidden"></section>
+        <section id="listView" class="list hidden">
+          <section id="editorPanel" class="editor-panel hidden" aria-label="問題編集">
+            <div class="editor-grid">
+              <div>
+                <label for="editSource">範囲</label>
+                <input id="editSource" type="text">
+              </div>
+              <div>
+                <label for="editCategory">カテゴリ</label>
+                <select id="editCategory"></select>
+              </div>
+              <div>
+                <label for="editType">形式</label>
+                <select id="editType"></select>
+              </div>
+              <div>
+                <label for="editNumber">番号</label>
+                <input id="editNumber" type="number" min="1">
+              </div>
+              <div class="editor-field-wide">
+                <label for="editPrompt">問題文</label>
+                <textarea id="editPrompt"></textarea>
+              </div>
+              <div class="editor-field-wide">
+                <label for="editAnswer">答え</label>
+                <textarea id="editAnswer"></textarea>
+              </div>
+              <div class="editor-field-wide">
+                <label for="editChoices">選択肢</label>
+                <textarea id="editChoices" placeholder="1行に1つずつ入力"></textarea>
+              </div>
+              <div class="editor-field-wide">
+                <label for="editImages">画像</label>
+                <textarea id="editImages" placeholder="assets/example.png のように1行に1つずつ入力"></textarea>
+              </div>
+            </div>
+            <div class="editor-actions">
+              <button id="saveQuestionButton" class="primary" type="button">問題を保存</button>
+              <button id="cancelEditButton" type="button">閉じる</button>
+              <button id="resetQuestionButton" type="button">元に戻す</button>
+            </div>
+          </section>
+          <div id="listItems" class="list"></div>
+        </section>
       </section>
     </main>
 
@@ -673,11 +670,11 @@
         cancelEditButton: document.getElementById("cancelEditButton"),
         resetQuestionButton: document.getElementById("resetQuestionButton"),
         answerButton: document.getElementById("answerButton"),
-        editButton: document.getElementById("editButton"),
         knownButton: document.getElementById("knownButton"),
         reviewButton: document.getElementById("reviewButton"),
         prevButton: document.getElementById("prevButton"),
-        nextButton: document.getElementById("nextButton")
+        nextButton: document.getElementById("nextButton"),
+        listItems: document.getElementById("listItems")
       };
 
       function normalize(items, category) {
@@ -1296,9 +1293,7 @@
           el.choices.replaceChildren();
           el.feedback.className = "feedback hidden";
           el.answer.className = "answer hidden";
-          el.editorPanel.classList.add("hidden");
           el.answerButton.disabled = true;
-          el.editButton.disabled = true;
           el.knownButton.disabled = true;
           el.reviewButton.disabled = true;
           el.prevButton.disabled = true;
@@ -1307,7 +1302,6 @@
         }
 
         el.answerButton.disabled = false;
-        el.editButton.disabled = false;
         el.knownButton.disabled = false;
         el.reviewButton.disabled = false;
         el.prevButton.disabled = false;
@@ -1340,10 +1334,8 @@
         el.answer.className = `answer ${state.revealed ? "" : "hidden"}`;
         el.answer.innerHTML = `<span>答え</span><strong>${question.answer || "解答なし"}</strong>`;
         el.answerButton.textContent = state.revealed ? "答えを隠す" : "答えを見る";
-        el.editButton.textContent = state.editingId === question.id ? "編集中" : "編集";
         el.knownButton.classList.toggle("is-active", progress === "known");
         el.reviewButton.classList.toggle("is-active", progress === "review");
-        renderEditor(question);
       }
 
       function pill(text) {
@@ -1365,7 +1357,7 @@
       }
 
       function renderEditor(question) {
-        if (state.editingId !== question.id) {
+        if (state.mode !== "list" || !question || state.editingId !== question.id) {
           el.editorPanel.classList.add("hidden");
           return;
         }
@@ -1506,7 +1498,7 @@
       }
 
       function renderList(items) {
-        el.listView.replaceChildren(...items.map((question) => {
+        el.listItems.replaceChildren(...items.map((question) => {
           const card = document.createElement("article");
           card.className = "list-card";
           const title = document.createElement("h2");
@@ -1527,15 +1519,15 @@
             button.textContent = answer.classList.contains("hidden") ? "答えを表示" : "答えを隠す";
           });
           editButton.addEventListener("click", () => {
-            const index = filtered().findIndex((item) => item.id === question.id);
-            state.mode = "quiz";
-            state.index = Math.max(index, 0);
             state.editingId = question.id;
             render();
           });
           card.append(title, prompt, button, editButton, answer);
           return card;
         }));
+
+        const question = allQuestions.find((item) => item.id === state.editingId);
+        renderEditor(question);
       }
 
       function move(delta) {
@@ -1652,12 +1644,6 @@
       el.nextButton.addEventListener("click", () => move(1));
       el.answerButton.addEventListener("click", () => {
         state.revealed = !state.revealed;
-        render();
-      });
-      el.editButton.addEventListener("click", () => {
-        const question = filtered()[state.index];
-        if (!question) return;
-        state.editingId = state.editingId === question.id ? "" : question.id;
         render();
       });
       el.saveQuestionButton.addEventListener("click", saveCurrentQuestionEdit);
