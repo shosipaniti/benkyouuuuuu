@@ -487,6 +487,12 @@
         <section class="import-panel" aria-label="問題データ追加">
           <p class="filter-title">ファイルから追加</p>
           <input id="fileInput" type="file" accept=".json,.js,.csv,.md,.markdown,.txt,.html,.htm" multiple>
+          <label for="fileKind">ファイルの種類</label>
+          <select id="fileKind">
+            <option value="quiz">小テスト</option>
+            <option value="slides">授業スライド</option>
+            <option value="manual">手入力データ</option>
+          </select>
           <label for="importCategory">追加先</label>
           <select id="importCategory">
             <option value="quiz">小テスト問題</option>
@@ -495,7 +501,7 @@
           <textarea id="pasteInput" placeholder="ここに Q: 問題 / A: 答え の形式や、CSV・Markdown表を貼り付けても追加できます"></textarea>
           <button id="pasteButton" type="button">貼り付け内容を追加</button>
           <button id="clearImportedButton" type="button">追加データを削除</button>
-          <p class="helper">JSON、CSV、Markdown表、HTML、TXTに対応。PDFは本文をコピーして貼り付けると読み取れます。</p>
+          <p class="helper">小テストは実際の問題として登録、授業スライドは空欄・重要語句から予想問題を作成します。PDFは本文をコピーして貼り付けると読み取れます。</p>
           <p id="importStatus" class="import-status" aria-live="polite"></p>
         </section>
 
@@ -630,6 +636,7 @@
         typeFilter: document.getElementById("typeFilter"),
         statusFilter: document.getElementById("statusFilter"),
         fileInput: document.getElementById("fileInput"),
+        fileKind: document.getElementById("fileKind"),
         importCategory: document.getElementById("importCategory"),
         pasteInput: document.getElementById("pasteInput"),
         pasteButton: document.getElementById("pasteButton"),
@@ -910,6 +917,106 @@
         }], category)[0]);
       }
 
+      function normalizeSlideText(text) {
+        return stripHtml(text)
+          .replace(/[ \t]+/g, " ")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+
+      function isUsefulSlideLine(line) {
+        const cleaned = line.trim();
+        if (cleaned.length < 5) return false;
+        if (/^\d+$/.test(cleaned)) return false;
+        if (/^(http|www\.)/i.test(cleaned)) return false;
+        if (/^(第\d+回|授業|講義|スライド|page|p\.)\s*\d*$/i.test(cleaned)) return false;
+        return true;
+      }
+
+      function extractKeyTerm(line) {
+        const definitionPatterns = [
+          /^(.{2,24}?)(?:とは|とは、|とは:|とは：)/,
+          /^(.{2,24}?)(?:は|：|:)\s*(?:[^。]{6,})$/,
+          /「([^」]{2,24})」/,
+          /『([^』]{2,24})』/
+        ];
+
+        for (const pattern of definitionPatterns) {
+          const match = line.match(pattern);
+          if (match) return match[1].replace(/[「」『』()（）]/g, "").trim();
+        }
+
+        const bracket = line.match(/[（(]([^（）()]{2,24})[)）]/);
+        if (bracket) return bracket[1].trim();
+
+        return "";
+      }
+
+      function uniqueQuestions(questions) {
+        const seen = new Set();
+        return questions.filter((question) => {
+          const key = `${question.prompt}|${question.answer}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      }
+
+      function parseSlideQuestions(text, fileName) {
+        const source = fileName.replace(/\.[^.]+$/, "");
+        const cleaned = normalizeSlideText(text);
+        const lines = cleaned.split(/\r?\n/).map((line) => line.trim()).filter(isUsefulSlideLine);
+        const questions = [];
+
+        lines.forEach((line) => {
+          const blankMatches = [...line.matchAll(/[（(]([^（）()]{2,30})[)）]/g)];
+          blankMatches.forEach((match) => {
+            const answer = match[1].trim();
+            if (!answer || /上昇|下落|増加|減少|右|左/.test(answer) && line.length < 10) return;
+            questions.push({
+              prompt: line.replace(match[0], "（　）"),
+              answer,
+              type: "text",
+              choices: []
+            });
+          });
+
+          const term = extractKeyTerm(line);
+          if (term && line.length >= 12) {
+            questions.push({
+              prompt: `次の説明に当てはまる語句を答えなさい。\n${line.replace(term, "（　）")}`,
+              answer: term,
+              type: "text",
+              choices: []
+            });
+          }
+        });
+
+        const compactLines = lines.filter((line) => line.length >= 8 && line.length <= 70);
+        compactLines.slice(0, 20).forEach((line) => {
+          const term = extractKeyTerm(line);
+          if (!term) return;
+          questions.push({
+            prompt: `${term}について、最も近い説明を選びなさい。`,
+            answer: line,
+            type: "single",
+            choices: uniqueQuestions([line, ...compactLines.filter((item) => item !== line).slice(0, 3)].map((choice, index) => ({
+              prompt: String(index),
+              answer: choice
+            }))).map((item) => item.answer)
+          });
+        });
+
+        return uniqueQuestions(questions).map((question, index) => normalize([{
+          id: makeImportedId(fileName, index),
+          source: `予想 ${source}`,
+          category: "prediction",
+          number: index + 1,
+          images: [],
+          ...question
+        }], "prediction")[0]);
+      }
+
       function extractArrayFromJs(text, name) {
         const marker = `window.${name}`;
         const start = text.indexOf(marker);
@@ -943,32 +1050,44 @@
         return null;
       }
 
-      function parseQuestionFile(text, fileName, category) {
+      function categoryForFileKind(fileKind, selectedCategory) {
+        if (fileKind === "quiz") return "quiz";
+        if (fileKind === "slides") return "prediction";
+        return selectedCategory;
+      }
+
+      function parseQuestionFile(text, fileName, category, fileKind) {
         const lower = fileName.toLowerCase();
         const cleanedText = lower.endsWith(".html") || lower.endsWith(".htm") ? stripHtml(text) : text;
+        const resolvedCategory = categoryForFileKind(fileKind, category);
+
+        if (fileKind === "slides") {
+          return parseSlideQuestions(cleanedText, fileName);
+        }
 
         if (lower.endsWith(".json")) {
           const parsed = JSON.parse(text);
           const items = Array.isArray(parsed) ? parsed : parsed.questions || parsed.data || [];
-          return normalize(items, category);
+          return normalize(items, resolvedCategory);
         }
 
         if (lower.endsWith(".js")) {
           const arrayText = extractArrayFromJs(text, "QUESTION_DATA") || extractArrayFromJs(text, "PREDICTED_QUESTION_DATA");
           if (!arrayText) return [];
-          return normalize(JSON.parse(arrayText), category);
+          return normalize(JSON.parse(arrayText), resolvedCategory);
         }
 
-        if (lower.endsWith(".csv")) return parseCsvQuestions(text, fileName, category);
+        if (lower.endsWith(".csv")) return parseCsvQuestions(text, fileName, resolvedCategory);
 
-        const tableQuestions = parseMarkdownTableQuestions(cleanedText, fileName, category);
+        const tableQuestions = parseMarkdownTableQuestions(cleanedText, fileName, resolvedCategory);
         if (tableQuestions.length) return tableQuestions;
 
-        return parseQaTextQuestions(cleanedText, fileName, category);
+        return parseQaTextQuestions(cleanedText, fileName, resolvedCategory);
       }
 
-      function addImportedQuestions(questions, label) {
-        const normalized = normalize(questions, el.importCategory.value)
+      function addImportedQuestions(questions, label, fileKind = el.fileKind.value) {
+        const category = categoryForFileKind(fileKind, el.importCategory.value);
+        const normalized = normalize(questions, category)
           .filter((question) => String(question.prompt).trim() && String(question.answer).trim());
 
         importedQuestions = [...importedQuestions, ...normalized];
@@ -978,7 +1097,7 @@
         state.source = "all";
         state.index = 0;
         state.revealed = false;
-        el.importStatus.textContent = `${label}: ${normalized.length}問を追加しました。`;
+        el.importStatus.textContent = `${label}: ${normalized.length}問を${categoryLabels[category]}に追加しました。`;
         render();
       }
 
@@ -986,9 +1105,9 @@
         let added = [];
         for (const file of files) {
           const text = await file.text();
-          added = [...added, ...parseQuestionFile(text, file.name, el.importCategory.value)];
+          added = [...added, ...parseQuestionFile(text, file.name, el.importCategory.value, el.fileKind.value)];
         }
-        addImportedQuestions(added, `${files.length}ファイル`);
+        addImportedQuestions(added, `${files.length}ファイル`, el.fileKind.value);
         el.fileInput.value = "";
       }
 
@@ -1461,6 +1580,14 @@
       }
 
       el.searchInput.addEventListener("input", (event) => updateFilter("query", event.target.value));
+      el.fileKind.addEventListener("change", () => {
+        if (el.fileKind.value === "quiz") el.importCategory.value = "quiz";
+        if (el.fileKind.value === "slides") el.importCategory.value = "prediction";
+        el.importStatus.textContent = el.fileKind.value === "slides"
+          ? "授業スライドは予想問題として追加されます。"
+          : "";
+        render();
+      });
       el.fileInput.addEventListener("change", (event) => {
         importFiles([...event.target.files]).catch((error) => {
           el.importStatus.textContent = `読み込みに失敗しました: ${error.message}`;
@@ -1473,8 +1600,8 @@
             el.importStatus.textContent = "貼り付け欄が空です。";
             return;
           }
-          const questions = parseQuestionFile(text, "貼り付けデータ.txt", el.importCategory.value);
-          addImportedQuestions(questions, "貼り付け");
+          const questions = parseQuestionFile(text, "貼り付けデータ.txt", el.importCategory.value, el.fileKind.value);
+          addImportedQuestions(questions, "貼り付け", el.fileKind.value);
           el.pasteInput.value = "";
         } catch (error) {
           el.importStatus.textContent = `読み込みに失敗しました: ${error.message}`;
