@@ -1,13 +1,26 @@
-const quizQuestions = (window.QUESTION_DATA || []).map((question) => ({
-  category: "quiz",
-  ...question
-}));
-const predictedQuestions = (window.PREDICTED_QUESTION_DATA || []).map((question) => ({
-  category: "prediction",
-  ...question
-}));
+const supportedTypes = ["single", "multiple", "matching", "text", "free"];
+
+const quizQuestions = normalizeQuestions(window.QUESTION_DATA || [], "quiz");
+const predictedQuestions = normalizeQuestions(window.PREDICTED_QUESTION_DATA || [], "prediction");
 const questions = [...quizQuestions, ...predictedQuestions];
-const storageKey = "economics-quiz-progress-v1";
+const validationIssues = validateQuestions(questions);
+const storageKey = "study-quiz-progress-v2";
+const legacyStorageKey = "economics-quiz-progress-v1";
+
+function normalizeQuestions(items, fallbackCategory) {
+  return items.map((question, index) => ({
+    ...question,
+    id: question.id || `${fallbackCategory}-${index + 1}`,
+    source: question.source || "未分類",
+    number: question.number || index + 1,
+    prompt: question.prompt || "",
+    answer: question.answer || "",
+    type: question.type || "single",
+    choices: Array.isArray(question.choices) ? question.choices : [],
+    images: Array.isArray(question.images) ? question.images : [],
+    category: question.category || fallbackCategory
+  }));
+}
 
 const typeLabels = {
   single: "選択",
@@ -44,6 +57,7 @@ const els = {
   sourceFilters: document.getElementById("sourceFilters"),
   typeFilters: document.getElementById("typeFilters"),
   statusFilters: document.getElementById("statusFilters"),
+  dataStatus: document.getElementById("dataStatus"),
   searchInput: document.getElementById("searchInput"),
   quizModeBtn: document.getElementById("quizModeBtn"),
   listModeBtn: document.getElementById("listModeBtn"),
@@ -72,7 +86,7 @@ const els = {
 
 function loadProgress() {
   try {
-    return JSON.parse(localStorage.getItem(storageKey)) || {};
+    return JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey)) || {};
   } catch {
     return {};
   }
@@ -82,8 +96,41 @@ function saveProgress() {
   localStorage.setItem(storageKey, JSON.stringify(state.progress));
 }
 
+function validateQuestions(items) {
+  const issues = [];
+  const ids = new Set();
+
+  items.forEach((question, index) => {
+    const label = question.id || `${index + 1}問目`;
+
+    if (!question.id) issues.push(`${label}: id が空です。`);
+    if (ids.has(question.id)) issues.push(`${label}: id が重複しています。`);
+    ids.add(question.id);
+
+    if (!String(question.prompt).trim()) issues.push(`${label}: prompt が空です。`);
+    if (!String(question.answer).trim()) issues.push(`${label}: answer が空です。`);
+    if (!supportedTypes.includes(question.type)) issues.push(`${label}: type が未対応です。`);
+
+    if ((question.type === "single" || question.type === "multiple") && !question.choices.length) {
+      issues.push(`${label}: ${question.type} には choices が必要です。`);
+    }
+
+    if (question.type === "matching") {
+      const pairs = parseMatchingAnswer(question.answer);
+      const valid = pairs.length > 0 && pairs.every((pair) => pair.label && pair.value);
+      if (!valid) issues.push(`${label}: matching の answer は「① = 用語 / ② = 用語」形式にしてください。`);
+    }
+
+    question.images.forEach((src) => {
+      if (!src || typeof src !== "string") issues.push(`${label}: images に空の値があります。`);
+    });
+  });
+
+  return issues;
+}
+
 function parseMatchingAnswer(answer) {
-  return answer.split("/")
+  return String(answer).split("/")
     .map((part) => part.trim())
     .filter(Boolean)
     .map((part) => {
@@ -245,6 +292,23 @@ function renderStats(items) {
   els.reviewCount.textContent = `${review}復習`;
 }
 
+function renderDataStatus() {
+  if (!els.dataStatus) return;
+
+  if (!validationIssues.length) {
+    els.dataStatus.hidden = false;
+    els.dataStatus.className = "data-status is-ok";
+    els.dataStatus.textContent = `データOK: ${questions.length}問`;
+    return;
+  }
+
+  els.dataStatus.hidden = false;
+  els.dataStatus.className = "data-status is-warning";
+  els.dataStatus.textContent = `データ確認: ${validationIssues.length}件`;
+  els.dataStatus.title = validationIssues.join("\n");
+  console.warn("Question data validation issues", validationIssues);
+}
+
 function renderQuiz(items) {
   const card = els.quizView.querySelector(".quiz-card");
   let empty = document.getElementById("quizEmpty");
@@ -304,11 +368,14 @@ function renderInteraction(question, response) {
       button.className = `choice-button ${response.selected.includes(choice) ? "is-selected" : ""}`;
       button.textContent = choice;
       button.addEventListener("click", () => {
+        response.checked = false;
         response.selected = [choice];
-        judge(question);
+        state.revealed = false;
+        render();
       });
       els.choiceList.appendChild(button);
     });
+    els.choiceList.appendChild(makeJudgeButton(question, response.selected.length === 0));
     return;
   }
 
@@ -443,6 +510,7 @@ function render() {
   const items = filteredQuestions();
   renderFilters();
   renderStats(items);
+  renderDataStatus();
   renderMode();
   if (state.mode === "quiz") renderQuiz(items);
   renderList(items);
