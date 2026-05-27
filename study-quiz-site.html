@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>汎用学習クイズ</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f5ef;
+        --surface: #ffffff;
+        --ink: #202724;
+        --muted: #66706b;
+        --line: #d9ddd8;
+        --accent: #156b5e;
+        --blue: #2d5f91;
+        --orange: #b9602c;
+        --ok: #1f6b3b;
+        --bad: #943b29;
+        --shadow: 0 18px 42px rgba(32, 39, 36, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Segoe UI", sans-serif;
+        line-height: 1.65;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        padding: 0 14px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.48;
+      }
+
+      .primary,
+      .is-active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+
+      header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 26px clamp(16px, 4vw, 46px) 18px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .eyebrow {
+        margin: 0 0 2px;
+        color: var(--orange);
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.55rem, 3vw, 2.25rem);
+        line-height: 1.15;
+        letter-spacing: 0;
+      }
+
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--surface);
+        padding: 3px 10px;
+        color: var(--muted);
+        font-size: 0.86rem;
+        white-space: nowrap;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(230px, 290px) 1fr;
+        gap: 22px;
+        padding: 24px clamp(16px, 4vw, 46px) 42px;
+      }
+
+      aside,
+      .quiz-card,
+      .list-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      aside {
+        position: sticky;
+        top: 16px;
+        align-self: start;
+        padding: 16px;
+      }
+
+      label,
+      .filter-title {
+        display: block;
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      input,
+      select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        padding: 8px 10px;
+      }
+
+      .filter {
+        margin-top: 18px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .segmented {
+        display: inline-flex;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .segmented button {
+        border: 0;
+        border-radius: 0;
+        min-width: 88px;
+      }
+
+      .quiz-card {
+        box-shadow: var(--shadow);
+        padding: clamp(18px, 4vw, 32px);
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .question {
+        margin: 0;
+        white-space: pre-line;
+        font-size: clamp(1.08rem, 2vw, 1.32rem);
+        line-height: 1.8;
+      }
+
+      .images {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .images img {
+        width: min(100%, 680px);
+        max-height: 420px;
+        object-fit: contain;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .choices {
+        display: grid;
+        gap: 9px;
+        margin-top: 20px;
+      }
+
+      .choice {
+        min-height: 46px;
+        border: 1px solid #c8d8e9;
+        border-left: 4px solid var(--blue);
+        background: #f5f8fb;
+        color: #243346;
+        text-align: left;
+      }
+
+      .choice.is-selected {
+        border-color: var(--blue);
+        background: #dcecf7;
+        color: #183759;
+        font-weight: 700;
+      }
+
+      .matching-row {
+        display: grid;
+        grid-template-columns: 58px 1fr;
+        gap: 10px;
+        align-items: start;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: #fbfcfb;
+      }
+
+      .matching-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        border-radius: 6px;
+        background: #edf5f1;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .matching-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .feedback,
+      .answer,
+      .data-status {
+        margin-top: 18px;
+        border-radius: 8px;
+        padding: 12px 14px;
+      }
+
+      .feedback strong,
+      .feedback span,
+      .answer span,
+      .answer strong {
+        display: block;
+      }
+
+      .feedback.ok,
+      .data-status.ok {
+        border: 1px solid #b7d8c3;
+        background: #edf8f0;
+        color: var(--ok);
+      }
+
+      .feedback.bad,
+      .data-status.bad {
+        border: 1px solid #efc1b6;
+        background: #fff0ec;
+        color: var(--bad);
+      }
+
+      .answer {
+        border-left: 5px solid var(--orange);
+        background: #fff7f0;
+      }
+
+      .answer span {
+        color: var(--orange);
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .answer strong {
+        margin-top: 4px;
+        white-space: pre-line;
+        font-size: 1.12rem;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 42px minmax(120px, 1fr) minmax(92px, auto) minmax(82px, auto) 42px;
+        gap: 8px;
+        margin-top: 24px;
+      }
+
+      .icon {
+        width: 42px;
+        padding: 0;
+        font-size: 1.15rem;
+      }
+
+      .list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .list-card {
+        padding: 16px;
+      }
+
+      .list-card h2 {
+        margin: 0 0 8px;
+        font-size: 1rem;
+      }
+
+      .list-card p {
+        margin: 8px 0 0;
+        white-space: pre-line;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 820px) {
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        main {
+          grid-template-columns: 1fr;
+        }
+
+        aside {
+          position: static;
+        }
+
+        .toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .segmented,
+        .toolbar button {
+          width: 100%;
+        }
+
+        .actions {
+          grid-template-columns: 42px 1fr 42px;
+        }
+
+        .actions .mark {
+          grid-column: span 3;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <p class="eyebrow">Common JSON quiz format</p>
+        <h1>汎用学習クイズ</h1>
+      </div>
+      <div class="stats" aria-live="polite">
+        <span id="totalCount" class="pill">0問</span>
+        <span id="knownCount" class="pill">0習得</span>
+        <span id="reviewCount" class="pill">0復習</span>
+      </div>
+    </header>
+
+    <main>
+      <aside aria-label="問題フィルター">
+        <label for="searchInput">検索</label>
+        <input id="searchInput" type="search" placeholder="問題文・答えで検索">
+
+        <div class="filter">
+          <label for="categoryFilter">問題区分</label>
+          <select id="categoryFilter"></select>
+        </div>
+
+        <div class="filter">
+          <label for="sourceFilter">範囲</label>
+          <select id="sourceFilter"></select>
+        </div>
+
+        <div class="filter">
+          <label for="typeFilter">形式</label>
+          <select id="typeFilter"></select>
+        </div>
+
+        <div class="filter">
+          <label for="statusFilter">進捗</label>
+          <select id="statusFilter"></select>
+        </div>
+
+        <div id="dataStatus" class="data-status" hidden></div>
+      </aside>
+
+      <section>
+        <div class="toolbar">
+          <div class="segmented" aria-label="表示切替">
+            <button id="quizMode" class="is-active" type="button">一問一答</button>
+            <button id="listMode" type="button">一覧</button>
+          </div>
+          <button id="shuffleButton" type="button">シャッフル</button>
+        </div>
+
+        <section id="quizView">
+          <article id="quizCard" class="quiz-card">
+            <div id="meta" class="meta"></div>
+            <div id="images" class="images"></div>
+            <p id="prompt" class="question"></p>
+            <div id="choices" class="choices"></div>
+            <div id="feedback" class="feedback hidden"></div>
+            <div id="answer" class="answer hidden"></div>
+            <div class="actions">
+              <button id="prevButton" class="icon" type="button" aria-label="前の問題">←</button>
+              <button id="answerButton" type="button">答えを見る</button>
+              <button id="knownButton" class="mark" type="button">分かった</button>
+              <button id="reviewButton" class="mark" type="button">復習</button>
+              <button id="nextButton" class="icon" type="button" aria-label="次の問題">→</button>
+            </div>
+          </article>
+        </section>
+
+        <section id="listView" class="list hidden"></section>
+      </section>
+    </main>
+
+    <script src="questions.js"></script>
+    <script src="predicted_questions.js"></script>
+    <script>
+      const supportedTypes = ["single", "multiple", "matching", "text", "free"];
+      const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
+      const categoryLabels = { quiz: "小テスト問題", prediction: "予想問題" };
+      const storageKey = "study-quiz-standalone-progress-v1";
+
+      const quizQuestions = normalize(window.QUESTION_DATA || [], "quiz");
+      const predictedQuestions = normalize(window.PREDICTED_QUESTION_DATA || [], "prediction");
+      const allQuestions = [...quizQuestions, ...predictedQuestions];
+      const validationIssues = validate(allQuestions);
+
+      const state = {
+        category: "all",
+        source: "all",
+        type: "all",
+        status: "all",
+        query: "",
+        mode: "quiz",
+        index: 0,
+        revealed: false,
+        order: allQuestions.map((_, index) => index),
+        responses: {},
+        progress: loadProgress()
+      };
+
+      const el = {
+        totalCount: document.getElementById("totalCount"),
+        knownCount: document.getElementById("knownCount"),
+        reviewCount: document.getElementById("reviewCount"),
+        searchInput: document.getElementById("searchInput"),
+        categoryFilter: document.getElementById("categoryFilter"),
+        sourceFilter: document.getElementById("sourceFilter"),
+        typeFilter: document.getElementById("typeFilter"),
+        statusFilter: document.getElementById("statusFilter"),
+        dataStatus: document.getElementById("dataStatus"),
+        quizMode: document.getElementById("quizMode"),
+        listMode: document.getElementById("listMode"),
+        shuffleButton: document.getElementById("shuffleButton"),
+        quizView: document.getElementById("quizView"),
+        listView: document.getElementById("listView"),
+        quizCard: document.getElementById("quizCard"),
+        meta: document.getElementById("meta"),
+        images: document.getElementById("images"),
+        prompt: document.getElementById("prompt"),
+        choices: document.getElementById("choices"),
+        feedback: document.getElementById("feedback"),
+        answer: document.getElementById("answer"),
+        answerButton: document.getElementById("answerButton"),
+        knownButton: document.getElementById("knownButton"),
+        reviewButton: document.getElementById("reviewButton"),
+        prevButton: document.getElementById("prevButton"),
+        nextButton: document.getElementById("nextButton")
+      };
+
+      function normalize(items, category) {
+        return items.map((question, index) => ({
+          ...question,
+          id: question.id || `${category}-${index + 1}`,
+          source: question.source || "未分類",
+          category: question.category || category,
+          number: question.number || index + 1,
+          prompt: question.prompt || "",
+          answer: question.answer || "",
+          type: question.type || "single",
+          choices: Array.isArray(question.choices) ? question.choices : [],
+          images: Array.isArray(question.images) ? question.images : []
+        }));
+      }
+
+      function loadProgress() {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey)) || {};
+        } catch {
+          return {};
+        }
+      }
+
+      function saveProgress() {
+        localStorage.setItem(storageKey, JSON.stringify(state.progress));
+      }
+
+      function parseMatchingAnswer(answer) {
+        return String(answer)
+          .split("/")
+          .map((part) => part.trim())
+          .filter(Boolean)
+          .map((part) => {
+            const [label, value] = part.split("=").map((item) => item.trim());
+            return { label, value };
+          });
+      }
+
+      function parseChoice(choice) {
+        const match = String(choice).match(/^([^:]+):\s*(.*)$/);
+        return match ? { key: match[1], label: match[2] } : { key: choice, label: choice };
+      }
+
+      function validate(questions) {
+        const issues = [];
+        const ids = new Set();
+
+        questions.forEach((question, index) => {
+          const label = question.id || `${index + 1}問目`;
+
+          if (!question.id) issues.push(`${label}: id が空です。`);
+          if (ids.has(question.id)) issues.push(`${label}: id が重複しています。`);
+          ids.add(question.id);
+          if (!String(question.prompt).trim()) issues.push(`${label}: prompt が空です。`);
+          if (!String(question.answer).trim()) issues.push(`${label}: answer が空です。`);
+          if (!supportedTypes.includes(question.type)) issues.push(`${label}: type が未対応です。`);
+          if ((question.type === "single" || question.type === "multiple") && !question.choices.length) {
+            issues.push(`${label}: ${question.type} には choices が必要です。`);
+          }
+          if (question.type === "matching") {
+            const pairs = parseMatchingAnswer(question.answer);
+            if (!pairs.length || pairs.some((pair) => !pair.label || !pair.value)) {
+              issues.push(`${label}: matching の answer は「① = 用語 / ② = 用語」形式にしてください。`);
+            }
+          }
+          question.images.forEach((src) => {
+            if (!src || typeof src !== "string") issues.push(`${label}: images に空の値があります。`);
+          });
+        });
+
+        return issues;
+      }
+
+      function getResponse(question) {
+        if (!state.responses[question.id]) {
+          state.responses[question.id] = { selected: [], matching: {}, text: "", checked: false, correct: false };
+        }
+        return state.responses[question.id];
+      }
+
+      function normalizeAnswer(value) {
+        return String(value).trim().replace(/\s+/g, "").toLowerCase();
+      }
+
+      function correctValues(question) {
+        if (question.type === "multiple") return String(question.answer).split("/").map((item) => item.trim()).filter(Boolean);
+        return [String(question.answer).trim()];
+      }
+
+      function sameSet(a, b) {
+        return a.length === b.length && a.every((item) => b.includes(item));
+      }
+
+      function judge(question) {
+        const response = getResponse(question);
+        let correct = false;
+
+        if (question.type === "matching") {
+          correct = parseMatchingAnswer(question.answer).every((pair) => response.matching[pair.label] === pair.value);
+        } else if (question.type === "multiple") {
+          correct = sameSet(
+            response.selected.map(normalizeAnswer).sort(),
+            correctValues(question).map(normalizeAnswer).sort()
+          );
+        } else if (question.type === "text" || question.type === "free") {
+          correct = normalizeAnswer(response.text) === normalizeAnswer(question.answer);
+        } else {
+          correct = normalizeAnswer(response.selected[0] || "") === normalizeAnswer(question.answer);
+        }
+
+        response.checked = true;
+        response.correct = correct;
+        state.progress[question.id] = correct ? "known" : "review";
+        saveProgress();
+        render();
+      }
+
+      function filtered() {
+        const query = state.query.trim().toLowerCase();
+        return state.order
+          .map((index) => allQuestions[index])
+          .filter((question) => {
+            const status = state.progress[question.id] || "new";
+            const text = `${question.prompt} ${question.answer} ${question.source}`.toLowerCase();
+            return (state.category === "all" || question.category === state.category)
+              && (state.source === "all" || question.source === state.source)
+              && (state.type === "all" || question.type === state.type)
+              && (state.status === "all" || status === state.status)
+              && (!query || text.includes(query));
+          });
+      }
+
+      function option(value, label) {
+        const item = document.createElement("option");
+        item.value = value;
+        item.textContent = label;
+        return item;
+      }
+
+      function unique(values) {
+        return [...new Set(values)];
+      }
+
+      function setOptions(select, current, entries) {
+        select.replaceChildren(...entries.map(([value, label]) => option(value, label)));
+        select.value = current;
+      }
+
+      function renderFilters() {
+        setOptions(el.categoryFilter, state.category, [
+          ["all", "すべて"],
+          ["quiz", "小テスト問題"],
+          ["prediction", "予想問題"]
+        ]);
+
+        const sourceQuestions = allQuestions.filter((question) => state.category === "all" || question.category === state.category);
+        setOptions(el.sourceFilter, state.source, [
+          ["all", "すべて"],
+          ...unique(sourceQuestions.map((question) => question.source)).map((source) => [source, source])
+        ]);
+
+        setOptions(el.typeFilter, state.type, [
+          ["all", "すべて"],
+          ...unique(allQuestions.map((question) => question.type)).map((type) => [type, typeLabels[type] || type])
+        ]);
+
+        setOptions(el.statusFilter, state.status, [
+          ["all", "すべて"],
+          ["new", "未着手"],
+          ["known", "習得"],
+          ["review", "復習"]
+        ]);
+      }
+
+      function renderStatus(items) {
+        const known = allQuestions.filter((question) => state.progress[question.id] === "known").length;
+        const review = allQuestions.filter((question) => state.progress[question.id] === "review").length;
+        el.totalCount.textContent = `${items.length}/${allQuestions.length}問`;
+        el.knownCount.textContent = `${known}習得`;
+        el.reviewCount.textContent = `${review}復習`;
+
+        el.dataStatus.hidden = false;
+        el.dataStatus.className = `data-status ${validationIssues.length ? "bad" : "ok"}`;
+        el.dataStatus.textContent = validationIssues.length ? `データ確認: ${validationIssues.length}件` : `データOK: ${allQuestions.length}問`;
+        el.dataStatus.title = validationIssues.join("\n");
+      }
+
+      function renderQuiz(items) {
+        if (!items.length) {
+          el.quizCard.innerHTML = '<p class="question">条件に合う問題がありません。</p>';
+          return;
+        }
+
+        if (state.index >= items.length) state.index = 0;
+        const question = items[state.index];
+        const response = getResponse(question);
+        const progress = state.progress[question.id] || "new";
+
+        el.meta.replaceChildren(
+          pill(question.source),
+          pill(`${categoryLabels[question.category] || question.category} / ${typeLabels[question.type] || question.type}`),
+          pill(`${state.index + 1} / ${items.length}`)
+        );
+        el.images.replaceChildren(...question.images.map((src) => {
+          const img = document.createElement("img");
+          img.src = src;
+          img.alt = `${question.source}の図`;
+          return img;
+        }));
+        el.prompt.textContent = question.prompt;
+        renderInteraction(question, response);
+
+        el.feedback.className = `feedback ${response.correct ? "ok" : "bad"} ${response.checked ? "" : "hidden"}`;
+        el.feedback.innerHTML = response.checked
+          ? `<strong>${response.correct ? "正解" : "不正解"}</strong><span>${response.correct ? "その調子です。" : `正解: ${question.answer}`}</span>`
+          : "";
+
+        el.answer.className = `answer ${state.revealed ? "" : "hidden"}`;
+        el.answer.innerHTML = `<span>答え</span><strong>${question.answer || "解答なし"}</strong>`;
+        el.answerButton.textContent = state.revealed ? "答えを隠す" : "答えを見る";
+        el.knownButton.classList.toggle("is-active", progress === "known");
+        el.reviewButton.classList.toggle("is-active", progress === "review");
+      }
+
+      function pill(text) {
+        const span = document.createElement("span");
+        span.className = "pill";
+        span.textContent = text;
+        return span;
+      }
+
+      function renderInteraction(question, response) {
+        el.choices.replaceChildren();
+
+        if (question.type === "single" || question.type === "multiple") {
+          question.choices.forEach((choice) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `choice ${response.selected.includes(choice) ? "is-selected" : ""}`;
+            button.textContent = choice;
+            button.addEventListener("click", () => {
+              response.checked = false;
+              state.revealed = false;
+              response.selected = question.type === "single"
+                ? [choice]
+                : response.selected.includes(choice)
+                  ? response.selected.filter((item) => item !== choice)
+                  : [...response.selected, choice];
+              render();
+            });
+            el.choices.appendChild(button);
+          });
+          el.choices.appendChild(judgeButton(question, response.selected.length === 0));
+          return;
+        }
+
+        if (question.type === "matching") {
+          const choices = question.choices.map(parseChoice);
+          parseMatchingAnswer(question.answer).forEach((pair) => {
+            const row = document.createElement("div");
+            row.className = "matching-row";
+            const label = document.createElement("span");
+            label.className = "matching-label";
+            label.textContent = pair.label;
+            const options = document.createElement("div");
+            options.className = "matching-options";
+            choices.forEach((choice) => {
+              const button = document.createElement("button");
+              button.type = "button";
+              button.className = `choice ${response.matching[pair.label] === choice.label ? "is-selected" : ""}`;
+              button.textContent = choice.label;
+              button.addEventListener("click", () => {
+                response.checked = false;
+                response.matching[pair.label] = choice.label;
+                render();
+              });
+              options.appendChild(button);
+            });
+            row.append(label, options);
+            el.choices.appendChild(row);
+          });
+          const done = parseMatchingAnswer(question.answer).every((pair) => response.matching[pair.label]);
+          el.choices.appendChild(judgeButton(question, !done));
+          return;
+        }
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = response.text;
+        input.placeholder = "答えを入力";
+        input.addEventListener("input", (event) => {
+          response.checked = false;
+          response.text = event.target.value;
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" && response.text.trim()) judge(question);
+        });
+        el.choices.append(input, judgeButton(question, !response.text.trim() || String(question.answer).includes("保存された解答なし")));
+      }
+
+      function judgeButton(question, disabled) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "primary";
+        button.disabled = disabled;
+        button.textContent = "判定する";
+        button.addEventListener("click", () => judge(question));
+        return button;
+      }
+
+      function renderList(items) {
+        el.listView.replaceChildren(...items.map((question) => {
+          const card = document.createElement("article");
+          card.className = "list-card";
+          const title = document.createElement("h2");
+          title.textContent = `${categoryLabels[question.category] || question.category} / ${question.source} / ${typeLabels[question.type] || question.type}`;
+          const prompt = document.createElement("p");
+          prompt.textContent = question.prompt;
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = "答えを表示";
+          const answer = document.createElement("p");
+          answer.className = "hidden";
+          answer.textContent = `答え: ${question.answer}`;
+          button.addEventListener("click", () => {
+            answer.classList.toggle("hidden");
+            button.textContent = answer.classList.contains("hidden") ? "答えを表示" : "答えを隠す";
+          });
+          card.append(title, prompt, button, answer);
+          return card;
+        }));
+      }
+
+      function move(delta) {
+        const items = filtered();
+        if (!items.length) return;
+        state.index = (state.index + delta + items.length) % items.length;
+        state.revealed = false;
+        render();
+      }
+
+      function mark(status) {
+        const question = filtered()[state.index];
+        if (!question) return;
+        if (state.progress[question.id] === status) {
+          delete state.progress[question.id];
+        } else {
+          state.progress[question.id] = status;
+        }
+        saveProgress();
+        render();
+      }
+
+      function render() {
+        const items = filtered();
+        renderFilters();
+        renderStatus(items);
+        el.quizView.classList.toggle("hidden", state.mode !== "quiz");
+        el.listView.classList.toggle("hidden", state.mode !== "list");
+        el.quizMode.classList.toggle("is-active", state.mode === "quiz");
+        el.listMode.classList.toggle("is-active", state.mode === "list");
+        renderQuiz(items);
+        renderList(items);
+      }
+
+      function updateFilter(key, value) {
+        state[key] = value;
+        state.index = 0;
+        state.revealed = false;
+        render();
+      }
+
+      el.searchInput.addEventListener("input", (event) => updateFilter("query", event.target.value));
+      el.categoryFilter.addEventListener("change", (event) => {
+        state.source = "all";
+        updateFilter("category", event.target.value);
+      });
+      el.sourceFilter.addEventListener("change", (event) => updateFilter("source", event.target.value));
+      el.typeFilter.addEventListener("change", (event) => updateFilter("type", event.target.value));
+      el.statusFilter.addEventListener("change", (event) => updateFilter("status", event.target.value));
+      el.quizMode.addEventListener("click", () => updateFilter("mode", "quiz"));
+      el.listMode.addEventListener("click", () => updateFilter("mode", "list"));
+      el.shuffleButton.addEventListener("click", () => {
+        state.order = state.order.map((value) => [Math.random(), value]).sort((a, b) => a[0] - b[0]).map((pair) => pair[1]);
+        state.index = 0;
+        state.revealed = false;
+        render();
+      });
+      el.prevButton.addEventListener("click", () => move(-1));
+      el.nextButton.addEventListener("click", () => move(1));
+      el.answerButton.addEventListener("click", () => {
+        state.revealed = !state.revealed;
+        render();
+      });
+      el.knownButton.addEventListener("click", () => mark("known"));
+      el.reviewButton.addEventListener("click", () => mark("review"));
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
+      }
+
+      render();
+    </script>
+  </body>
+</html>
