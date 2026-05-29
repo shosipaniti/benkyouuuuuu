@@ -564,6 +564,10 @@
                   <label for="audioCategoryName">音声工学側の名前</label>
                   <input id="audioCategoryName" type="text">
                 </div>
+                <div id="audioPredictionCategoryField">
+                  <label for="audioPredictionCategoryName">音声工学予想側の名前</label>
+                  <input id="audioPredictionCategoryName" type="text">
+                </div>
               </div>
               <div class="editor-actions">
                 <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ名を保存</button>
@@ -588,11 +592,11 @@
 
     <script src="questions.js"></script>
     <script src="predicted_questions.js"></script>
-    <script src="study_extra_questions.js?v=2"></script>
+    <script src="study_extra_questions.js?v=3"></script>
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
-      const defaultCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学" };
+      const defaultCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学", "audio-prediction": "音声工学 予想問題" };
       const storageKey = "study-quiz-standalone-progress-v1";
       const importedStorageKey = "study-quiz-standalone-imported-v1";
       const questionEditsStorageKey = "study-quiz-standalone-edits-v1";
@@ -652,6 +656,8 @@
         predictionCategoryName: document.getElementById("predictionCategoryName"),
         audioCategoryField: document.getElementById("audioCategoryField"),
         audioCategoryName: document.getElementById("audioCategoryName"),
+        audioPredictionCategoryField: document.getElementById("audioPredictionCategoryField"),
+        audioPredictionCategoryName: document.getElementById("audioPredictionCategoryName"),
         saveCategoryNamesButton: document.getElementById("saveCategoryNamesButton"),
         resetCategoryNamesButton: document.getElementById("resetCategoryNamesButton"),
         categoryStatus: document.getElementById("categoryStatus"),
@@ -1306,9 +1312,11 @@
         el.quizCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "quiz");
         el.predictionCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "prediction");
         el.audioCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "audio");
+        el.audioPredictionCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "audio-prediction");
         el.quizCategoryName.value = categoryLabels.quiz;
         el.predictionCategoryName.value = categoryLabels.prediction;
         el.audioCategoryName.value = categoryLabels.audio;
+        el.audioPredictionCategoryName.value = categoryLabels["audio-prediction"];
       }
 
       function renderDeletePanel() {
@@ -1778,7 +1786,8 @@
         categoryLabels = {
           quiz: el.quizCategoryName.value.trim() || defaultCategoryLabels.quiz,
           prediction: el.predictionCategoryName.value.trim() || defaultCategoryLabels.prediction,
-          audio: el.audioCategoryName.value.trim() || defaultCategoryLabels.audio
+          audio: el.audioCategoryName.value.trim() || defaultCategoryLabels.audio,
+          "audio-prediction": el.audioPredictionCategoryName.value.trim() || defaultCategoryLabels["audio-prediction"]
         };
         saveCategoryLabels();
         el.categoryStatus.textContent = "カテゴリ名を保存しました。";
