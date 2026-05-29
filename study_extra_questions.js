@@ -8,7 +8,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "イ = 9 / ロ = 不明な / ハ = 音韻 / ニ = 文法",
     type: "matching",
     choices: ["a: 90", "b: 9", "c: 明らかな", "d: 不明な", "e: 文法", "f: 音韻"],
-    images: ["assets/audio-engineering-midterm-1.jpg"]
+    images: []
   },
   {
     id: "audio-mid-002",
@@ -19,7 +19,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "イ = 母音 / ロ = 摩擦音 / ハ = 破裂音",
     type: "matching",
     choices: ["a: 母音", "b: 摩擦音", "c: 破裂音"],
-    images: ["assets/audio-engineering-midterm-1.jpg"]
+    images: []
   },
   {
     id: "audio-mid-003",
@@ -30,7 +30,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "び",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-1.jpg"]
+    images: []
   },
   {
     id: "audio-mid-004",
@@ -41,7 +41,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "IPA",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-1.jpg"]
+    images: []
   },
   {
     id: "audio-mid-005",
@@ -52,7 +52,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "東京都 = 5 / チョコレート = 5 / 関東 = 4 / サッカー = 4",
     type: "matching",
     choices: ["a: 3", "b: 4", "c: 5", "d: 6"],
-    images: ["assets/audio-engineering-midterm-1.jpg"]
+    images: []
   },
   {
     id: "audio-mid-006",
@@ -63,7 +63,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "声帯は膨張し、声は高くなる",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-007",
@@ -74,7 +74,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "声帯は収縮し、声は低くなる",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-008",
@@ -85,7 +85,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "声帯振動の基本周波数(f0)",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-009",
@@ -96,7 +96,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "長さ = 1 cm / 質量 = 1 g / 振幅 = 1 mm / 最高周波数 = 1 kHz",
     type: "matching",
     choices: ["a: 1 cm", "b: 1 g", "c: 1 mm", "d: 1 kHz"],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-010",
@@ -107,7 +107,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "横隔膜 / 外肋間筋",
     type: "multiple",
     choices: ["横隔膜", "外肋間筋", "内肋間筋", "腹筋"],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-011",
@@ -118,7 +118,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "吸気時 = 横隔膜 / 呼気時 = 腹筋",
     type: "matching",
     choices: ["a: 横隔膜", "b: 腹筋", "c: 外肋間筋", "d: 内肋間筋"],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-012",
@@ -129,7 +129,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "筋静水圧系",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-013",
@@ -140,7 +140,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "深層の筋群 = 伸張 / 浅層の筋群 = 短縮 / 螺旋状の浅層筋群 = 回旋",
     type: "matching",
     choices: ["a: 伸張", "b: 短縮", "c: 回旋"],
-    images: ["assets/audio-engineering-midterm-2.jpg"]
+    images: []
   },
   {
     id: "audio-mid-014",
@@ -151,7 +151,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "極大",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-015",
@@ -162,7 +162,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "逆フーリエ変換",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-016",
@@ -173,7 +173,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "低次成分 = 声道共鳴 / 高次成分 = 声帯振動",
     type: "matching",
     choices: ["a: 声道共鳴", "b: 声帯振動"],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-017",
@@ -184,7 +184,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "IIR",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-018",
@@ -195,7 +195,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "山",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-019",
@@ -206,7 +206,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "F1 = 上下 / F2 = 前後",
     type: "matching",
     choices: ["a: 上下", "b: 前後"],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-020",
@@ -217,7 +217,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "極",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-021",
@@ -228,7 +228,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "小さくなる",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-022",
@@ -239,7 +239,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "原点から遠ざかる",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-023",
@@ -250,7 +250,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "カテゴリ知覚",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-024",
@@ -261,7 +261,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "スペクトル",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-025",
@@ -272,7 +272,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "VOT",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   },
   {
     id: "audio-mid-026",
@@ -283,6 +283,6 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "ローカス",
     type: "text",
     choices: [],
-    images: ["assets/audio-engineering-midterm-3.jpg"]
+    images: []
   }
 ];
