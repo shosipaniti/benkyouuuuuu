@@ -549,6 +549,7 @@
         <section id="listView" class="list hidden">
           <section class="list-tools" aria-label="一覧編集">
             <button id="toggleCategoryEditorButton" type="button">カテゴリ名を編集</button>
+            <button id="toggleDeleteModeButton" type="button">まとめて削除</button>
             <section id="categoryEditorPanel" class="editor-panel hidden" aria-label="カテゴリ名編集">
               <div class="editor-grid">
                 <div id="quizCategoryField">
@@ -566,6 +567,15 @@
               </div>
               <p id="categoryStatus" class="import-status" aria-live="polite"></p>
             </section>
+            <section id="deletePanel" class="editor-panel hidden" aria-label="まとめて削除">
+              <p class="helper">削除した問題はこの端末では非表示になります。必要な場合は削除を全解除できます。</p>
+              <div class="editor-actions">
+                <button id="selectVisibleButton" type="button">表示中を全選択</button>
+                <button id="deleteSelectedButton" class="primary" type="button">選択した問題を削除</button>
+                <button id="restoreDeletedButton" type="button">削除を全解除</button>
+              </div>
+              <p id="deleteStatus" class="import-status" aria-live="polite"></p>
+            </section>
           </section>
           <div id="listItems" class="list"></div>
         </section>
@@ -574,6 +584,7 @@
 
     <script src="questions.js"></script>
     <script src="predicted_questions.js"></script>
+    <script src="study_extra_questions.js"></script>
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
@@ -582,13 +593,16 @@
       const importedStorageKey = "study-quiz-standalone-imported-v1";
       const questionEditsStorageKey = "study-quiz-standalone-edits-v1";
       const categoryLabelsStorageKey = "study-quiz-standalone-category-labels-v1";
+      const deletedQuestionsStorageKey = "study-quiz-standalone-deleted-v1";
       let categoryLabels = loadCategoryLabels();
 
       const quizQuestions = normalize(window.QUESTION_DATA || [], "quiz");
       const predictedQuestions = normalize(window.PREDICTED_QUESTION_DATA || [], "prediction");
+      const extraQuestions = normalize(window.STUDY_EXTRA_QUESTION_DATA || [], "quiz");
       let importedQuestions = loadImportedQuestions();
       let questionEdits = loadQuestionEdits();
-      let allQuestions = applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...importedQuestions]);
+      let deletedQuestionIds = new Set(loadDeletedQuestionIds());
+      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...importedQuestions]));
       let validationIssues = validate(allQuestions);
 
       const state = {
@@ -602,6 +616,8 @@
         revealed: false,
         editingId: "",
         categoryEditing: false,
+        deleteMode: false,
+        selectedDeleteIds: new Set(),
         order: allQuestions.map((_, index) => index),
         responses: {},
         progress: loadProgress()
@@ -624,6 +640,7 @@
         clearImportedButton: document.getElementById("clearImportedButton"),
         importStatus: document.getElementById("importStatus"),
         toggleCategoryEditorButton: document.getElementById("toggleCategoryEditorButton"),
+        toggleDeleteModeButton: document.getElementById("toggleDeleteModeButton"),
         categoryEditorPanel: document.getElementById("categoryEditorPanel"),
         quizCategoryField: document.getElementById("quizCategoryField"),
         quizCategoryName: document.getElementById("quizCategoryName"),
@@ -632,6 +649,11 @@
         saveCategoryNamesButton: document.getElementById("saveCategoryNamesButton"),
         resetCategoryNamesButton: document.getElementById("resetCategoryNamesButton"),
         categoryStatus: document.getElementById("categoryStatus"),
+        deletePanel: document.getElementById("deletePanel"),
+        selectVisibleButton: document.getElementById("selectVisibleButton"),
+        deleteSelectedButton: document.getElementById("deleteSelectedButton"),
+        restoreDeletedButton: document.getElementById("restoreDeletedButton"),
+        deleteStatus: document.getElementById("deleteStatus"),
         dataStatus: document.getElementById("dataStatus"),
         quizMode: document.getElementById("quizMode"),
         listMode: document.getElementById("listMode"),
@@ -724,8 +746,24 @@
         });
       }
 
+      function loadDeletedQuestionIds() {
+        try {
+          return JSON.parse(localStorage.getItem(deletedQuestionsStorageKey)) || [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveDeletedQuestionIds() {
+        localStorage.setItem(deletedQuestionsStorageKey, JSON.stringify([...deletedQuestionIds]));
+      }
+
+      function visibleQuestions(questions) {
+        return questions.filter((question) => !deletedQuestionIds.has(question.id));
+      }
+
       function refreshQuestionData() {
-        allQuestions = applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...importedQuestions]);
+        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...importedQuestions]));
         validationIssues = validate(allQuestions);
         state.order = allQuestions.map((_, index) => index);
         if (state.index >= filtered().length) state.index = 0;
@@ -1262,6 +1300,13 @@
         el.predictionCategoryName.value = categoryLabels.prediction;
       }
 
+      function renderDeletePanel() {
+        el.deletePanel.classList.toggle("hidden", !state.deleteMode || state.mode !== "list");
+        el.toggleDeleteModeButton.textContent = state.deleteMode ? "まとめて削除を閉じる" : "まとめて削除";
+        el.deleteSelectedButton.disabled = state.selectedDeleteIds.size === 0;
+        el.deleteStatus.textContent = state.deleteMode ? `${state.selectedDeleteIds.size}問を選択中` : "";
+      }
+
       function renderStatus(items) {
         const known = allQuestions.filter((question) => state.progress[question.id] === "known").length;
         const review = allQuestions.filter((question) => state.progress[question.id] === "review").length;
@@ -1549,6 +1594,23 @@
         el.listItems.replaceChildren(...items.map((question) => {
           const card = document.createElement("article");
           card.className = "list-card";
+          if (state.deleteMode) {
+            const select = document.createElement("label");
+            select.className = "helper";
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = state.selectedDeleteIds.has(question.id);
+            checkbox.addEventListener("change", () => {
+              if (checkbox.checked) {
+                state.selectedDeleteIds.add(question.id);
+              } else {
+                state.selectedDeleteIds.delete(question.id);
+              }
+              renderDeletePanel();
+            });
+            select.append(checkbox, " 削除対象にする");
+            card.appendChild(select);
+          }
           const title = document.createElement("h2");
           title.textContent = `${categoryLabels[question.category] || question.category} / ${question.source} / ${typeLabels[question.type] || question.type}`;
           const prompt = document.createElement("p");
@@ -1578,12 +1640,38 @@
         }));
       }
 
+      function deleteSelectedQuestions() {
+        if (!state.selectedDeleteIds.size) return;
+        state.selectedDeleteIds.forEach((id) => {
+          deletedQuestionIds.add(id);
+          delete state.progress[id];
+          delete state.responses[id];
+        });
+        saveDeletedQuestionIds();
+        saveProgress();
+        state.selectedDeleteIds.clear();
+        state.editingId = "";
+        refreshQuestionData();
+        el.deleteStatus.textContent = "選択した問題を削除しました。";
+        render();
+      }
+
+      function restoreDeletedQuestions() {
+        deletedQuestionIds = new Set();
+        saveDeletedQuestionIds();
+        state.selectedDeleteIds.clear();
+        refreshQuestionData();
+        el.deleteStatus.textContent = "削除を全解除しました。";
+        render();
+      }
+
       function move(delta) {
         const items = filtered();
         if (!items.length) return;
         state.index = (state.index + delta + items.length) % items.length;
         state.revealed = false;
         state.editingId = "";
+        state.selectedDeleteIds.clear();
         render();
       }
 
@@ -1604,6 +1692,7 @@
         renderFilters();
         renderStatus(items);
         renderCategoryNameInputs();
+        renderDeletePanel();
         el.quizView.classList.toggle("hidden", state.mode !== "quiz");
         el.listView.classList.toggle("hidden", state.mode !== "list");
         el.quizMode.classList.toggle("is-active", state.mode === "quiz");
@@ -1663,6 +1752,18 @@
         el.categoryStatus.textContent = "";
         render();
       });
+      el.toggleDeleteModeButton.addEventListener("click", () => {
+        state.deleteMode = !state.deleteMode;
+        state.selectedDeleteIds.clear();
+        state.editingId = "";
+        render();
+      });
+      el.selectVisibleButton.addEventListener("click", () => {
+        filtered().forEach((question) => state.selectedDeleteIds.add(question.id));
+        render();
+      });
+      el.deleteSelectedButton.addEventListener("click", deleteSelectedQuestions);
+      el.restoreDeletedButton.addEventListener("click", restoreDeletedQuestions);
       el.saveCategoryNamesButton.addEventListener("click", () => {
         categoryLabels = {
           quiz: el.quizCategoryName.value.trim() || defaultCategoryLabels.quiz,
