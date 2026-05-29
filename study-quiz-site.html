@@ -609,18 +609,18 @@
 
     <script src="questions.js"></script>
     <script src="predicted_questions.js"></script>
-    <script src="study_extra_questions.js?v=3"></script>
+    <script src="study_extra_questions.js?v=4"></script>
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
-      const defaultCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学", "audio-prediction": "音声工学 予想問題" };
+      const defaultCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学", "audio-prediction": "音声工学 予想問題", knowledge: "知識工学" };
       const storageKey = "study-quiz-standalone-progress-v1";
       const importedStorageKey = "study-quiz-standalone-imported-v1";
       const questionEditsStorageKey = "study-quiz-standalone-edits-v1";
       const categoryLabelsStorageKey = "study-quiz-standalone-category-labels-v1";
       const categoryOrderStorageKey = "study-quiz-standalone-category-order-v1";
       const deletedQuestionsStorageKey = "study-quiz-standalone-deleted-v1";
-      const defaultCategoryOrder = ["quiz", "prediction", "audio", "audio-prediction"];
+      const defaultCategoryOrder = ["quiz", "prediction", "audio", "audio-prediction", "knowledge"];
       let categoryLabels = loadCategoryLabels();
       let categoryOrder = loadCategoryOrder();
 
