@@ -2,7 +2,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-001",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 1,
     prompt: "日本語について、次の空欄に入る組み合わせを答えなさい。\n日本語は世界で（イ）番目に話者数が多いが、系統が（ロ）孤立した言語である。基礎語彙や（ハ）体系はオーストロネシア語族に由来、（ニ）体系はアルタイ諸語に由来すると言われている。",
     answer: "イ = 9 / ロ = 不明な / ハ = 音韻 / ニ = 文法",
@@ -13,7 +13,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-002",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 2,
     prompt: "音が発生する3つの原因と音声での対応について、正しい組み合わせを答えなさい。\n（イ）物体の振動、（ロ）空気の乱流、（ハ）空気の急激な膨張や収縮。",
     answer: "イ = 母音 / ロ = 摩擦音 / ハ = 破裂音",
@@ -24,7 +24,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-003",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 3,
     prompt: "「ぴ」の頭子音を有声化した仮名を書きなさい。",
     answer: "び",
@@ -35,7 +35,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-004",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 4,
     prompt: "あらゆる言語の音声を文字で表記するために、国際音声学会が定めた記号を3文字のアルファベットで答えなさい。",
     answer: "IPA",
@@ -46,7 +46,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-005",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 5,
     prompt: "次の語はそれぞれ何モーラか答えなさい。",
     answer: "東京都 = 5 / チョコレート = 5 / 関東 = 4 / サッカー = 4",
@@ -57,7 +57,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-006",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 6,
     prompt: "輪状甲状筋が収縮すると、声帯と声はどうなるか。",
     answer: "声帯は膨張し、声は高くなる",
@@ -68,7 +68,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-007",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 7,
     prompt: "甲状披裂筋が収縮すると、声帯と声はどうなるか。",
     answer: "声帯は収縮し、声は低くなる",
@@ -79,7 +79,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-008",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 8,
     prompt: "人間が声の高さ（ピッチ）として知覚する物理量は主に何か。",
     answer: "声帯振動の基本周波数(f0)",
@@ -90,7 +90,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-009",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 9,
     prompt: "女性の声帯について、振動部分の長さ・質量・振幅・最高周波数を答えなさい。",
     answer: "長さ = 1 cm / 質量 = 1 g / 振幅 = 1 mm / 最高周波数 = 1 kHz",
@@ -101,7 +101,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-010",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 10,
     prompt: "安静呼吸の吸気時に働く筋肉を答えなさい。",
     answer: "横隔膜 / 外肋間筋",
@@ -112,7 +112,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-011",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 11,
     prompt: "腹式呼吸では、吸気時と呼気時にそれぞれ何が働くか。",
     answer: "吸気時 = 横隔膜 / 呼気時 = 腹筋",
@@ -123,7 +123,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-012",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 12,
     prompt: "象の鼻、イカの足、舌のように内部に骨がなく、ほとんどが筋組織からなる組織を何というか。",
     answer: "筋静水圧系",
@@ -134,7 +134,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-013",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 13,
     prompt: "舌の運動について、深層の筋群・浅層の筋群・螺旋状に走る浅層の筋群が収縮した時の動きを答えなさい。",
     answer: "深層の筋群 = 伸張 / 浅層の筋群 = 短縮 / 螺旋状の浅層筋群 = 回旋",
@@ -145,7 +145,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-014",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 14,
     prompt: "自己相関係数を用いたピッチ抽出では、シフト量がピッチ周期と一致すると係数はどうなるか。",
     answer: "極大",
@@ -156,7 +156,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-015",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 15,
     prompt: "ケプストラムとは、一般的に音声の対数スペクトルを何したものか。",
     answer: "逆フーリエ変換",
@@ -167,7 +167,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-016",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 16,
     prompt: "ケプストラムの低次成分と高次成分には、それぞれ何の成分が含まれるか。",
     answer: "低次成分 = 声道共鳴 / 高次成分 = 声帯振動",
@@ -178,7 +178,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-017",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 17,
     prompt: "線形予測係数は、声道伝達関数を分子が1の何フィルタで表した時の分母の係数か。",
     answer: "IIR",
@@ -189,7 +189,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-018",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 18,
     prompt: "フォルマントとは、母音スペクトルのどの部分か。",
     answer: "山",
@@ -200,7 +200,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-019",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 19,
     prompt: "母音のF1周波数とF2周波数は、それぞれ舌のどの位置を反映するか。",
     answer: "F1 = 上下 / F2 = 前後",
@@ -211,7 +211,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-020",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 20,
     prompt: "線形予測係数を用いた声道伝達関数の何の周波数が、フォルマントの中心周波数を表すか。",
     answer: "極",
@@ -222,7 +222,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-021",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 21,
     prompt: "/aiueo/を速く、またはあいまいに発話すると、F1-F2平面上の母音5角形の面積はどうなるか。",
     answer: "小さくなる",
@@ -233,7 +233,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-022",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 22,
     prompt: "母音5角形は、声道が小さくなると原点からどうなるか。",
     answer: "原点から遠ざかる",
@@ -244,7 +244,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-023",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 23,
     prompt: "刺激が連続的であるにもかかわらず、知覚が範疇的に行われることを何というか。",
     answer: "カテゴリ知覚",
@@ -255,7 +255,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-024",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 24,
     prompt: "無声摩擦音 /s/ と /ʃ/、鼻音 /m/ と /n/ の違いは何に現れるか。",
     answer: "スペクトル",
@@ -266,7 +266,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-025",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 25,
     prompt: "破裂音の無声と有声の弁別の手がかりとなる物理量は何か。",
     answer: "VOT",
@@ -277,7 +277,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "audio-mid-026",
     source: "音声工学 中間",
-    category: "quiz",
+    category: "audio",
     number: 26,
     prompt: "有声破裂音は、後続母音へのF2遷移パターンの違いにより特徴づけられる。この遷移パターンの仮想的な開始点を何というか。",
     answer: "ローカス",

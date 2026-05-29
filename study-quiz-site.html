@@ -560,6 +560,10 @@
                   <label for="predictionCategoryName">予想問題側の名前</label>
                   <input id="predictionCategoryName" type="text">
                 </div>
+                <div id="audioCategoryField">
+                  <label for="audioCategoryName">音声工学側の名前</label>
+                  <input id="audioCategoryName" type="text">
+                </div>
               </div>
               <div class="editor-actions">
                 <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ名を保存</button>
@@ -588,7 +592,7 @@
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
-      const defaultCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題" };
+      const defaultCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学" };
       const storageKey = "study-quiz-standalone-progress-v1";
       const importedStorageKey = "study-quiz-standalone-imported-v1";
       const questionEditsStorageKey = "study-quiz-standalone-edits-v1";
@@ -646,6 +650,8 @@
         quizCategoryName: document.getElementById("quizCategoryName"),
         predictionCategoryField: document.getElementById("predictionCategoryField"),
         predictionCategoryName: document.getElementById("predictionCategoryName"),
+        audioCategoryField: document.getElementById("audioCategoryField"),
+        audioCategoryName: document.getElementById("audioCategoryName"),
         saveCategoryNamesButton: document.getElementById("saveCategoryNamesButton"),
         resetCategoryNamesButton: document.getElementById("resetCategoryNamesButton"),
         categoryStatus: document.getElementById("categoryStatus"),
@@ -1260,16 +1266,19 @@
         select.value = current;
       }
 
+      function categoryEntries() {
+        const values = unique(allQuestions.map((question) => question.category));
+        return values.map((category) => [category, categoryLabels[category] || category]);
+      }
+
       function renderFilters() {
         setOptions(el.categoryFilter, state.category, [
           ["all", "すべて"],
-          ["quiz", categoryLabels.quiz],
-          ["prediction", categoryLabels.prediction]
+          ...categoryEntries()
         ]);
 
         setOptions(el.importCategory, el.importCategory.value || "quiz", [
-          ["quiz", categoryLabels.quiz],
-          ["prediction", categoryLabels.prediction]
+          ...categoryEntries()
         ]);
 
         const sourceQuestions = allQuestions.filter((question) => state.category === "all" || question.category === state.category);
@@ -1294,10 +1303,12 @@
       function renderCategoryNameInputs() {
         el.categoryEditorPanel.classList.toggle("hidden", !state.categoryEditing || state.mode !== "list");
         el.toggleCategoryEditorButton.textContent = state.categoryEditing ? "カテゴリ名編集を閉じる" : "カテゴリ名を編集";
-        el.quizCategoryField.classList.toggle("hidden", state.category === "prediction");
-        el.predictionCategoryField.classList.toggle("hidden", state.category === "quiz");
+        el.quizCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "quiz");
+        el.predictionCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "prediction");
+        el.audioCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "audio");
         el.quizCategoryName.value = categoryLabels.quiz;
         el.predictionCategoryName.value = categoryLabels.prediction;
+        el.audioCategoryName.value = categoryLabels.audio;
       }
 
       function renderDeletePanel() {
@@ -1431,8 +1442,7 @@
 
         const source = createInput(question.source);
         const category = createSelect([
-          ["quiz", categoryLabels.quiz],
-          ["prediction", categoryLabels.prediction]
+          ...categoryEntries()
         ], question.category);
         const type = createSelect(supportedTypes.map((item) => [item, typeLabels[item] || item]), question.type);
         const number = createInput(question.number || 1, "number");
@@ -1767,7 +1777,8 @@
       el.saveCategoryNamesButton.addEventListener("click", () => {
         categoryLabels = {
           quiz: el.quizCategoryName.value.trim() || defaultCategoryLabels.quiz,
-          prediction: el.predictionCategoryName.value.trim() || defaultCategoryLabels.prediction
+          prediction: el.predictionCategoryName.value.trim() || defaultCategoryLabels.prediction,
+          audio: el.audioCategoryName.value.trim() || defaultCategoryLabels.audio
         };
         saveCategoryLabels();
         el.categoryStatus.textContent = "カテゴリ名を保存しました。";
