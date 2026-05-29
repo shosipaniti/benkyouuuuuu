@@ -187,6 +187,39 @@
         min-height: 1.4em;
       }
 
+      .category-editor-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .category-row {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px;
+        background: #fff;
+      }
+
+      .category-rank {
+        color: var(--muted);
+        font-size: 0.84rem;
+        font-weight: 700;
+        text-align: center;
+      }
+
+      .category-controls {
+        display: flex;
+        gap: 6px;
+      }
+
+      .category-controls button {
+        min-width: 42px;
+        padding: 0 8px;
+      }
+
 
       .toolbar {
         display: flex;
@@ -551,27 +584,11 @@
             <button id="toggleCategoryEditorButton" type="button">カテゴリ名を編集</button>
             <button id="toggleDeleteModeButton" type="button">まとめて削除</button>
             <section id="categoryEditorPanel" class="editor-panel hidden" aria-label="カテゴリ名編集">
-              <div class="editor-grid">
-                <div id="quizCategoryField">
-                  <label for="quizCategoryName">小テスト側の名前</label>
-                  <input id="quizCategoryName" type="text">
-                </div>
-                <div id="predictionCategoryField">
-                  <label for="predictionCategoryName">予想問題側の名前</label>
-                  <input id="predictionCategoryName" type="text">
-                </div>
-                <div id="audioCategoryField">
-                  <label for="audioCategoryName">音声工学側の名前</label>
-                  <input id="audioCategoryName" type="text">
-                </div>
-                <div id="audioPredictionCategoryField">
-                  <label for="audioPredictionCategoryName">音声工学予想側の名前</label>
-                  <input id="audioPredictionCategoryName" type="text">
-                </div>
-              </div>
+              <p class="helper">上から順に問題区分フィルターと追加先に表示されます。名前もここで変更できます。</p>
+              <div id="categoryEditorList" class="category-editor-list"></div>
               <div class="editor-actions">
-                <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ名を保存</button>
-                <button id="resetCategoryNamesButton" type="button">カテゴリ名を戻す</button>
+                <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ設定を保存</button>
+                <button id="resetCategoryNamesButton" type="button">初期状態に戻す</button>
               </div>
               <p id="categoryStatus" class="import-status" aria-live="polite"></p>
             </section>
@@ -601,8 +618,11 @@
       const importedStorageKey = "study-quiz-standalone-imported-v1";
       const questionEditsStorageKey = "study-quiz-standalone-edits-v1";
       const categoryLabelsStorageKey = "study-quiz-standalone-category-labels-v1";
+      const categoryOrderStorageKey = "study-quiz-standalone-category-order-v1";
       const deletedQuestionsStorageKey = "study-quiz-standalone-deleted-v1";
+      const defaultCategoryOrder = ["quiz", "prediction", "audio", "audio-prediction"];
       let categoryLabels = loadCategoryLabels();
+      let categoryOrder = loadCategoryOrder();
 
       const quizQuestions = normalize(window.QUESTION_DATA || [], "quiz");
       const predictedQuestions = normalize(window.PREDICTED_QUESTION_DATA || [], "prediction");
@@ -650,14 +670,7 @@
         toggleCategoryEditorButton: document.getElementById("toggleCategoryEditorButton"),
         toggleDeleteModeButton: document.getElementById("toggleDeleteModeButton"),
         categoryEditorPanel: document.getElementById("categoryEditorPanel"),
-        quizCategoryField: document.getElementById("quizCategoryField"),
-        quizCategoryName: document.getElementById("quizCategoryName"),
-        predictionCategoryField: document.getElementById("predictionCategoryField"),
-        predictionCategoryName: document.getElementById("predictionCategoryName"),
-        audioCategoryField: document.getElementById("audioCategoryField"),
-        audioCategoryName: document.getElementById("audioCategoryName"),
-        audioPredictionCategoryField: document.getElementById("audioPredictionCategoryField"),
-        audioPredictionCategoryName: document.getElementById("audioPredictionCategoryName"),
+        categoryEditorList: document.getElementById("categoryEditorList"),
         saveCategoryNamesButton: document.getElementById("saveCategoryNamesButton"),
         resetCategoryNamesButton: document.getElementById("resetCategoryNamesButton"),
         categoryStatus: document.getElementById("categoryStatus"),
@@ -724,6 +737,19 @@
 
       function saveCategoryLabels() {
         localStorage.setItem(categoryLabelsStorageKey, JSON.stringify(categoryLabels));
+      }
+
+      function loadCategoryOrder() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(categoryOrderStorageKey));
+          return Array.isArray(saved) ? unique([...saved, ...defaultCategoryOrder]) : [...defaultCategoryOrder];
+        } catch {
+          return [...defaultCategoryOrder];
+        }
+      }
+
+      function saveCategoryOrder() {
+        localStorage.setItem(categoryOrderStorageKey, JSON.stringify(categoryOrder));
       }
 
       function loadImportedQuestions() {
@@ -1273,8 +1299,24 @@
       }
 
       function categoryEntries() {
-        const values = unique(allQuestions.map((question) => question.category));
+        const values = orderedCategories(unique(allQuestions.map((question) => question.category)));
         return values.map((category) => [category, categoryLabels[category] || category]);
+      }
+
+      function importCategoryEntries() {
+        const values = orderedCategories(unique([...defaultCategoryOrder, ...allQuestions.map((question) => question.category)]));
+        return values.map((category) => [category, categoryLabels[category] || category]);
+      }
+
+      function orderedCategories(values) {
+        const target = unique(values.filter(Boolean));
+        const order = unique([...categoryOrder, ...defaultCategoryOrder]);
+        return [
+          ...order.filter((category) => target.includes(category)),
+          ...target
+            .filter((category) => !order.includes(category))
+            .sort((a, b) => (categoryLabels[a] || a).localeCompare(categoryLabels[b] || b, "ja"))
+        ];
       }
 
       function renderFilters() {
@@ -1284,7 +1326,7 @@
         ]);
 
         setOptions(el.importCategory, el.importCategory.value || "quiz", [
-          ...categoryEntries()
+          ...importCategoryEntries()
         ]);
 
         const sourceQuestions = allQuestions.filter((question) => state.category === "all" || question.category === state.category);
@@ -1309,14 +1351,63 @@
       function renderCategoryNameInputs() {
         el.categoryEditorPanel.classList.toggle("hidden", !state.categoryEditing || state.mode !== "list");
         el.toggleCategoryEditorButton.textContent = state.categoryEditing ? "カテゴリ名編集を閉じる" : "カテゴリ名を編集";
-        el.quizCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "quiz");
-        el.predictionCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "prediction");
-        el.audioCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "audio");
-        el.audioPredictionCategoryField.classList.toggle("hidden", state.category !== "all" && state.category !== "audio-prediction");
-        el.quizCategoryName.value = categoryLabels.quiz;
-        el.predictionCategoryName.value = categoryLabels.prediction;
-        el.audioCategoryName.value = categoryLabels.audio;
-        el.audioPredictionCategoryName.value = categoryLabels["audio-prediction"];
+        if (!state.categoryEditing || state.mode !== "list") return;
+        const categories = importCategoryEntries().map(([category]) => category);
+        el.categoryEditorList.replaceChildren(...categories.map((category, index) => {
+          const row = document.createElement("div");
+          row.className = "category-row";
+          row.dataset.categoryRow = category;
+
+          const rank = document.createElement("span");
+          rank.className = "category-rank";
+          rank.textContent = String(index + 1);
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = categoryLabels[category] || category;
+          input.placeholder = defaultCategoryLabels[category] || category;
+          input.dataset.categoryName = category;
+          input.setAttribute("aria-label", `${categoryLabels[category] || category}の表示名`);
+
+          const controls = document.createElement("div");
+          controls.className = "category-controls";
+          const up = document.createElement("button");
+          up.type = "button";
+          up.textContent = "↑";
+          up.disabled = index === 0;
+          up.setAttribute("aria-label", `${categoryLabels[category] || category}を上へ移動`);
+          up.addEventListener("click", () => moveCategory(category, -1));
+          const down = document.createElement("button");
+          down.type = "button";
+          down.textContent = "↓";
+          down.disabled = index === categories.length - 1;
+          down.setAttribute("aria-label", `${categoryLabels[category] || category}を下へ移動`);
+          down.addEventListener("click", () => moveCategory(category, 1));
+          controls.append(up, down);
+
+          row.append(rank, input, controls);
+          return row;
+        }));
+      }
+
+      function moveCategory(category, delta) {
+        captureCategoryEditorLabels();
+        const categories = importCategoryEntries().map(([value]) => value);
+        const index = categories.indexOf(category);
+        const target = index + delta;
+        if (index < 0 || target < 0 || target >= categories.length) return;
+        [categories[index], categories[target]] = [categories[target], categories[index]];
+        categoryOrder = categories;
+        saveCategoryOrder();
+        el.categoryStatus.textContent = "表示順を変更しました。";
+        render();
+      }
+
+      function captureCategoryEditorLabels() {
+        el.categoryEditorList.querySelectorAll("[data-category-name]").forEach((input) => {
+          const category = input.dataset.categoryName;
+          categoryLabels[category] = input.value.trim() || defaultCategoryLabels[category] || category;
+        });
       }
 
       function renderDeletePanel() {
@@ -1783,20 +1874,20 @@
       el.deleteSelectedButton.addEventListener("click", deleteSelectedQuestions);
       el.restoreDeletedButton.addEventListener("click", restoreDeletedQuestions);
       el.saveCategoryNamesButton.addEventListener("click", () => {
-        categoryLabels = {
-          quiz: el.quizCategoryName.value.trim() || defaultCategoryLabels.quiz,
-          prediction: el.predictionCategoryName.value.trim() || defaultCategoryLabels.prediction,
-          audio: el.audioCategoryName.value.trim() || defaultCategoryLabels.audio,
-          "audio-prediction": el.audioPredictionCategoryName.value.trim() || defaultCategoryLabels["audio-prediction"]
-        };
+        categoryLabels = { ...categoryLabels };
+        captureCategoryEditorLabels();
+        categoryOrder = [...el.categoryEditorList.querySelectorAll("[data-category-row]")].map((row) => row.dataset.categoryRow);
         saveCategoryLabels();
-        el.categoryStatus.textContent = "カテゴリ名を保存しました。";
+        saveCategoryOrder();
+        el.categoryStatus.textContent = "カテゴリ設定を保存しました。";
         render();
       });
       el.resetCategoryNamesButton.addEventListener("click", () => {
         categoryLabels = { ...defaultCategoryLabels };
+        categoryOrder = [...defaultCategoryOrder];
         saveCategoryLabels();
-        el.categoryStatus.textContent = "カテゴリ名を戻しました。";
+        saveCategoryOrder();
+        el.categoryStatus.textContent = "カテゴリ設定を初期状態に戻しました。";
         render();
       });
       el.categoryFilter.addEventListener("change", (event) => {
