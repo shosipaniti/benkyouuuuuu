@@ -3,99 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>経済 小テスト 一問一答</title>
+    <title>汎用学習クイズ</title>
     <meta name="theme-color" content="#146c5f">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css">
+    <meta http-equiv="refresh" content="0; url=study-quiz-site.html?v=8">
+    <script>
+      window.location.replace("study-quiz-site.html?v=8");
+    </script>
   </head>
   <body>
-    <header class="app-header">
-      <div>
-        <p class="eyebrow">Economics quiz deck</p>
-        <h1>経済 小テスト 一問一答</h1>
-      </div>
-      <div class="stats" aria-live="polite">
-        <span id="totalCount">0問</span>
-        <span id="knownCount">0習得</span>
-        <span id="reviewCount">0復習</span>
-      </div>
-    </header>
-
-    <main class="layout">
-      <aside class="sidebar" aria-label="問題フィルター">
-        <label class="search-label" for="searchInput">検索</label>
-        <input id="searchInput" type="search" placeholder="語句・答えで検索">
-
-        <div class="filter-group">
-          <h2>問題区分</h2>
-          <div id="kindFilters" class="chip-list"></div>
-        </div>
-
-        <div class="filter-group">
-          <h2>範囲</h2>
-          <div id="sourceFilters" class="chip-list"></div>
-        </div>
-
-        <div class="filter-group">
-          <h2>形式</h2>
-          <div id="typeFilters" class="chip-list"></div>
-        </div>
-
-        <div class="filter-group">
-          <h2>進捗</h2>
-          <div id="statusFilters" class="chip-list"></div>
-        </div>
-      </aside>
-
-      <section class="workspace">
-        <div class="toolbar" aria-label="表示切替">
-          <div class="segmented">
-            <button id="quizModeBtn" class="is-active" type="button">一問一答</button>
-            <button id="listModeBtn" type="button">一覧</button>
-          </div>
-          <div class="toolbar-actions">
-            <button id="shuffleBtn" type="button">シャッフル</button>
-            <button id="resetProgressBtn" type="button">進捗リセット</button>
-          </div>
-        </div>
-
-        <section id="quizView" class="quiz-view" aria-live="polite">
-          <article class="quiz-card">
-            <div class="card-meta">
-              <span id="cardSource"></span>
-              <span id="cardType"></span>
-              <span id="cardPosition"></span>
-            </div>
-            <div id="imageFrame" class="image-frame"></div>
-            <p id="questionText" class="question-text"></p>
-            <div id="choiceList" class="choices"></div>
-            <div id="feedbackPanel" class="feedback-panel" hidden>
-              <strong id="feedbackTitle"></strong>
-              <span id="feedbackDetail"></span>
-            </div>
-            <div id="answerPanel" class="answer-panel" hidden>
-              <span>答え</span>
-              <strong id="answerText"></strong>
-            </div>
-            <div class="card-actions">
-              <button id="prevBtn" class="icon-button" type="button" aria-label="前の問題">←</button>
-              <button id="revealBtn" class="primary" type="button">答えを見る</button>
-              <button id="knownBtn" type="button">分かった</button>
-              <button id="reviewBtn" type="button">復習</button>
-              <button id="nextBtn" class="icon-button" type="button" aria-label="次の問題">→</button>
-            </div>
-          </article>
-        </section>
-
-        <section id="listView" class="list-view" hidden>
-          <div id="questionList" class="question-list"></div>
-        </section>
-      </section>
-    </main>
-
-    <script src="questions.js"></script>
-    <script src="predicted_questions.js"></script>
-    <script src="app.js"></script>
+    <p><a href="study-quiz-site.html?v=8">汎用学習クイズを開く</a></p>
   </body>
 </html>

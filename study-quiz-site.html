@@ -584,7 +584,7 @@
             <button id="toggleCategoryEditorButton" type="button">カテゴリ名を編集</button>
             <button id="toggleDeleteModeButton" type="button">まとめて削除</button>
             <section id="categoryEditorPanel" class="editor-panel hidden" aria-label="カテゴリ名編集">
-              <p class="helper">上から順に問題区分フィルターと追加先に表示されます。名前もここで変更できます。</p>
+              <p class="helper">上から順に問題区分フィルター、追加先、一問一答の出題順へ反映されます。名前もここで変更できます。</p>
               <div id="categoryEditorList" class="category-editor-list"></div>
               <div class="editor-actions">
                 <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ設定を保存</button>
@@ -800,10 +800,37 @@
         return questions.filter((question) => !deletedQuestionIds.has(question.id));
       }
 
+      function categoryRank(category) {
+        const order = orderedCategories(unique([...categoryOrder, ...defaultCategoryOrder, ...allQuestions.map((question) => question.category)]));
+        const index = order.indexOf(category);
+        return index === -1 ? order.length : index;
+      }
+
+      function sortedQuestionIndexes() {
+        return allQuestions
+          .map((question, index) => ({ question, index }))
+          .sort((a, b) => {
+            const categoryDiff = categoryRank(a.question.category) - categoryRank(b.question.category);
+            if (categoryDiff) return categoryDiff;
+            const sourceDiff = String(a.question.source).localeCompare(String(b.question.source), "ja", { numeric: true });
+            if (sourceDiff) return sourceDiff;
+            const numberDiff = Number(a.question.number || 0) - Number(b.question.number || 0);
+            if (numberDiff) return numberDiff;
+            return String(a.question.id).localeCompare(String(b.question.id), "ja", { numeric: true });
+          })
+          .map((item) => item.index);
+      }
+
+      function applyCategoryOrderToQuestions() {
+        state.order = sortedQuestionIndexes();
+        state.index = 0;
+        state.revealed = false;
+      }
+
       function refreshQuestionData() {
         allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...importedQuestions]));
         validationIssues = validate(allQuestions);
-        state.order = allQuestions.map((_, index) => index);
+        applyCategoryOrderToQuestions();
         if (state.index >= filtered().length) state.index = 0;
       }
 
@@ -1399,6 +1426,7 @@
         [categories[index], categories[target]] = [categories[target], categories[index]];
         categoryOrder = categories;
         saveCategoryOrder();
+        applyCategoryOrderToQuestions();
         el.categoryStatus.textContent = "表示順を変更しました。";
         render();
       }
@@ -1879,6 +1907,7 @@
         categoryOrder = [...el.categoryEditorList.querySelectorAll("[data-category-row]")].map((row) => row.dataset.categoryRow);
         saveCategoryLabels();
         saveCategoryOrder();
+        applyCategoryOrderToQuestions();
         el.categoryStatus.textContent = "カテゴリ設定を保存しました。";
         render();
       });
@@ -1887,6 +1916,7 @@
         categoryOrder = [...defaultCategoryOrder];
         saveCategoryLabels();
         saveCategoryOrder();
+        applyCategoryOrderToQuestions();
         el.categoryStatus.textContent = "カテゴリ設定を初期状態に戻しました。";
         render();
       });
@@ -1919,6 +1949,7 @@
         window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
       }
 
+      applyCategoryOrderToQuestions();
       render();
     </script>
   </body>
