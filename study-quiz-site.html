@@ -1258,6 +1258,30 @@
         return state.responses[question.id];
       }
 
+      function shuffled(items) {
+        const result = [...items];
+        for (let i = result.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [result[i], result[j]] = [result[j], result[i]];
+        }
+        return result;
+      }
+
+      function randomizedChoices(question, response) {
+        const signature = question.choices.join("\u0001");
+        if (response.choiceOrderSignature !== signature || !Array.isArray(response.choiceOrder)) {
+          response.choiceOrderSignature = signature;
+          response.choiceOrder = shuffled(question.choices);
+        }
+        return response.choiceOrder;
+      }
+
+      function resetChoiceOrder(question) {
+        if (!question || !state.responses[question.id]) return;
+        delete state.responses[question.id].choiceOrderSignature;
+        delete state.responses[question.id].choiceOrder;
+      }
+
       function normalizeAnswer(value) {
         return String(value).trim().replace(/\s+/g, "").toLowerCase();
       }
@@ -1698,7 +1722,7 @@
         el.choices.replaceChildren();
 
         if (question.type === "single" || question.type === "multiple") {
-          question.choices.forEach((choice) => {
+          randomizedChoices(question, response).forEach((choice) => {
             const button = document.createElement("button");
             button.type = "button";
             button.className = `choice ${response.selected.includes(choice) ? "is-selected" : ""}`;
@@ -1719,7 +1743,7 @@
         }
 
         if (question.type === "matching") {
-          const choices = question.choices.map(parseChoice);
+          const choices = randomizedChoices(question, response).map(parseChoice);
           parseMatchingAnswer(question.answer).forEach((pair) => {
             const row = document.createElement("div");
             row.className = "matching-row";
@@ -1842,6 +1866,7 @@
         state.revealed = false;
         state.editingId = "";
         state.selectedDeleteIds.clear();
+        resetChoiceOrder(filtered()[state.index]);
         render();
       }
 
@@ -1876,6 +1901,7 @@
         state.index = 0;
         state.revealed = false;
         state.editingId = "";
+        resetChoiceOrder(filtered()[state.index]);
         render();
       }
 
@@ -1966,6 +1992,7 @@
         state.order = state.order.map((value) => [Math.random(), value]).sort((a, b) => a[0] - b[0]).map((pair) => pair[1]);
         state.index = 0;
         state.revealed = false;
+        resetChoiceOrder(filtered()[state.index]);
         render();
       });
       el.prevButton.addEventListener("click", () => move(-1));
