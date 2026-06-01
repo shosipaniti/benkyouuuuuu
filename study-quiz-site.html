@@ -207,13 +207,39 @@
 
       .category-row {
         display: grid;
-        grid-template-columns: 34px minmax(0, 1fr) auto;
+        grid-template-columns: 30px 34px minmax(0, 1fr) auto;
         align-items: center;
         gap: 8px;
         border: 1px solid var(--line);
         border-radius: 8px;
         padding: 8px;
         background: #fff;
+      }
+
+      .category-row.is-dragging {
+        opacity: 0.55;
+      }
+
+      .category-row.is-drag-over {
+        border-color: var(--accent);
+        box-shadow: inset 0 0 0 1px var(--accent);
+      }
+
+      .category-drag-handle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 30px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        color: var(--muted);
+        cursor: grab;
+        font-weight: 800;
+      }
+
+      .category-drag-handle:active {
+        cursor: grabbing;
       }
 
       .category-rank {
@@ -476,6 +502,13 @@
         min-height: 36px;
       }
 
+      .category-delete-list button.is-selected {
+        border-color: var(--accent);
+        background: var(--soft);
+        color: var(--accent);
+        font-weight: 800;
+      }
+
       .actions {
         display: grid;
         grid-template-columns: 42px minmax(150px, 1fr) 42px minmax(82px, auto) minmax(82px, auto);
@@ -657,6 +690,10 @@
                   <button id="restoreDeletedButton" type="button">削除を全解除</button>
                 </div>
                 <p class="filter-title">カテゴリごとに削除</p>
+                <div class="editor-actions">
+                  <button id="deleteSelectedCategoriesButton" class="primary" type="button">選択したカテゴリを削除</button>
+                  <button id="clearSelectedCategoriesButton" type="button">カテゴリ選択を解除</button>
+                </div>
                 <div id="categoryDeleteList" class="category-delete-list"></div>
                 <p id="deleteStatus" class="import-status" aria-live="polite"></p>
               </section>
@@ -729,6 +766,8 @@
         deleteMode: false,
         deleteMessage: "",
         selectedDeleteIds: new Set(),
+        selectedDeleteCategories: new Set(),
+        draggingCategory: "",
         order: allQuestions.map((_, index) => index),
         responses: {},
         progress: loadProgress()
@@ -761,6 +800,8 @@
         selectVisibleButton: document.getElementById("selectVisibleButton"),
         deleteSelectedButton: document.getElementById("deleteSelectedButton"),
         restoreDeletedButton: document.getElementById("restoreDeletedButton"),
+        deleteSelectedCategoriesButton: document.getElementById("deleteSelectedCategoriesButton"),
+        clearSelectedCategoriesButton: document.getElementById("clearSelectedCategoriesButton"),
         categoryDeleteList: document.getElementById("categoryDeleteList"),
         deleteStatus: document.getElementById("deleteStatus"),
         dataStatus: document.getElementById("dataStatus"),
@@ -1492,6 +1533,39 @@
           row.className = "category-row";
           row.dataset.categoryRow = category;
 
+          const handle = document.createElement("span");
+          handle.className = "category-drag-handle";
+          handle.textContent = "↕";
+          handle.draggable = true;
+          handle.setAttribute("role", "button");
+          handle.setAttribute("aria-label", `${categoryLabels[category] || category}をドラッグして並べ替え`);
+          handle.addEventListener("dragstart", (event) => {
+            captureCategoryEditorLabels();
+            state.draggingCategory = category;
+            row.classList.add("is-dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", category);
+          });
+          handle.addEventListener("dragend", () => {
+            state.draggingCategory = "";
+            el.categoryEditorList.querySelectorAll(".category-row").forEach((item) => {
+              item.classList.remove("is-dragging", "is-drag-over");
+            });
+          });
+          row.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            if (state.draggingCategory && state.draggingCategory !== category) {
+              row.classList.add("is-drag-over");
+            }
+          });
+          row.addEventListener("dragleave", () => row.classList.remove("is-drag-over"));
+          row.addEventListener("drop", (event) => {
+            event.preventDefault();
+            row.classList.remove("is-drag-over");
+            const draggedCategory = event.dataTransfer.getData("text/plain") || state.draggingCategory;
+            moveCategoryTo(draggedCategory, category);
+          });
+
           const rank = document.createElement("span");
           rank.className = "category-rank";
           rank.textContent = String(index + 1);
@@ -1519,7 +1593,7 @@
           down.addEventListener("click", () => moveCategory(category, 1));
           controls.append(up, down);
 
-          row.append(rank, input, controls);
+          row.append(handle, rank, input, controls);
           return row;
         }));
       }
@@ -1538,6 +1612,22 @@
         render();
       }
 
+      function moveCategoryTo(category, targetCategory) {
+        if (!category || !targetCategory || category === targetCategory) return;
+        captureCategoryEditorLabels();
+        const categories = importCategoryEntries().map(([value]) => value);
+        const index = categories.indexOf(category);
+        const target = categories.indexOf(targetCategory);
+        if (index < 0 || target < 0) return;
+        categories.splice(index, 1);
+        categories.splice(target, 0, category);
+        categoryOrder = categories;
+        saveCategoryOrder();
+        applyCategoryOrderToQuestions();
+        el.categoryStatus.textContent = "表示順を変更しました。";
+        render();
+      }
+
       function captureCategoryEditorLabels() {
         el.categoryEditorList.querySelectorAll("[data-category-name]").forEach((input) => {
           const category = input.dataset.categoryName;
@@ -1549,13 +1639,16 @@
         el.deletePanel.classList.toggle("hidden", !state.deleteMode || state.mode !== "list");
         el.toggleDeleteModeButton.textContent = state.deleteMode ? "まとめて削除を閉じる" : "まとめて削除";
         el.deleteSelectedButton.disabled = state.selectedDeleteIds.size === 0;
+        el.deleteSelectedCategoriesButton.disabled = state.selectedDeleteCategories.size === 0;
+        el.clearSelectedCategoriesButton.disabled = state.selectedDeleteCategories.size === 0;
         renderCategoryDeleteButtons();
         if (!state.deleteMode || state.mode !== "list") {
           el.deleteStatus.textContent = "";
         } else if (state.deleteMessage) {
           el.deleteStatus.textContent = state.deleteMessage;
         } else {
-          el.deleteStatus.textContent = `${state.selectedDeleteIds.size}問を選択中`;
+          const categoryCount = state.selectedDeleteCategories.size;
+          el.deleteStatus.textContent = `${state.selectedDeleteIds.size}問、${categoryCount}カテゴリを選択中`;
         }
       }
 
@@ -1583,8 +1676,18 @@
         el.categoryDeleteList.replaceChildren(...categories.map((item) => {
           const button = document.createElement("button");
           button.type = "button";
-          button.textContent = `${item.label}を削除 (${item.count}問)`;
-          button.addEventListener("click", () => deleteCategoryQuestions(item.category, item.label));
+          button.className = state.selectedDeleteCategories.has(item.category) ? "is-selected" : "";
+          button.textContent = `${item.label} (${item.count}問)`;
+          button.setAttribute("aria-pressed", String(state.selectedDeleteCategories.has(item.category)));
+          button.addEventListener("click", () => {
+            if (state.selectedDeleteCategories.has(item.category)) {
+              state.selectedDeleteCategories.delete(item.category);
+            } else {
+              state.selectedDeleteCategories.add(item.category);
+            }
+            state.deleteMessage = "";
+            render();
+          });
           return button;
         }));
       }
@@ -1970,10 +2073,32 @@
         render();
       }
 
+      function deleteSelectedCategories() {
+        if (!state.selectedDeleteCategories.size) return;
+        const labels = categoryEntries()
+          .filter(([category]) => state.selectedDeleteCategories.has(category))
+          .map(([, label]) => label);
+        const targets = allQuestions.filter((question) => state.selectedDeleteCategories.has(question.category));
+        targets.forEach((question) => {
+          deletedQuestionIds.add(question.id);
+          delete state.progress[question.id];
+          delete state.responses[question.id];
+        });
+        saveDeletedQuestionIds();
+        saveProgress();
+        state.selectedDeleteIds.clear();
+        state.selectedDeleteCategories.clear();
+        state.editingId = "";
+        refreshQuestionData();
+        state.deleteMessage = `${labels.join("、")}を${targets.length}問削除しました。`;
+        render();
+      }
+
       function restoreDeletedQuestions() {
         deletedQuestionIds = new Set();
         saveDeletedQuestionIds();
         state.selectedDeleteIds.clear();
+        state.selectedDeleteCategories.clear();
         refreshQuestionData();
         state.deleteMessage = "削除を全解除しました。";
         render();
@@ -2069,6 +2194,7 @@
           state.deleteMode = false;
           state.deleteMessage = "";
           state.selectedDeleteIds.clear();
+          state.selectedDeleteCategories.clear();
           state.editingId = "";
         }
         el.categoryStatus.textContent = "";
@@ -2081,6 +2207,7 @@
           state.editingId = "";
         }
         state.selectedDeleteIds.clear();
+        state.selectedDeleteCategories.clear();
         state.deleteMessage = "";
         render();
       });
@@ -2090,6 +2217,12 @@
         render();
       });
       el.deleteSelectedButton.addEventListener("click", deleteSelectedQuestions);
+      el.deleteSelectedCategoriesButton.addEventListener("click", deleteSelectedCategories);
+      el.clearSelectedCategoriesButton.addEventListener("click", () => {
+        state.selectedDeleteCategories.clear();
+        state.deleteMessage = "";
+        render();
+      });
       el.restoreDeletedButton.addEventListener("click", restoreDeletedQuestions);
       el.saveCategoryNamesButton.addEventListener("click", () => {
         categoryLabels = { ...categoryLabels };
