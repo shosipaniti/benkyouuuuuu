@@ -436,7 +436,7 @@
 
       .actions {
         display: grid;
-        grid-template-columns: 42px minmax(112px, 1fr) minmax(70px, auto) minmax(92px, auto) minmax(82px, auto) 42px;
+        grid-template-columns: 42px minmax(150px, 1fr) 42px minmax(82px, auto) minmax(82px, auto);
         gap: 8px;
         margin-top: 24px;
       }
@@ -590,9 +590,9 @@
             <div class="actions">
               <button id="prevButton" class="icon" type="button" aria-label="前の問題">←</button>
               <button id="answerButton" class="primary" type="button">答え合わせ</button>
+              <button id="nextButton" class="icon" type="button" aria-label="次の問題">→</button>
               <button id="knownButton" class="mark" type="button">分かった</button>
               <button id="reviewButton" class="mark" type="button">復習</button>
-              <button id="nextButton" class="icon" type="button" aria-label="次の問題">→</button>
             </div>
           </article>
         </section>
@@ -1977,6 +1977,19 @@
       });
       el.knownButton.addEventListener("click", () => mark("known"));
       el.reviewButton.addEventListener("click", () => mark("review"));
+
+      document.addEventListener("keydown", (event) => {
+        if (state.mode !== "quiz") return;
+        if (event.target.matches("input, textarea, select, [contenteditable='true']")) return;
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          move(-1);
+        }
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          move(1);
+        }
+      });
 
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
