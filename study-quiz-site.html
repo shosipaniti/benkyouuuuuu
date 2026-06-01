@@ -363,6 +363,24 @@
         color: #243346;
       }
 
+      .feedback-answer {
+        margin-top: 10px;
+        border-top: 1px solid currentColor;
+        padding-top: 10px;
+      }
+
+      .feedback-answer-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+      }
+
+      .feedback-answer-value {
+        margin-top: 4px;
+        white-space: pre-line;
+        font-size: 1.12rem;
+        font-weight: 700;
+      }
+
       .answer {
         border-left: 5px solid var(--orange);
         background: #fff7f0;
@@ -1502,10 +1520,26 @@
         const feedbackTitle = response.correct === null ? "模範解答" : response.correct ? "正解" : "不正解";
         const feedbackDetail = response.correct === null ? "答えを確認して、分かった・復習を選んでください。" : response.correct ? "その調子です。" : "正解を確認しましょう。";
         el.feedback.className = `feedback ${feedbackClass} ${response.checked ? "" : "hidden"}`;
-        el.feedback.innerHTML = response.checked ? `<strong>${feedbackTitle}</strong><span>${feedbackDetail}</span>` : "";
+        el.feedback.replaceChildren();
+        if (response.checked) {
+          const title = document.createElement("strong");
+          title.textContent = feedbackTitle;
+          const detail = document.createElement("span");
+          detail.textContent = feedbackDetail;
+          const answerBox = document.createElement("div");
+          answerBox.className = "feedback-answer";
+          const answerLabel = document.createElement("span");
+          answerLabel.className = "feedback-answer-label";
+          answerLabel.textContent = "答え";
+          const answerValue = document.createElement("strong");
+          answerValue.className = "feedback-answer-value";
+          answerValue.textContent = question.answer || "解答なし";
+          answerBox.append(answerLabel, answerValue);
+          el.feedback.append(title, detail, answerBox);
+        }
 
-        el.answer.className = `answer ${response.checked ? "" : "hidden"}`;
-        el.answer.innerHTML = `<span>答え</span><strong>${question.answer || "解答なし"}</strong>`;
+        el.answer.className = "answer hidden";
+        el.answer.replaceChildren();
         el.answerButton.textContent = response.checked ? "もう一度答え合わせ" : "答え合わせ";
         el.answerButton.disabled = !canCheckAnswer(question);
         el.knownButton.classList.toggle("is-active", progress === "known");
