@@ -426,12 +426,41 @@
       }
 
       .list-tools {
-        display: grid;
+        display: flex;
+        flex-wrap: wrap;
         gap: 10px;
+        align-items: flex-start;
+        position: relative;
       }
 
-      .list-tools > button {
-        justify-self: start;
+      .tool-dropdown {
+        position: relative;
+      }
+
+      .tool-dropdown > button {
+        white-space: nowrap;
+      }
+
+      .tool-dropdown .editor-panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        z-index: 20;
+        width: min(86vw, 620px);
+        max-height: 68vh;
+        overflow: auto;
+        box-shadow: var(--shadow);
+        margin-top: 0;
+      }
+
+      .category-delete-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .category-delete-list button {
+        min-height: 36px;
       }
 
       .actions {
@@ -500,6 +529,18 @@
 
         .actions .mark {
           grid-column: span 3;
+        }
+
+        .list-tools {
+          display: grid;
+        }
+
+        .tool-dropdown .editor-panel {
+          position: static;
+          width: 100%;
+          max-height: none;
+          box-shadow: none;
+          margin-top: 8px;
         }
 
         .editor-grid {
@@ -599,26 +640,32 @@
 
         <section id="listView" class="list hidden">
           <section class="list-tools" aria-label="一覧編集">
-            <button id="toggleCategoryEditorButton" type="button">カテゴリ名を編集</button>
-            <button id="toggleDeleteModeButton" type="button">まとめて削除</button>
-            <section id="categoryEditorPanel" class="editor-panel hidden" aria-label="カテゴリ名編集">
-              <p class="helper">上から順に問題区分フィルター、追加先、一問一答の出題順へ反映されます。名前もここで変更できます。</p>
-              <div id="categoryEditorList" class="category-editor-list"></div>
-              <div class="editor-actions">
-                <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ設定を保存</button>
-                <button id="resetCategoryNamesButton" type="button">初期状態に戻す</button>
-              </div>
-              <p id="categoryStatus" class="import-status" aria-live="polite"></p>
-            </section>
-            <section id="deletePanel" class="editor-panel hidden" aria-label="まとめて削除">
-              <p class="helper">削除した問題はこの端末では非表示になります。必要な場合は削除を全解除できます。</p>
-              <div class="editor-actions">
-                <button id="selectVisibleButton" type="button">表示中を全選択</button>
-                <button id="deleteSelectedButton" class="primary" type="button">選択した問題を削除</button>
-                <button id="restoreDeletedButton" type="button">削除を全解除</button>
-              </div>
-              <p id="deleteStatus" class="import-status" aria-live="polite"></p>
-            </section>
+            <div class="tool-dropdown">
+              <button id="toggleCategoryEditorButton" type="button">カテゴリ名を編集</button>
+              <section id="categoryEditorPanel" class="editor-panel hidden" aria-label="カテゴリ名編集">
+                <p class="helper">上から順に問題区分フィルター、追加先、一問一答の出題順へ反映されます。名前もここで変更できます。</p>
+                <div id="categoryEditorList" class="category-editor-list"></div>
+                <div class="editor-actions">
+                  <button id="saveCategoryNamesButton" class="primary" type="button">カテゴリ設定を保存</button>
+                  <button id="resetCategoryNamesButton" type="button">初期状態に戻す</button>
+                </div>
+                <p id="categoryStatus" class="import-status" aria-live="polite"></p>
+              </section>
+            </div>
+            <div class="tool-dropdown">
+              <button id="toggleDeleteModeButton" type="button">まとめて削除</button>
+              <section id="deletePanel" class="editor-panel hidden" aria-label="まとめて削除">
+                <p class="helper">削除した問題はこの端末では非表示になります。必要な場合は削除を全解除できます。</p>
+                <div class="editor-actions">
+                  <button id="selectVisibleButton" type="button">表示中を全選択</button>
+                  <button id="deleteSelectedButton" class="primary" type="button">選択した問題を削除</button>
+                  <button id="restoreDeletedButton" type="button">削除を全解除</button>
+                </div>
+                <p class="filter-title">カテゴリごとに削除</p>
+                <div id="categoryDeleteList" class="category-delete-list"></div>
+                <p id="deleteStatus" class="import-status" aria-live="polite"></p>
+              </section>
+            </div>
           </section>
           <div id="listItems" class="list"></div>
         </section>
@@ -663,6 +710,7 @@
         editingId: "",
         categoryEditing: false,
         deleteMode: false,
+        deleteMessage: "",
         selectedDeleteIds: new Set(),
         order: allQuestions.map((_, index) => index),
         responses: {},
@@ -696,6 +744,7 @@
         selectVisibleButton: document.getElementById("selectVisibleButton"),
         deleteSelectedButton: document.getElementById("deleteSelectedButton"),
         restoreDeletedButton: document.getElementById("restoreDeletedButton"),
+        categoryDeleteList: document.getElementById("categoryDeleteList"),
         deleteStatus: document.getElementById("deleteStatus"),
         dataStatus: document.getElementById("dataStatus"),
         quizMode: document.getElementById("quizMode"),
@@ -1483,7 +1532,44 @@
         el.deletePanel.classList.toggle("hidden", !state.deleteMode || state.mode !== "list");
         el.toggleDeleteModeButton.textContent = state.deleteMode ? "まとめて削除を閉じる" : "まとめて削除";
         el.deleteSelectedButton.disabled = state.selectedDeleteIds.size === 0;
-        el.deleteStatus.textContent = state.deleteMode ? `${state.selectedDeleteIds.size}問を選択中` : "";
+        renderCategoryDeleteButtons();
+        if (!state.deleteMode || state.mode !== "list") {
+          el.deleteStatus.textContent = "";
+        } else if (state.deleteMessage) {
+          el.deleteStatus.textContent = state.deleteMessage;
+        } else {
+          el.deleteStatus.textContent = `${state.selectedDeleteIds.size}問を選択中`;
+        }
+      }
+
+      function renderCategoryDeleteButtons() {
+        if (!state.deleteMode || state.mode !== "list") {
+          el.categoryDeleteList.replaceChildren();
+          return;
+        }
+        const categories = categoryEntries()
+          .map(([category, label]) => ({
+            category,
+            label,
+            count: allQuestions.filter((question) => question.category === category).length
+          }))
+          .filter((item) => item.count > 0);
+
+        if (!categories.length) {
+          const empty = document.createElement("p");
+          empty.className = "helper";
+          empty.textContent = "削除できるカテゴリはありません。";
+          el.categoryDeleteList.replaceChildren(empty);
+          return;
+        }
+
+        el.categoryDeleteList.replaceChildren(...categories.map((item) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = `${item.label}を削除 (${item.count}問)`;
+          button.addEventListener("click", () => deleteCategoryQuestions(item.category, item.label));
+          return button;
+        }));
       }
 
       function renderStatus(items) {
@@ -1800,6 +1886,7 @@
               } else {
                 state.selectedDeleteIds.delete(question.id);
               }
+              state.deleteMessage = "";
               renderDeletePanel();
             });
             select.append(checkbox, " 削除対象にする");
@@ -1846,7 +1933,23 @@
         state.selectedDeleteIds.clear();
         state.editingId = "";
         refreshQuestionData();
-        el.deleteStatus.textContent = "選択した問題を削除しました。";
+        state.deleteMessage = "選択した問題を削除しました。";
+        render();
+      }
+
+      function deleteCategoryQuestions(category, label) {
+        const targets = allQuestions.filter((question) => question.category === category);
+        targets.forEach((question) => {
+          deletedQuestionIds.add(question.id);
+          delete state.progress[question.id];
+          delete state.responses[question.id];
+        });
+        saveDeletedQuestionIds();
+        saveProgress();
+        state.selectedDeleteIds.clear();
+        state.editingId = "";
+        refreshQuestionData();
+        state.deleteMessage = `${label}を${targets.length}問削除しました。`;
         render();
       }
 
@@ -1855,7 +1958,7 @@
         saveDeletedQuestionIds();
         state.selectedDeleteIds.clear();
         refreshQuestionData();
-        el.deleteStatus.textContent = "削除を全解除しました。";
+        state.deleteMessage = "削除を全解除しました。";
         render();
       }
 
@@ -1945,17 +2048,28 @@
       });
       el.toggleCategoryEditorButton.addEventListener("click", () => {
         state.categoryEditing = !state.categoryEditing;
+        if (state.categoryEditing) {
+          state.deleteMode = false;
+          state.deleteMessage = "";
+          state.selectedDeleteIds.clear();
+          state.editingId = "";
+        }
         el.categoryStatus.textContent = "";
         render();
       });
       el.toggleDeleteModeButton.addEventListener("click", () => {
         state.deleteMode = !state.deleteMode;
+        if (state.deleteMode) {
+          state.categoryEditing = false;
+          state.editingId = "";
+        }
         state.selectedDeleteIds.clear();
-        state.editingId = "";
+        state.deleteMessage = "";
         render();
       });
       el.selectVisibleButton.addEventListener("click", () => {
         filtered().forEach((question) => state.selectedDeleteIds.add(question.id));
+        state.deleteMessage = "";
         render();
       });
       el.deleteSelectedButton.addEventListener("click", deleteSelectedQuestions);
