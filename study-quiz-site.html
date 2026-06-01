@@ -1259,8 +1259,7 @@
         if (question.type === "matching") {
           return parseMatchingAnswer(question.answer).every((pair) => response.matching[pair.label]);
         }
-        if (question.type === "text") return response.text.trim().length > 0;
-        return question.type === "free";
+        return question.type === "text" || question.type === "free";
       }
 
       function judge(question) {
@@ -1722,7 +1721,7 @@
           response.text = event.target.value;
         });
         input.addEventListener("keydown", (event) => {
-          if (event.key === "Enter" && response.text.trim()) judge(question);
+          if (event.key === "Enter") judge(question);
         });
         el.choices.append(input);
       }
