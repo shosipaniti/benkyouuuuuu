@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v23";
+const CACHE_NAME = "keizai-quiz-v24";
 const ASSETS = [
   "./",
   "./index.html",
@@ -7,7 +7,7 @@ const ASSETS = [
   "./app.js",
   "./questions.js",
   "./predicted_questions.js",
-  "./study_extra_questions.js?v=7",
+  "./study_extra_questions.js",
   "./manifest.webmanifest",
   "./icon.svg",
   "./examples/question-template.csv",
@@ -36,14 +36,24 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  const shouldRefresh =
+    event.request.mode === "navigate" ||
+    ["document", "script", "style", "worker"].includes(event.request.destination);
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
+    (shouldRefresh
+      ? fetch(event.request).then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return response;
-      }).catch(() => caches.match("./index.html"));
-    })
+      }).catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
+      : caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        }).catch(() => caches.match("./index.html"));
+      }))
   );
 });
