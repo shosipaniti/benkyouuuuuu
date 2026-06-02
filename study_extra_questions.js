@@ -378,10 +378,10 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     source: "音声工学 予想 第02回",
     category: "audio-prediction",
     number: 4,
-    prompt: "音素表記では、音素記号を何で前後から挟むか。",
-    answer: "/ /",
-    type: "text",
-    choices: [],
+    prompt: "音素表記では音素記号を / / で囲む。では、[ ] で囲む表記は何というか。",
+    answer: "音声表記",
+    type: "single",
+    choices: ["音声表記", "音素表記", "音節表記", "モーラ表記"],
     images: []
   },
   {
