@@ -1991,9 +1991,27 @@
         input.type = "text";
         input.value = response.text;
         input.placeholder = "答えを入力";
+        let isComposingText = false;
+        let justComposedText = false;
         input.addEventListener("input", (event) => {
           response.checked = false;
           response.text = event.target.value;
+        });
+        input.addEventListener("compositionstart", () => {
+          isComposingText = true;
+        });
+        input.addEventListener("compositionend", () => {
+          isComposingText = false;
+          justComposedText = true;
+          setTimeout(() => {
+            justComposedText = false;
+          }, 0);
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          if (isComposingText || justComposedText || event.isComposing || event.keyCode === 229) return;
+          event.preventDefault();
+          judge(question);
         });
         el.choices.append(input);
       }
