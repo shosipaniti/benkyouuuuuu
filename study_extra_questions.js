@@ -286,6 +286,42 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     images: []
   },
   {
+    id: "audio-mid-027",
+    source: "音声工学 中間",
+    category: "audio",
+    number: 27,
+    prompt: "声の大きさ・声の高さ・声の種類は、それぞれ主に何で決まるか。正しい対応を選びなさい。",
+    answer: "声の大きさ = 呼気圧 / 声の高さ = 声帯振動 / 声の種類 = 声道の形状",
+    explanation: "声の大きさは呼気圧、高さは声帯振動、声の種類は声道の形状によって決まります。",
+    type: "matching",
+    choices: ["a: 呼気圧", "b: 声帯振動", "c: 声道の形状", "d: モーラ", "e: VOT"],
+    images: []
+  },
+  {
+    id: "audio-mid-028",
+    source: "音声工学 中間",
+    category: "audio",
+    number: 28,
+    prompt: "フォルマントは何に由来するか。",
+    answer: "声道の共鳴",
+    explanation: "フォルマントは、声道で起こる共鳴によって強調される周波数成分です。",
+    type: "text",
+    choices: [],
+    images: []
+  },
+  {
+    id: "audio-mid-029",
+    source: "音声工学 中間",
+    category: "audio",
+    number: 29,
+    prompt: "音声の知覚は音声の生成過程を参照しているという理論を何というか。",
+    answer: "運動理論",
+    explanation: "音声知覚を、発声運動や生成過程と結びつけて説明する考え方なので運動理論です。",
+    type: "text",
+    choices: [],
+    images: []
+  },
+  {
     id: "audio-pred-01-001",
     source: "音声工学 予想 第01回",
     category: "audio-prediction",
