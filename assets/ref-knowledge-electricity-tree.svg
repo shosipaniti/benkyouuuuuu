@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 470" role="img" aria-labelledby="title desc">
-  <title id="title">電力需要予測の回帰木参考図</title>
-  <desc id="desc">平均気温、曜日、湿度で電力需要量を分岐する回帰木。</desc>
+  <title id="title">電力需要予測モデルBの参考図</title>
+  <desc id="desc">複数の入力値で予測値を分岐する木構造モデル。</desc>
   <rect width="820" height="470" fill="#f8faf7"/>
-  <text x="34" y="48" font-family="sans-serif" font-size="25" font-weight="700" fill="#24302f">予測モデルB: 回帰木</text>
+  <text x="34" y="48" font-family="sans-serif" font-size="25" font-weight="700" fill="#24302f">予測モデルB</text>
   <g stroke="#2f6f73" stroke-width="4" fill="none">
     <path d="M410 92 L250 164"/><path d="M410 92 L570 164"/>
     <path d="M250 164 L168 244"/><path d="M250 164 L332 244"/>

@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
-  <title id="title">正規分布の参考図</title>
-  <desc id="desc">平均と分散が正規分布の位置と広がりに影響することを示す。</desc>
+  <title id="title">分布の形の参考図</title>
+  <desc id="desc">中心位置と広がりが分布の形に影響することを示す。</desc>
   <rect width="720" height="420" fill="#fbfaf6"/>
-  <text x="34" y="52" font-family="sans-serif" font-size="25" font-weight="700" fill="#272b2c">正規分布: 平均と分散</text>
+  <text x="34" y="52" font-family="sans-serif" font-size="25" font-weight="700" fill="#272b2c">分布の位置と広がり</text>
   <line x1="88" y1="326" x2="640" y2="326" stroke="#4d5657" stroke-width="2"/>
   <path d="M92 322 C158 318 196 288 232 216 C270 140 310 102 360 102 C410 102 450 140 488 216 C524 288 562 318 636 322" fill="none" stroke="#2f6f73" stroke-width="5"/>
   <path d="M92 322 C170 310 226 258 278 190 C328 126 388 126 438 190 C490 258 546 310 636 322" fill="none" stroke="#e47c5d" stroke-width="5" stroke-dasharray="10 8"/>
   <line x1="360" y1="92" x2="360" y2="342" stroke="#9ccac3" stroke-width="3" stroke-dasharray="8 8"/>
-  <text x="370" y="92" font-family="sans-serif" font-size="17" fill="#24302f">平均 μ</text>
-  <text x="190" y="370" font-family="sans-serif" font-size="17" fill="#2f6f73">分散が小さい: 細く高い</text>
-  <text x="410" y="370" font-family="sans-serif" font-size="17" fill="#e47c5d">分散が大きい: 広く低い</text>
+  <text x="370" y="92" font-family="sans-serif" font-size="17" fill="#24302f">中心</text>
+  <text x="190" y="370" font-family="sans-serif" font-size="17" fill="#2f6f73">広がりが小さい</text>
+  <text x="410" y="370" font-family="sans-serif" font-size="17" fill="#e47c5d">広がりが大きい</text>
 </svg>

@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
-  <title id="title">勾配ベクトルとヘッセ行列の参考図</title>
-  <desc id="desc">等高線、勾配ベクトル、ヘッセ行列による極値判定の関係を示す。</desc>
+  <title id="title">多変数関数の極値判定の参考図</title>
+  <desc id="desc">等高線、向きのベクトル、2階微分による判定の関係を示す。</desc>
   <rect width="720" height="420" fill="#f8faf7"/>
-  <text x="34" y="52" font-family="sans-serif" font-size="25" font-weight="700" fill="#24302f">勾配ベクトルとヘッセ行列</text>
+  <text x="34" y="52" font-family="sans-serif" font-size="25" font-weight="700" fill="#24302f">多変数関数の極値判定</text>
   <g fill="none" stroke="#9ccac3" stroke-width="3">
     <ellipse cx="232" cy="220" rx="150" ry="86"/>
     <ellipse cx="232" cy="220" rx="104" ry="58"/>
@@ -10,13 +10,13 @@
   </g>
   <circle cx="232" cy="220" r="6" fill="#2f6f73"/>
   <path d="M232 220 L310 158" stroke="#e47c5d" stroke-width="5" marker-end="url(#arrow)"/>
-  <text x="318" y="154" font-family="sans-serif" font-size="17" fill="#e47c5d">勾配: 最も増える向き</text>
+  <text x="318" y="154" font-family="sans-serif" font-size="17" fill="#e47c5d">最も増える向き</text>
   <rect x="432" y="118" width="224" height="82" rx="10" fill="#fff" stroke="#2f6f73" stroke-width="3"/>
-  <text x="452" y="152" font-family="sans-serif" font-size="18" fill="#24302f">停留点: 勾配 = 0</text>
-  <text x="452" y="180" font-family="sans-serif" font-size="18" fill="#24302f">ヘッセ正定値: 極小</text>
+  <text x="452" y="152" font-family="sans-serif" font-size="18" fill="#24302f">条件①: ベクトル = 0</text>
+  <text x="452" y="180" font-family="sans-serif" font-size="18" fill="#24302f">条件②: □□□ → 結果A</text>
   <rect x="432" y="232" width="224" height="82" rx="10" fill="#fff" stroke="#e47c5d" stroke-width="3"/>
-  <text x="452" y="266" font-family="sans-serif" font-size="18" fill="#24302f">ヘッセ負定値: 極大</text>
-  <text x="452" y="294" font-family="sans-serif" font-size="18" fill="#24302f">不定: 鞍点の可能性</text>
+  <text x="452" y="266" font-family="sans-serif" font-size="18" fill="#24302f">条件③: □□□ → 結果B</text>
+  <text x="452" y="294" font-family="sans-serif" font-size="18" fill="#24302f">それ以外: 別判定が必要</text>
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
       <path d="M0,0 L0,6 L9,3 z" fill="#e47c5d"/>

@@ -404,7 +404,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "骨 = 舌骨 / 軟骨 = 甲状軟骨・輪状軟骨・披裂軟骨",
     type: "matching",
     choices: ["a: 舌骨", "b: 甲状軟骨・輪状軟骨・披裂軟骨", "c: 下顎骨", "d: 口蓋骨・鼻骨・頬骨"],
-    images: []
+    images: ["assets/ref-audio-larynx-test-redacted.png"]
   },
   {
     id: "audio-pred-03-002",

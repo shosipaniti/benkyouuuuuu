@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v25";
+const CACHE_NAME = "keizai-quiz-v26";
 const ASSETS = [
   "./",
   "./index.html",
@@ -13,6 +13,7 @@ const ASSETS = [
   "./examples/question-template.csv",
   "./assets/keizai-2-figure-1.png",
   "./assets/keizai-3-figure-1.jpg",
+  "./assets/ref-audio-larynx-test-redacted.png",
   "./assets/ref-audio-spectrum-cepstrum.svg",
   "./assets/ref-audio-vocal-tract.svg",
   "./assets/ref-audio-vowel-pentagon.svg",
