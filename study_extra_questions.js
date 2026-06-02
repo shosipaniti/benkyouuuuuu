@@ -400,10 +400,10 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     source: "音声工学 予想 第03回",
     category: "audio-prediction",
     number: 1,
-    prompt: "喉頭の構造で覚えるべき骨1つと軟骨3つを答えなさい。",
-    answer: "骨 = 舌骨 / 軟骨 = 甲状軟骨・輪状軟骨・披裂軟骨",
+    prompt: "画像の青い四角が示す喉頭の構造について、位置と名称の正しい組み合わせを選びなさい。\n① 上部左 / ② 中央左 / ③ 中央右 / ④ 下部左",
+    answer: "① 上部左 = 舌骨 / ② 中央左 = 甲状軟骨 / ③ 中央右 = 披裂軟骨 / ④ 下部左 = 輪状軟骨",
     type: "matching",
-    choices: ["a: 舌骨", "b: 甲状軟骨・輪状軟骨・披裂軟骨", "c: 下顎骨", "d: 口蓋骨・鼻骨・頬骨"],
+    choices: ["a: 舌骨", "b: 甲状軟骨", "c: 披裂軟骨", "d: 輪状軟骨", "e: 喉頭蓋", "f: 声帯", "g: 喉頭隆起"],
     images: ["assets/ref-audio-larynx-test-redacted.png"]
   },
   {
