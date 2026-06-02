@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v24";
+const CACHE_NAME = "keizai-quiz-v25";
 const ASSETS = [
   "./",
   "./index.html",
@@ -12,7 +12,16 @@ const ASSETS = [
   "./icon.svg",
   "./examples/question-template.csv",
   "./assets/keizai-2-figure-1.png",
-  "./assets/keizai-3-figure-1.jpg"
+  "./assets/keizai-3-figure-1.jpg",
+  "./assets/ref-audio-spectrum-cepstrum.svg",
+  "./assets/ref-audio-vocal-tract.svg",
+  "./assets/ref-audio-vowel-pentagon.svg",
+  "./assets/ref-knowledge-decision-tree.svg",
+  "./assets/ref-knowledge-electricity-tree.svg",
+  "./assets/ref-knowledge-neural.svg",
+  "./assets/ref-ml-gradient-hessian.svg",
+  "./assets/ref-ml-normal-distribution.svg",
+  "./assets/ref-regression.svg"
 ];
 
 self.addEventListener("install", (event) => {

@@ -162,7 +162,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "逆フーリエ変換",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-mid-016",
@@ -173,7 +173,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "低次成分 = 声道共鳴 / 高次成分 = 声帯振動",
     type: "matching",
     choices: ["a: 声道共鳴", "b: 声帯振動"],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-mid-017",
@@ -184,7 +184,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "IIR",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-mid-018",
@@ -195,7 +195,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "山",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-mid-019",
@@ -217,7 +217,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "極",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-mid-021",
@@ -228,7 +228,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "小さくなる",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-vowel-pentagon.svg"]
   },
   {
     id: "audio-mid-022",
@@ -239,7 +239,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "原点から遠ざかる",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-vowel-pentagon.svg"]
   },
   {
     id: "audio-mid-023",
@@ -261,7 +261,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "スペクトル",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-mid-025",
@@ -349,7 +349,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "喉頭腔 / 咽頭腔 / 口腔 / 鼻腔",
     type: "multiple",
     choices: ["喉頭腔", "咽頭腔", "口腔", "鼻腔", "肺胞"],
-    images: []
+    images: ["assets/ref-audio-vocal-tract.svg"]
   },
   {
     id: "audio-pred-02-002",
@@ -459,7 +459,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "90度",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-vocal-tract.svg"]
   },
   {
     id: "audio-pred-04-002",
@@ -514,7 +514,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "大きさ = 音圧 / 高さ = 基本周波数 / 音色 = スペクトル",
     type: "matching",
     choices: ["a: 音圧", "b: 基本周波数", "c: スペクトル", "d: 声道長"],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-pred-05-002",
@@ -547,7 +547,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "波形処理 = 零交叉法 / 相関処理 = 自己相関法・AMDF法 / スペクトル処理 = ケプストラム",
     type: "matching",
     choices: ["a: 零交叉法", "b: 自己相関法・AMDF法", "c: ケプストラム", "d: LPC"],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-pred-05-005",
@@ -569,7 +569,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "音声スペクトルの山で、声道の共鳴に由来する",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-pred-06-002",
@@ -580,7 +580,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "F1 = 舌の上下位置 / F2 = 舌の前後位置",
     type: "matching",
     choices: ["a: 舌の上下位置", "b: 舌の前後位置", "c: 声帯の開閉", "d: 口唇の丸め"],
-    images: []
+    images: ["assets/ref-audio-vowel-pentagon.svg"]
   },
   {
     id: "audio-pred-06-003",
@@ -591,7 +591,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "F1とF2",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-vowel-pentagon.svg"]
   },
   {
     id: "audio-pred-06-004",
@@ -602,7 +602,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "s音 = 6 kHz以上にピーク / sh音 = 4 kHz付近にピーク",
     type: "matching",
     choices: ["a: 6 kHz以上にピーク", "b: 4 kHz付近にピーク", "c: 1 kHz付近にピーク", "d: ピークを持たない"],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "audio-pred-06-005",
@@ -613,7 +613,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "声帯振動の倍音成分や声道共鳴",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-audio-spectrum-cepstrum.svg"]
   },
   {
     id: "knowledge-mid-001",
@@ -712,7 +712,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "130000",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-electricity-tree.svg"]
   },
   {
     id: "knowledge-mid-010",
@@ -723,7 +723,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "回帰木",
     type: "single",
     choices: ["判別木", "ニューラルネットワーク", "深層学習", "回帰木", "クラスタリング", "決定木", "パーセプトロン"],
-    images: []
+    images: ["assets/ref-knowledge-electricity-tree.svg"]
   },
   {
     id: "knowledge-mid-011",
@@ -745,7 +745,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "ウ = ジェフリー・ヒントン / エ = ディープラーニング",
     type: "matching",
     choices: ["a: マーヴィン・ミンスキー", "b: ジョン・マッカーシー", "c: フランキ・サイワ", "d: ジェフリー・ヒントン", "e: アラン・チューリング", "f: パーセプトロン", "g: 機械学習", "h: ディープラーニング", "i: IT"],
-    images: []
+    images: ["assets/ref-knowledge-neural.svg"]
   },
   {
     id: "knowledge-mid-013",
@@ -822,7 +822,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "誤差逆伝播法",
     type: "single",
     choices: ["最尤法", "誤差逆伝播法", "ID3アルゴリズム", "誤差伝搬法", "最小二乗法"],
-    images: []
+    images: ["assets/ref-knowledge-neural.svg"]
   },
   {
     id: "knowledge-mid-020",
@@ -866,7 +866,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "ケ = 説明変数 / コ = 目的変数",
     type: "matching",
     choices: ["a: 切片", "b: 偏回帰係数", "c: 傾き", "d: 決定係数", "e: 説明変数", "f: 目的変数"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "knowledge-mid-024",
@@ -1075,7 +1075,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "人工知能 > 機械学習 > ニューラルネットワーク > 深層学習",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-neural.svg"]
   },
   {
     id: "knowledge-pred-04-003",
@@ -1130,7 +1130,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "説明変数 = 予測に使う変数 / 目的変数 = 予測対象の変数",
     type: "matching",
     choices: ["a: 予測に使う変数", "b: 予測対象の変数", "c: 誤差だけを表す変数", "d: 探索木の根"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "knowledge-pred-05-003",
@@ -1141,7 +1141,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "単回帰分析 = 説明変数が1つ / 重回帰分析 = 説明変数が複数",
     type: "matching",
     choices: ["a: 説明変数が1つ", "b: 説明変数が複数", "c: 目的変数が必ず離散値", "d: 探索手法の一種"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "knowledge-pred-05-004",
@@ -1163,7 +1163,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "● = 目的変数 / . = 目的変数以外の全変数を説明変数にする / ■ = 分析対象データ",
     type: "matching",
     choices: ["a: 目的変数", "b: 目的変数以外の全変数を説明変数にする", "c: 分析対象データ", "d: 作業ディレクトリ"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "knowledge-pred-06-001",
@@ -1185,7 +1185,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "根 = 一番最初の条件分岐を担うノード / 枝 = ノードとノードを結ぶリンク / 葉 = クラスが割り当てられる端点",
     type: "matching",
     choices: ["a: 一番最初の条件分岐を担うノード", "b: ノードとノードを結ぶリンク", "c: クラスが割り当てられる端点", "d: 行列の対角成分"],
-    images: []
+    images: ["assets/ref-knowledge-decision-tree.svg"]
   },
   {
     id: "knowledge-pred-06-003",
@@ -1196,7 +1196,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "属性 = 特徴量を表す変数 / クラス = 予測されるべき変数",
     type: "matching",
     choices: ["a: 特徴量を表す変数", "b: 予測されるべき変数", "c: 残差平方和", "d: 経路の長さ"],
-    images: []
+    images: ["assets/ref-knowledge-decision-tree.svg"]
   },
   {
     id: "knowledge-pred-06-004",
@@ -1229,7 +1229,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "予測モデルが学習データに特化しすぎて、新しいデータに対する予測精度が下がり、汎化性能が落ちる。",
     type: "free",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-decision-tree.svg"]
   },
   {
     id: "knowledge-pred-06-007",
@@ -1240,7 +1240,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "分類の決定木",
     type: "single",
     choices: ["分類の決定木", "回帰木", "散布図の描画", "CSVの読み込み"],
-    images: []
+    images: ["assets/ref-knowledge-decision-tree.svg"]
   },
   {
     id: "knowledge-pred-06-008",
@@ -1284,7 +1284,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "回帰分析",
     type: "single",
     choices: ["回帰分析", "分類", "教師なし学習", "定数化"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-004",
@@ -1295,7 +1295,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "確率的",
     type: "single",
     choices: ["場当たり的", "独立的", "確率的", "教師なし"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-005",
@@ -1306,7 +1306,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "x = 特徴変数 / t = 目的変数 / 複数のx = 特徴ベクトル / 関係を表す関数 = 目的関数",
     type: "matching",
     choices: ["a: 特徴変数", "b: 目的変数", "c: 特徴ベクトル", "d: 目的関数", "e: パラメータ"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-006",
@@ -1361,7 +1361,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "E = 1/2 Σ{f(x_n)-t_n}^2",
     type: "single",
     choices: ["E = Σ w_m x^m", "E = 1/2 Σ{f(x_n)-t_n}^2", "E = (Φ^TΦ)^-1Φ^Tt", "E = Σ t_n x_n"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-011",
@@ -1372,7 +1372,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "係数で偏微分し、その値が0になる方程式を求める",
     type: "single",
     choices: ["係数で偏微分し、その値が0になる方程式を求める", "誤差関数をそのまま最大化する", "テストセットだけで係数を決める", "全ての係数を1に固定する"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-012",
@@ -1383,7 +1383,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "ヘッセ行列が正定値である",
     type: "single",
     choices: ["ヘッセ行列が正定値である", "ヘッセ行列の行列式が必ず0である", "勾配ベクトルが0でない", "係数がすべて負である"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-mid-2022-013",
@@ -1394,7 +1394,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "トレーニングセットのサンプル数が近似式の次数Mに対して十分に多いため",
     type: "single",
     choices: ["トレーニングセットの分散が大きすぎるため", "トレーニングセットのサンプル数が近似式の次数Mに対して十分に多いため", "トレーニングセットのサンプル数が少なすぎるため", "特徴変数が存在しないため"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-014",
@@ -1405,7 +1405,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "テストセットのRMS Errorがそれ以上変化しないため、その手前の次数を選ぶ",
     type: "single",
     choices: ["トレーニングセットだけで誤差が最小になる最大次数を選ぶ", "テストセットのRMS Errorがそれ以上変化しないため、その手前の次数を選ぶ", "必ず次数1を選ぶ", "次数はランダムに選ぶ"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-015",
@@ -1427,7 +1427,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "データを分割して複数回評価し、テストセットの偏りを検出しやすくするため",
     type: "single",
     choices: ["学習データだけで精度を最大化するため", "データを分割して複数回評価し、テストセットの偏りを検出しやすくするため", "全てのデータをテストセットにするため", "モデルの次数を必ず0にするため"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-mid-2022-017",
@@ -1471,7 +1471,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "x=-1 は極大値、x=1 は極小値",
     type: "single",
     choices: ["x=-1 は極大値、x=1 は極小値", "x=-1 は極小値、x=1 は極大値", "どちらも極大値", "どちらも極値でない"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-mid-2022-021",
@@ -1482,7 +1482,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "(3x^2+2y-1, 2x+2y)",
     type: "single",
     choices: ["(3x^2+2y-1, 2x+2y)", "(3x^2+3y, 2x+3y)", "(3x^3+2y-1, 4x+2y)", "(2x^2+2y, 2x+3y)"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-mid-2022-022",
@@ -1493,7 +1493,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "(1, -1), (-1/3, 1/3)",
     type: "single",
     choices: ["(1, -1), (-1/3, 1/3)", "(1, -1), (1/3, -1/3)", "(-1, -1), (-1/3, 1/3)", "(1, 1), (-1/3, -1/3)"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-mid-2022-023",
@@ -1504,7 +1504,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "[[6x, 2], [2, 2]]",
     type: "single",
     choices: ["[[6x, 2], [2, 2]]", "[[6x, 2x], [2x, 2]]", "[[6x, 2], [2, 3]]", "[[6, 2], [2, 2]]"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-mid-2022-024",
@@ -1515,7 +1515,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "(1,-1) は極小値、(-1/3,1/3) は極値でない",
     type: "single",
     choices: ["(1,-1) は極小値、(-1/3,1/3) は極値でない", "(1,-1) は極大値、(-1/3,1/3) は極小値", "どちらも極小値", "どちらも極値でない"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-001",
@@ -1537,7 +1537,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "分類 = クラスを予測する / 回帰分析 = 数値を予測する / クラスタリング = 似たデータをグループ化する",
     type: "matching",
     choices: ["a: クラスを予測する", "b: 数値を予測する", "c: 似たデータをグループ化する", "d: 誤差を必ず0にする"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-003",
@@ -1559,7 +1559,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "x = 特徴変数 / t = 目的変数",
     type: "matching",
     choices: ["a: 特徴変数", "b: 目的変数", "c: 誤差関数", "d: 標準偏差"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-005",
@@ -1614,7 +1614,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "平均 = 中心位置を決める / 分散 = 広がりを決める",
     type: "matching",
     choices: ["a: 中心位置を決める", "b: 広がりを決める", "c: データ数だけを決める", "d: クラス数だけを決める"],
-    images: []
+    images: ["assets/ref-ml-normal-distribution.svg"]
   },
   {
     id: "ml-pred-focus-010",
@@ -1636,7 +1636,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "補間法は全ての点を通る関数を求め、最小二乗法は誤差の二乗和が小さい近似関数を求める",
     type: "single",
     choices: ["補間法は全ての点を通る関数を求め、最小二乗法は誤差の二乗和が小さい近似関数を求める", "補間法はテストセットだけを使う方法である", "最小二乗法は分類問題にしか使えない", "最小二乗法では誤差を必ず全て0にする"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-012",
@@ -1647,7 +1647,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "多項式の次数",
     type: "single",
     choices: ["多項式の次数", "データの個数", "目的変数の値", "標準偏差"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-013",
@@ -1669,7 +1669,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "E = 1/2 Σ{f(x_n)-t_n}^2",
     type: "single",
     choices: ["E = 1/2 Σ{f(x_n)-t_n}^2", "E = Σw_m x^m", "E = 平均値 + 分散", "E = x + t"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-015",
@@ -1680,7 +1680,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "各係数で偏微分した値が0になる条件",
     type: "single",
     choices: ["各係数で偏微分した値が0になる条件", "全ての係数を0にする条件", "テストデータを使わない条件", "平均値が必ず0になる条件"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-016",
@@ -1702,7 +1702,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "予測値と実測値の平均的なずれの大きさ",
     type: "single",
     choices: ["予測値と実測値の平均的なずれの大きさ", "特徴変数の個数", "分類クラスの名前", "正規分布の中心位置だけ"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-018",
@@ -1713,7 +1713,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "トレーニングセット = モデルを学習するデータ / テストセット = 汎化性能を確認するデータ",
     type: "matching",
     choices: ["a: モデルを学習するデータ", "b: 汎化性能を確認するデータ", "c: 必ず削除するデータ", "d: 目的変数だけのデータ"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-019",
@@ -1724,7 +1724,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "トレーニングデータに合いすぎて、未知データの予測が悪くなる",
     type: "single",
     choices: ["トレーニングデータに合いすぎて、未知データの予測が悪くなる", "平均値が計算できなくなる", "全てのデータが同じ値になる", "必ず分類問題になる"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-020",
@@ -1735,7 +1735,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "トレーニングセットだけでなくテストセットの誤差も確認する",
     type: "single",
     choices: ["トレーニングセットだけでなくテストセットの誤差も確認する", "係数を全て同じ値にする", "平均値だけを見ればよい", "特徴変数を必ず1つにする"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-021",
@@ -1746,7 +1746,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "データの分け方による評価の偏りを小さくする",
     type: "single",
     choices: ["データの分け方による評価の偏りを小さくする", "教師なし学習を禁止する", "テストセットを使わないようにする", "誤差関数を消す"],
-    images: []
+    images: ["assets/ref-regression.svg"]
   },
   {
     id: "ml-pred-focus-022",
@@ -1779,7 +1779,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "x = 2",
     type: "single",
     choices: ["x = -2", "x = 0", "x = 2", "x = 4"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-025",
@@ -1790,7 +1790,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "極小値",
     type: "single",
     choices: ["極大値", "極小値", "極値でない", "判定不能"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-026",
@@ -1801,7 +1801,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "1階微分が0になる点だが、必ず極値とは限らない",
     type: "single",
     choices: ["1階微分が0になる点だが、必ず極値とは限らない", "必ず最大値になる点", "必ず最小値になる点", "分散が0になる点"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-027",
@@ -1812,7 +1812,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "多変数関数で、1つの変数以外を定数とみなして微分すること",
     type: "single",
     choices: ["多変数関数で、1つの変数以外を定数とみなして微分すること", "全ての変数を同時に足すこと", "平均値を求めること", "標準偏差を求めること"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-028",
@@ -1823,7 +1823,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "(2x+y, x+2y)",
     type: "single",
     choices: ["(2x+y, x+2y)", "(x+y, x+y)", "(2x, 2y)", "(x^2+y, x+y^2)"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-029",
@@ -1834,7 +1834,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "[[2, 1], [1, 2]]",
     type: "single",
     choices: ["[[2, 1], [1, 2]]", "[[2x, y], [x, 2y]]", "[[1, 2], [2, 1]]", "[[0, 1], [1, 0]]"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-030",
@@ -1845,7 +1845,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "各変数で偏微分した成分を並べたベクトルで、関数値が増える向きを表す",
     type: "single",
     choices: ["各変数で偏微分した成分を並べたベクトルで、関数値が増える向きを表す", "観測データの平均だけを表す", "分類ラベルを番号順に並べたもの", "テストセットの個数を表す"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-031",
@@ -1856,7 +1856,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "2階偏微分係数を並べた行列で、極値判定に使われる",
     type: "single",
     choices: ["2階偏微分係数を並べた行列で、極値判定に使われる", "目的変数だけを並べたベクトル", "分類結果の一覧", "正規分布の面積"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-032",
@@ -1867,7 +1867,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "極小値",
     type: "single",
     choices: ["極小値", "極大値", "必ず鞍点", "分類不能"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-033",
@@ -1878,7 +1878,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "極大値",
     type: "single",
     choices: ["極大値", "極小値", "平均値", "テストセット"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-034",
@@ -1889,7 +1889,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "半正定値 = 二次形式が0以上 / 正定値 = ゼロでないベクトルに対して二次形式が正",
     type: "matching",
     choices: ["a: 二次形式が0以上", "b: ゼロでないベクトルに対して二次形式が正", "c: 全ての成分が0", "d: 必ず逆行列を持たない"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   },
   {
     id: "ml-pred-focus-035",
@@ -1900,6 +1900,6 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "勾配ベクトルが0で、ヘッセ行列が正定値であることを確認する",
     type: "single",
     choices: ["勾配ベクトルが0で、ヘッセ行列が正定値であることを確認する", "平均値だけを確認する", "分類ラベルを増やす", "テストセットを全て削除する"],
-    images: []
+    images: ["assets/ref-ml-gradient-hessian.svg"]
   }
 ];

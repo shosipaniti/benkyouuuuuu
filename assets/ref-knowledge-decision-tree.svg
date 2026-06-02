@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">決定木の参考図</title>
+  <desc id="desc">根、枝、葉、属性、クラスの関係を示す決定木の簡略図。</desc>
+  <rect width="720" height="420" fill="#f8faf7"/>
+  <text x="34" y="52" font-family="sans-serif" font-size="25" font-weight="700" fill="#24302f">決定木: If-Thenルールの組み合わせ</text>
+  <g stroke="#2f6f73" stroke-width="4" fill="none">
+    <path d="M360 112 L230 210"/>
+    <path d="M360 112 L490 210"/>
+    <path d="M230 210 L154 306"/>
+    <path d="M230 210 L306 306"/>
+    <path d="M490 210 L414 306"/>
+    <path d="M490 210 L566 306"/>
+  </g>
+  <g font-family="sans-serif" text-anchor="middle">
+    <rect x="260" y="78" width="200" height="68" rx="12" fill="#e7f2ee" stroke="#2f6f73" stroke-width="3"/>
+    <text x="360" y="120" font-size="19" font-weight="700" fill="#24302f">根: 属性で分岐</text>
+    <rect x="150" y="184" width="160" height="56" rx="10" fill="#fff" stroke="#9ccac3" stroke-width="3"/>
+    <text x="230" y="219" font-size="17" fill="#24302f">条件A</text>
+    <rect x="410" y="184" width="160" height="56" rx="10" fill="#fff" stroke="#9ccac3" stroke-width="3"/>
+    <text x="490" y="219" font-size="17" fill="#24302f">条件B</text>
+    <g fill="#fbe7df" stroke="#e47c5d" stroke-width="3">
+      <rect x="104" y="288" width="100" height="50" rx="10"/>
+      <rect x="256" y="288" width="100" height="50" rx="10"/>
+      <rect x="364" y="288" width="100" height="50" rx="10"/>
+      <rect x="516" y="288" width="100" height="50" rx="10"/>
+    </g>
+    <g font-size="17" fill="#24302f" font-weight="700">
+      <text x="154" y="319">クラス1</text>
+      <text x="306" y="319">クラス2</text>
+      <text x="414" y="319">クラス2</text>
+      <text x="566" y="319">クラス3</text>
+    </g>
+  </g>
+  <text x="44" y="382" font-family="sans-serif" font-size="16" fill="#5b6663">葉に予測結果、途中の枝に判断ルールが対応する。</text>
+</svg>

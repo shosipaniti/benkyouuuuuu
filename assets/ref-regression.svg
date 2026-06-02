@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-labelledby="title desc">
+  <title id="title">線形回帰・重回帰の参考図</title>
+  <desc id="desc">散布図に回帰直線を当てはめ、説明変数から目的変数を予測する関係を示す。</desc>
+  <rect width="720" height="420" fill="#f8faf7"/>
+  <text x="34" y="52" font-family="sans-serif" font-size="25" font-weight="700" fill="#24302f">回帰分析: 数値を予測するモデル</text>
+  <line x1="96" y1="326" x2="592" y2="326" stroke="#4d5657" stroke-width="2"/>
+  <line x1="96" y1="326" x2="96" y2="82" stroke="#4d5657" stroke-width="2"/>
+  <g fill="#2f6f73">
+    <circle cx="136" cy="286" r="6"/><circle cx="178" cy="262" r="6"/><circle cx="224" cy="246" r="6"/><circle cx="276" cy="212" r="6"/><circle cx="326" cy="194" r="6"/><circle cx="370" cy="168" r="6"/><circle cx="426" cy="156" r="6"/><circle cx="492" cy="118" r="6"/>
+  </g>
+  <line x1="126" y1="292" x2="520" y2="112" stroke="#e47c5d" stroke-width="5"/>
+  <text x="530" y="118" font-family="sans-serif" font-size="17" fill="#e47c5d">回帰直線</text>
+  <text x="546" y="354" font-family="sans-serif" font-size="16" fill="#5b6663">説明変数 x</text>
+  <text x="44" y="98" font-family="sans-serif" font-size="16" fill="#5b6663">目的変数 y</text>
+  <rect x="420" y="254" width="238" height="52" rx="8" fill="#fff" stroke="#9ccac3"/>
+  <text x="438" y="287" font-family="sans-serif" font-size="18" fill="#24302f">単回帰: x が1つ</text>
+  <rect x="420" y="318" width="238" height="52" rx="8" fill="#fff" stroke="#9ccac3"/>
+  <text x="438" y="351" font-family="sans-serif" font-size="18" fill="#24302f">重回帰: x が複数</text>
+</svg>
