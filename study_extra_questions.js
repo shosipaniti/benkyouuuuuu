@@ -345,10 +345,10 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     source: "音声工学 予想 第02回",
     category: "audio-prediction",
     number: 1,
-    prompt: "声道を構成する4つの腔をすべて選びなさい。",
-    answer: "喉頭腔 / 咽頭腔 / 口腔 / 鼻腔",
-    type: "multiple",
-    choices: ["喉頭腔", "咽頭腔", "口腔", "鼻腔", "肺胞"],
+    prompt: "図の1〜4が示す声道の空間について、正しい組み合わせを選びなさい。",
+    answer: "1 = 鼻腔 / 2 = 口腔 / 3 = 咽頭腔 / 4 = 喉頭腔",
+    type: "matching",
+    choices: ["a: 鼻腔", "b: 口腔", "c: 咽頭腔", "d: 喉頭腔", "e: 肺胞"],
     images: ["assets/ref-audio-vocal-tract.svg"]
   },
   {
