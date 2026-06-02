@@ -431,6 +431,12 @@
         font-weight: 700;
       }
 
+      .feedback-explanation .feedback-answer-value {
+        font-size: 0.98rem;
+        font-weight: 600;
+        line-height: 1.55;
+      }
+
       .answer {
         border-left: 5px solid var(--orange);
         background: #fff7f0;
@@ -845,6 +851,7 @@
           number: question.number || index + 1,
           prompt: question.prompt || "",
           answer: question.answer || "",
+          explanation: question.explanation || "",
           type: question.type || "single",
           choices: Array.isArray(question.choices) ? question.choices : [],
           images: Array.isArray(question.images) ? question.images : []
@@ -990,6 +997,7 @@
       function questionFromRow(row, index, fileName, category) {
         const prompt = row.prompt || row.question || row.問題 || row.問題文 || row.q || "";
         const answer = row.answer || row.正解 || row.答え || row.a || "";
+        const explanation = row.explanation || row.解説 || row.理由 || "";
         const choices = row.choices || row.選択肢 || row.options || "";
         const images = row.images || row.画像 || "";
         const type = row.type || row.形式 || (choices ? "single" : "text");
@@ -1001,6 +1009,7 @@
           number: Number(row.number || row.番号 || index + 1),
           prompt,
           answer,
+          explanation,
           type,
           choices: splitList(choices),
           images: splitList(images)
@@ -1433,6 +1442,31 @@
         return `${prompt}\n${guidance}`;
       }
 
+      function explanationText(question) {
+        if (question.explanation) return question.explanation;
+        const prompt = String(question.prompt || "");
+        const answer = String(question.answer || "");
+        if (question.type === "free" || answer.includes("保存された解答なし")) {
+          return "自由記述なので、授業内容の要点を自分の言葉で整理できれば大丈夫です。";
+        }
+        if (question.type === "matching") {
+          return "問題文の項目と用語の対応を整理すると、この組み合わせになります。";
+        }
+        if (question.type === "multiple") {
+          return "条件に当てはまる項目だけを残すと、答えにある選択肢の組み合わせになります。";
+        }
+        if (/計算|求め|代入|偏微分|行列|分散|平均|確率|最小|最大|係数|成分/.test(prompt)) {
+          return "問題文の条件を式や定義に当てはめて計算すると、この答えになります。";
+        }
+        if (/何という|何と呼|何か|名称|用語|表記|定義/.test(prompt)) {
+          return "その内容を表す授業内の用語・定義が、この答えです。";
+        }
+        if (question.type === "single") {
+          return "選択肢の中で、問題文の説明や条件に合うものがこの答えです。";
+        }
+        return "問題文で問われている条件に対応する語句・値が、この答えです。";
+      }
+
       function judge(question) {
         const response = getResponse(question);
         let correct = false;
@@ -1787,7 +1821,16 @@
           answerValue.className = "feedback-answer-value";
           answerValue.textContent = question.answer || "解答なし";
           answerBox.append(answerLabel, answerValue);
-          el.feedback.append(title, detail, answerBox);
+          const explanationBox = document.createElement("div");
+          explanationBox.className = "feedback-answer feedback-explanation";
+          const explanationLabel = document.createElement("span");
+          explanationLabel.className = "feedback-answer-label";
+          explanationLabel.textContent = "解説";
+          const explanationValue = document.createElement("span");
+          explanationValue.className = "feedback-answer-value";
+          explanationValue.textContent = explanationText(question);
+          explanationBox.append(explanationLabel, explanationValue);
+          el.feedback.append(title, detail, answerBox, explanationBox);
         }
 
         el.answer.className = "answer hidden";
@@ -1861,6 +1904,7 @@
         number.min = "1";
         const prompt = createTextarea(question.prompt);
         const answer = createTextarea(question.answer);
+        const explanation = createTextarea(question.explanation, "空欄なら自動で短文解説を表示します");
         const choices = createTextarea(listText(question.choices), "1行に1つずつ入力");
         const images = createTextarea(listText(question.images), "assets/example.png のように1行に1つずつ入力");
 
@@ -1868,6 +1912,8 @@
         promptField.className = "editor-field-wide";
         const answerField = makeLabeledControl("答え", answer);
         answerField.className = "editor-field-wide";
+        const explanationField = makeLabeledControl("解説", explanation);
+        explanationField.className = "editor-field-wide";
         const choicesField = makeLabeledControl("選択肢", choices);
         choicesField.className = "editor-field-wide";
         const imagesField = makeLabeledControl("画像", images);
@@ -1880,6 +1926,7 @@
           makeLabeledControl("番号", number),
           promptField,
           answerField,
+          explanationField,
           choicesField,
           imagesField
         );
@@ -1905,6 +1952,7 @@
             number: Number(number.value || question.number || 1),
             prompt: prompt.value.trim(),
             answer: answer.value.trim(),
+            explanation: explanation.value.trim(),
             type: type.value,
             choices: fieldList(choices.value),
             images: fieldList(images.value)
@@ -1915,6 +1963,7 @@
             number: edited.number,
             prompt: edited.prompt,
             answer: edited.answer,
+            explanation: edited.explanation,
             type: edited.type,
             choices: edited.choices,
             images: edited.images
