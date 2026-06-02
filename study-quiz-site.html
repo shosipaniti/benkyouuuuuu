@@ -1411,6 +1411,17 @@
         return question.type === "text" || question.type === "free";
       }
 
+      function displayPrompt(question) {
+        const prompt = String(question.prompt || "");
+        if (question.type !== "multiple") return prompt;
+        const guidance = "当てはまるものを全て答えなさい。";
+        if (prompt.includes("全て答えなさい")) return prompt;
+        if (prompt.includes("すべて選びなさい")) {
+          return prompt.replace(/すべて選びなさい。?/g, guidance).replace(/すべて選びなさい/g, guidance);
+        }
+        return `${prompt}\n${guidance}`;
+      }
+
       function judge(question) {
         const response = getResponse(question);
         let correct = false;
@@ -1743,7 +1754,7 @@
           img.alt = `${question.source}の図`;
           return img;
         }));
-        el.prompt.textContent = question.prompt;
+        el.prompt.textContent = displayPrompt(question);
         renderInteraction(question, response);
 
         const feedbackClass = response.correct === null ? "neutral" : response.correct ? "ok" : "bad";
@@ -1980,12 +1991,27 @@
         input.type = "text";
         input.value = response.text;
         input.placeholder = "答えを入力";
+        let isComposingText = false;
+        let justComposedText = false;
         input.addEventListener("input", (event) => {
           response.checked = false;
           response.text = event.target.value;
         });
+        input.addEventListener("compositionstart", () => {
+          isComposingText = true;
+        });
+        input.addEventListener("compositionend", () => {
+          isComposingText = false;
+          justComposedText = true;
+          setTimeout(() => {
+            justComposedText = false;
+          }, 0);
+        });
         input.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") judge(question);
+          if (event.key !== "Enter") return;
+          if (isComposingText || justComposedText || event.isComposing || event.keyCode === 229) return;
+          event.preventDefault();
+          judge(question);
         });
         el.choices.append(input);
       }
@@ -2015,7 +2041,7 @@
           const title = document.createElement("h2");
           title.textContent = `${categoryLabels[question.category] || question.category} / ${question.source} / ${typeLabels[question.type] || question.type}`;
           const prompt = document.createElement("p");
-          prompt.textContent = question.prompt;
+          prompt.textContent = displayPrompt(question);
           const button = document.createElement("button");
           button.type = "button";
           button.textContent = "答えを確認";
