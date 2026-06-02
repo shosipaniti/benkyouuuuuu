@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v30";
+const CACHE_NAME = "keizai-quiz-v31";
 const ASSETS = [
   "./",
   "./index.html",

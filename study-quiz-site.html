@@ -749,7 +749,8 @@
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
-      const defaultCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学", "audio-prediction": "音声工学 予想問題", knowledge: "知識工学", "knowledge-prediction": "知識工学 予想問題", "machine-learning": "機械学習", "machine-learning-prediction": "機械学習 予想問題" };
+      const legacyCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学", "audio-prediction": "音声工学 予想問題", knowledge: "知識工学", "knowledge-prediction": "知識工学 予想問題", "machine-learning": "機械学習", "machine-learning-prediction": "機械学習 予想問題" };
+      const defaultCategoryLabels = { quiz: "経済学 中間 小テスト問題", prediction: "経済学 中間 予想問題", audio: "音声工学 中間", "audio-prediction": "音声工学 中間 予想問題", knowledge: "知識工学 中間", "knowledge-prediction": "知識工学 中間 予想問題", "machine-learning": "機械学習 中間", "machine-learning-prediction": "機械学習 中間 予想問題" };
       const storageKey = "study-quiz-standalone-progress-v1";
       const importedStorageKey = "study-quiz-standalone-imported-v1";
       const questionEditsStorageKey = "study-quiz-standalone-edits-v1";
@@ -872,10 +873,20 @@
 
       function loadCategoryLabels() {
         try {
-          return { ...defaultCategoryLabels, ...(JSON.parse(localStorage.getItem(categoryLabelsStorageKey)) || {}) };
+          return normalizeCategoryLabels({ ...defaultCategoryLabels, ...(JSON.parse(localStorage.getItem(categoryLabelsStorageKey)) || {}) });
         } catch {
           return { ...defaultCategoryLabels };
         }
+      }
+
+      function normalizeCategoryLabels(labels) {
+        const normalized = { ...labels };
+        Object.entries(defaultCategoryLabels).forEach(([category, label]) => {
+          if (!normalized[category] || normalized[category] === legacyCategoryLabels[category]) {
+            normalized[category] = label;
+          }
+        });
+        return normalized;
       }
 
       function saveCategoryLabels() {
