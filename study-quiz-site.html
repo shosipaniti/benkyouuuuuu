@@ -282,26 +282,42 @@
       }
 
       .import-panel {
-        display: grid;
-        gap: 10px;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        margin-top: 18px;
+        display: block;
+        margin-top: 12px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--surface);
-        padding: 14px;
+        padding: 10px 12px;
+      }
+
+      .import-panel summary {
+        cursor: pointer;
+        color: var(--ink);
+        font-size: 0.88rem;
+        font-weight: 800;
+      }
+
+      .import-panel summary::marker {
+        color: var(--accent);
+      }
+
+      .import-panel-body {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 12px;
       }
 
       .import-panel button {
         width: auto;
       }
 
-      .import-panel .filter-title,
-      .import-panel input[type="file"],
-      .import-panel textarea,
-      .import-panel .helper,
-      .import-panel .import-status,
-      .import-panel .data-status {
+      .import-panel-body .filter-title,
+      .import-panel-body input[type="file"],
+      .import-panel-body textarea,
+      .import-panel-body .helper,
+      .import-panel-body .import-status,
+      .import-panel-body .data-status {
         grid-column: 1 / -1;
       }
 
@@ -735,7 +751,7 @@
           grid-template-columns: 1fr;
         }
 
-        .import-panel {
+        .import-panel-body {
           grid-template-columns: 1fr;
         }
       }
@@ -880,25 +896,29 @@
         </section>
 
         <section id="importPanel" class="import-panel" aria-label="問題データ追加">
-          <p class="filter-title">ファイルから追加</p>
-          <input id="fileInput" type="file" accept=".json,.js,.csv,.md,.markdown,.txt,.html,.htm" multiple>
-          <label for="fileKind">ファイルの種類</label>
-          <select id="fileKind">
-            <option value="quiz">小テスト</option>
-            <option value="slides">授業スライド</option>
-            <option value="manual">手入力データ</option>
-          </select>
-          <label for="importCategory">追加先</label>
-          <select id="importCategory">
-            <option value="quiz">小テスト問題</option>
-            <option value="prediction">予想問題</option>
-          </select>
-          <textarea id="pasteInput" placeholder="ここに Q: 問題 / A: 答え の形式や、CSV・Markdown表を貼り付けても追加できます"></textarea>
-          <button id="pasteButton" type="button">貼り付け内容を追加</button>
-          <button id="clearImportedButton" type="button">追加データを削除</button>
-          <p class="helper">小テストは実際の問題として登録、授業スライドは空欄・重要語句から予想問題を作成します。PDFは本文をコピーして貼り付けると読み取れます。</p>
-          <p id="importStatus" class="import-status" aria-live="polite"></p>
-          <div id="dataStatus" class="data-status" hidden></div>
+          <details id="importDetails">
+            <summary>ファイルから問題を追加</summary>
+            <div class="import-panel-body">
+              <input id="fileInput" type="file" accept=".json,.js,.csv,.md,.markdown,.txt,.html,.htm,.pdf,application/pdf" multiple>
+              <label for="fileKind">ファイルの種類</label>
+              <select id="fileKind">
+                <option value="quiz">小テスト</option>
+                <option value="slides">授業スライド</option>
+                <option value="manual">手入力データ</option>
+              </select>
+              <label for="importCategory">追加先</label>
+              <select id="importCategory">
+                <option value="quiz">小テスト問題</option>
+                <option value="prediction">予想問題</option>
+              </select>
+              <textarea id="pasteInput" placeholder="ここに Q: 問題 / A: 答え の形式や、CSV・Markdown表を貼り付けても追加できます"></textarea>
+              <button id="pasteButton" type="button">貼り付け内容を追加</button>
+              <button id="clearImportedButton" type="button">追加データを削除</button>
+              <p class="helper">必要な時だけ開いて使います。PDFはテキスト層がある資料のみ自動抽出できます。画像だけのPDFは本文をコピーして貼り付けてください。</p>
+              <p id="importStatus" class="import-status" aria-live="polite"></p>
+              <div id="dataStatus" class="data-status" hidden></div>
+            </div>
+          </details>
         </section>
       </section>
     </main>
@@ -1428,6 +1448,146 @@
         });
       }
 
+      function decodePdfBytesBestEffort(bytes) {
+        const data = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+        if (data[0] === 0xfe && data[1] === 0xff) {
+          let output = "";
+          for (let i = 2; i < data.length; i += 2) output += String.fromCharCode((data[i] << 8) | (data[i + 1] || 0));
+          return output;
+        }
+        try {
+          return new TextDecoder("utf-8", { fatal: true }).decode(data);
+        } catch {
+          return new TextDecoder("latin1").decode(data);
+        }
+      }
+
+      function pdfBinaryString(bytes) {
+        const chunks = [];
+        const size = 8192;
+        for (let i = 0; i < bytes.length; i += size) {
+          chunks.push(String.fromCharCode(...bytes.slice(i, i + size)));
+        }
+        return chunks.join("");
+      }
+
+      function decodePdfLiteral(value) {
+        const output = [];
+        for (let i = 0; i < value.length; i += 1) {
+          const char = value[i];
+          if (char !== "\\") {
+            output.push(char.charCodeAt(0) & 0xff);
+            continue;
+          }
+
+          const next = value[i + 1];
+          if (next === "n") output.push(10);
+          else if (next === "r") output.push(13);
+          else if (next === "t") output.push(9);
+          else if (next === "b") output.push(8);
+          else if (next === "f") output.push(12);
+          else if (next === "(" || next === ")" || next === "\\") output.push(next.charCodeAt(0));
+          else if (/[0-7]/.test(next || "")) {
+            const octal = value.slice(i + 1, i + 4).match(/^[0-7]{1,3}/)?.[0] || "";
+            output.push(parseInt(octal, 8));
+            i += octal.length - 1;
+          }
+          i += 1;
+        }
+        return decodePdfBytesBestEffort(output);
+      }
+
+      function decodePdfHex(value) {
+        const compact = value.replace(/\s+/g, "");
+        if (!compact) return "";
+        const bytes = [];
+        for (let i = 0; i < compact.length; i += 2) {
+          bytes.push(parseInt(compact.slice(i, i + 2).padEnd(2, "0"), 16));
+        }
+        return decodePdfBytesBestEffort(bytes);
+      }
+
+      async function inflatePdfStream(bytes) {
+        if (!("DecompressionStream" in window)) return "";
+        try {
+          const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate"));
+          return await new Response(stream).text();
+        } catch {
+          return "";
+        }
+      }
+
+      function extractPdfTextFromStream(text) {
+        const parts = [];
+        const literal = /((?:\((?:\\.|[^\\()])*\)\s*)+)(?:Tj|'|")/g;
+        let match;
+        while ((match = literal.exec(text))) {
+          const strings = [...match[1].matchAll(/\((?:\\.|[^\\()])*\)/g)].map((item) => decodePdfLiteral(item[0].slice(1, -1)));
+          if (strings.length) parts.push(strings.join(""));
+        }
+
+        const array = /\[([\s\S]*?)\]\s*TJ/g;
+        while ((match = array.exec(text))) {
+          const strings = [];
+          const body = match[1];
+          for (const item of body.matchAll(/\((?:\\.|[^\\()])*\)|<([0-9A-Fa-f\s]+)>/g)) {
+            strings.push(item[0][0] === "(" ? decodePdfLiteral(item[0].slice(1, -1)) : decodePdfHex(item[1]));
+          }
+          if (strings.length) parts.push(strings.join(""));
+        }
+
+        const hex = /<([0-9A-Fa-f\s]{4,})>\s*Tj/g;
+        while ((match = hex.exec(text))) {
+          const decoded = decodePdfHex(match[1]);
+          if (decoded.trim()) parts.push(decoded);
+        }
+
+        return parts.join("\n");
+      }
+
+      function readablePdfText(text) {
+        return text
+          .replace(/\u0000/g, "")
+          .replace(/[^\S\r\n]+/g, " ")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+      }
+
+      async function extractPdfText(file) {
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+        const raw = pdfBinaryString(bytes);
+        const parts = [];
+        const streamPattern = /<<(.*?)>>\s*stream\r?\n?([\s\S]*?)\r?\n?endstream/g;
+        let match;
+
+        while ((match = streamPattern.exec(raw))) {
+          const dictionary = match[1];
+          const body = match[2].replace(/^\r?\n/, "").replace(/\r?\n$/, "");
+          let streamText = body;
+
+          if (/FlateDecode/.test(dictionary)) {
+            const streamBytes = Uint8Array.from(body, (char) => char.charCodeAt(0) & 0xff);
+            streamText = await inflatePdfStream(streamBytes);
+            if (!streamText) continue;
+          }
+
+          const extracted = extractPdfTextFromStream(streamText);
+          if (extracted.trim()) parts.push(extracted);
+        }
+
+        if (!parts.length) {
+          const fallback = extractPdfTextFromStream(raw);
+          if (fallback.trim()) parts.push(fallback);
+        }
+
+        const text = readablePdfText(parts.join("\n"));
+        if (text.replace(/\s/g, "").length < 20) {
+          throw new Error(`${file.name}: PDFから本文を抽出できませんでした。画像だけのPDFか、特殊な文字埋め込みの可能性があります。本文をコピーして貼り付けてください。`);
+        }
+        return text;
+      }
+
       function parseSlideQuestions(text, fileName) {
         const source = fileName.replace(/\.[^.]+$/, "");
         const cleaned = normalizeSlideText(text);
@@ -1551,10 +1711,24 @@
         return parseQaTextQuestions(cleanedText, fileName, resolvedCategory);
       }
 
+      async function parseUploadedFile(file, category, fileKind) {
+        const lower = file.name.toLowerCase();
+        if (lower.endsWith(".pdf") || file.type === "application/pdf") {
+          const text = await extractPdfText(file);
+          return parseQuestionFile(text, file.name.replace(/\.pdf$/i, ".txt"), category, fileKind);
+        }
+        return parseQuestionFile(await file.text(), file.name, category, fileKind);
+      }
+
       function addImportedQuestions(questions, label, fileKind = el.fileKind.value) {
         const category = categoryForFileKind(fileKind, el.importCategory.value);
         const normalized = normalize(questions, category)
           .filter((question) => String(question.prompt).trim() && String(question.answer).trim());
+
+        if (!normalized.length) {
+          el.importStatus.textContent = `${label}: 追加できる問題が見つかりませんでした。PDFの場合はテキスト層があるか確認するか、本文をコピーして貼り付けてください。`;
+          return;
+        }
 
         importedQuestions = [...importedQuestions, ...normalized];
         saveImportedQuestions();
@@ -1579,8 +1753,7 @@
       async function importFiles(files) {
         let added = [];
         for (const file of files) {
-          const text = await file.text();
-          added = [...added, ...parseQuestionFile(text, file.name, el.importCategory.value, el.fileKind.value)];
+          added = [...added, ...await parseUploadedFile(file, el.importCategory.value, el.fileKind.value)];
         }
         addImportedQuestions(added, `${files.length}ファイル`, el.fileKind.value);
         el.fileInput.value = "";
