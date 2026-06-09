@@ -811,10 +811,11 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     category: "knowledge",
     number: 15,
     prompt: "スライドで示されたボードゲームの状態空間の大きさについて、大きい順に並べなさい。",
-    answer: "1 = 将棋 / 2 = 囲碁 / 3 = チェス / 4 = オセロ",
+    answer: "1 = 囲碁 / 2 = 将棋 / 3 = チェス / 4 = オセロ",
     type: "matching",
     choices: ["a: 将棋", "b: 囲碁", "c: チェス", "d: オセロ"],
-    images: []
+    images: [],
+    explanation: "状態空間の大きさは目安として、囲碁が約10^360通り、将棋が約10^220通り、チェスが約10^120通り、オセロが約10^60通りなので、この順になります。"
   },
   {
     id: "knowledge-mid-016",
@@ -1072,7 +1073,8 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     answer: "1 = 囲碁 / 2 = 将棋 / 3 = チェス / 4 = オセロ",
     type: "matching",
     choices: ["a: 囲碁", "b: 将棋", "c: チェス", "d: オセロ"],
-    images: []
+    images: [],
+    explanation: "状態空間の大きさは目安として、囲碁が約10^360通り、将棋が約10^220通り、チェスが約10^120通り、オセロが約10^60通りなので、この順になります。"
   },
   {
     id: "knowledge-quiz1-014",
