@@ -853,6 +853,7 @@
           prompt: question.prompt || "",
           answer: question.answer || "",
           explanation: question.explanation || "",
+          slideReference: question.slideReference || question.reference || "",
           type: question.type || "single",
           choices: Array.isArray(question.choices) ? question.choices : [],
           images: Array.isArray(question.images) ? question.images : []
@@ -1464,29 +1465,61 @@
         return `${prompt}\n${guidance}`;
       }
 
+      function slideReferenceText(question) {
+        if (question.slideReference) return question.slideReference;
+
+        const source = String(question.source || "");
+        const category = String(question.category || "");
+        const prefixedRound = source.match(/第0?(\d+)回/);
+        const economicsRound = source.match(/経済(\d+)/);
+        const predictionRound = source.match(/^予想 第(\d+)回/);
+
+        if (category === "audio-prediction" && prefixedRound) return `音声工学 第${Number(prefixedRound[1])}回スライド`;
+        if (category === "audio") return "音声工学 第1回〜第6回スライド（中間範囲）・中間過去問";
+        if (category === "knowledge-prediction" && prefixedRound) return `知識工学 第${Number(prefixedRound[1])}回スライド`;
+        if (category === "knowledge") {
+          if (source.includes("小テスト")) return "知識工学 第1回〜第6回スライド（中間範囲）・小テスト";
+          return "知識工学 第1回〜第6回スライド（中間範囲）・中間過去問";
+        }
+        if (category === "machine-learning-prediction") return "機械学習 第1回〜第5回スライド（中間範囲）・中間過去問";
+        if (category === "machine-learning") return "機械学習 第1回〜第5回スライド（中間範囲）・中間過去問";
+        if (category === "economics-final") return "経済学 期末範囲スライド・期末過去問";
+        if ((category === "prediction" || category === "quiz" || !category) && predictionRound) return `経済学 第${Number(predictionRound[1])}回スライド`;
+        if ((category === "quiz" || !category) && economicsRound) return `経済学 第${Number(economicsRound[1])}回スライド`;
+
+        return source ? `${source} の授業資料` : "該当範囲の授業スライド";
+      }
+
+      function withSlideReference(text, question) {
+        const reference = slideReferenceText(question);
+        if (!reference) return text;
+        if (String(text).includes("参照スライド")) return text;
+        return `${text}\n参照スライド: ${reference}`;
+      }
+
       function explanationText(question) {
-        if (question.explanation) return question.explanation;
+        if (question.explanation) return withSlideReference(question.explanation, question);
         const prompt = String(question.prompt || "");
         const answer = String(question.answer || "");
         if (question.type === "free" || answer.includes("保存された解答なし")) {
-          return "自由記述なので、授業内容の要点を自分の言葉で整理できれば大丈夫です。";
+          return withSlideReference("自由記述なので、授業内容の要点を自分の言葉で整理できれば大丈夫です。", question);
         }
         if (question.type === "matching") {
-          return "問題文の項目と用語の対応を整理すると、この組み合わせになります。";
+          return withSlideReference("問題文の項目と用語の対応を整理すると、この組み合わせになります。", question);
         }
         if (question.type === "multiple") {
-          return "条件に当てはまる項目だけを残すと、答えにある選択肢の組み合わせになります。";
+          return withSlideReference("条件に当てはまる項目だけを残すと、答えにある選択肢の組み合わせになります。", question);
         }
         if (/計算|求め|代入|偏微分|行列|分散|平均|確率|最小|最大|係数|成分/.test(prompt)) {
-          return "問題文の条件を式や定義に当てはめて計算すると、この答えになります。";
+          return withSlideReference("問題文の条件を式や定義に当てはめて計算すると、この答えになります。", question);
         }
         if (/何という|何と呼|何か|名称|用語|表記|定義/.test(prompt)) {
-          return "その内容を表す授業内の用語・定義が、この答えです。";
+          return withSlideReference("その内容を表す授業内の用語・定義が、この答えです。", question);
         }
         if (question.type === "single") {
-          return "選択肢の中で、問題文の説明や条件に合うものがこの答えです。";
+          return withSlideReference("選択肢の中で、問題文の説明や条件に合うものがこの答えです。", question);
         }
-        return "問題文で問われている条件に対応する語句・値が、この答えです。";
+        return withSlideReference("問題文で問われている条件に対応する語句・値が、この答えです。", question);
       }
 
       function judge(question) {
