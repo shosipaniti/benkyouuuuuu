@@ -931,7 +931,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-001",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 1,
     prompt: "次の行列が定義されている。\nA = [1 3 5; 2 4 6], B = [1 0 1; 0 1 1]\nA + B = [a b c; d e f] としたとき、dに当てはまる値を答えなさい。",
     answer: "2",
@@ -943,7 +943,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-002",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 2,
     prompt: "次の行列が定義されている。\nA = [1 3 5; 2 4 6], B = [1 0 1; 0 1 1]\nA - B = [a b c; d e f] としたとき、eに当てはまる値を答えなさい。",
     answer: "3",
@@ -955,7 +955,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-003",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 3,
     prompt: "次の行列が定義されている。\nA = [1 3 5; 2 4 6], B = [1 0 1; 0 1 1]\nA - 4B = [a b c; d e f] としたとき、fに当てはまる値を答えなさい。",
     answer: "2",
@@ -967,7 +967,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-004",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 4,
     prompt: "次の行列が定義されている。\nC = [9 8 7; 6 5 4; 3 2 1]\n3C = [a b c; d e f; g h i] としたとき、gに当てはまる値を答えなさい。",
     answer: "9",
@@ -979,7 +979,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-005",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 5,
     prompt: "『人工知能』という言葉は1956年にアメリカで開催された（ア）において、著名なアメリカ人計算機科学者（イ）によって初めて使われた。なお、人工知能の定義は（ウ）。正しい組み合わせを答えなさい。",
     answer: "ア = ダートマス会議 / イ = ジョン・マッカーシー / ウ = 専門家の間でも定まっていない",
@@ -990,7 +990,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-006",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 6,
     prompt: "人工知能で何か新しいことが実現され、その原理が分かってしまうと『それは知能ではない』と思ってしまう人間心理をなんというか。",
     answer: "AI効果",
@@ -1001,7 +1001,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-007",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 7,
     prompt: "探索問題などの問題解決において到達可能で、考察の対象となる状況全ての集合をなんというか。",
     answer: "状態空間",
@@ -1012,7 +1012,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-008",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 8,
     prompt: "1946年、米国のペンシルバニア大学で公開された世界初の汎用コンピュータの呼称として適切なものを選びなさい。",
     answer: "ENIAC",
@@ -1023,7 +1023,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-009",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 9,
     prompt: "ゲームが複雑になるにつれて探索対象が増加することや、感染症の拡大のように、ある量が増大する速さが増大する量に比例することを（ ）的増加という。",
     answer: "指数関数",
@@ -1034,7 +1034,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-010",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 10,
     prompt: "第一次AIブームの説明として適切なものを全て答えなさい。",
     answer: "チェスやオセロ、迷路などの比較的簡単な問題を解決する方法が開発された / 推論と探索による人工知能が台頭した",
@@ -1045,7 +1045,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-011",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 11,
     prompt: "人工知能を表すAIとは何という英単語の略か。スペルアウトして半角小文字で答えなさい。",
     answer: "artificial intelligence",
@@ -1056,7 +1056,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-012",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 12,
     prompt: "8パズル問題において存在しうる状態の総数として適切なものを選びなさい。",
     answer: "9!",
@@ -1067,7 +1067,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-013",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 13,
     prompt: "ボードゲームをコンピュータで解く際には探索が用いられる。次のボードゲームを探索における組み合わせ数の大きい順に並べなさい。",
     answer: "1 = 囲碁 / 2 = 将棋 / 3 = チェス / 4 = オセロ",
@@ -1079,7 +1079,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-014",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 14,
     prompt: "次の探索木において、深さ優先探索を行った際、9回目の探索処理で到達するノードの記号を答えなさい。Aを1回目の探索とし、左側のノードが先に処理されるものとする。",
     answer: "ノード J",
@@ -1091,7 +1091,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-015",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 15,
     prompt: "次の探索木において、幅優先探索を行った際、9回目の探索処理で到達するノードの記号を答えなさい。Aを1回目の探索とし、左側のノードが先に処理されるものとする。",
     answer: "ノード I",
@@ -1103,7 +1103,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-016",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 16,
     prompt: "Rで dat <- c(2,4,6,8,10,12) と定義されている。length(dat) の実行結果を選びなさい。",
     answer: "> 6",
@@ -1114,7 +1114,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-017",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 17,
     prompt: "Rで dat <- c(2,4,6,8,10,12) と定義されている。max(dat) の実行結果を選びなさい。",
     answer: "> 12",
@@ -1125,7 +1125,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz1-018",
     source: "知識工学 小テスト1",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 18,
     prompt: "Rで dat <- c(2,4,6,8,10,12) と定義し、その後 dat <- dat + 2 を実行した。min(dat) の実行結果を選びなさい。",
     answer: "> 4",
@@ -1136,7 +1136,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-001",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 1,
     prompt: "次の行列が定義されている。\nA = [3 5; 1 2], B = [1 3; 2 2]\nA + 3B = [a b; c d] としたとき、aに当てはまる値を答えなさい。",
     answer: "6",
@@ -1148,7 +1148,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-002",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 2,
     prompt: "次の行列が定義されている。\nA = [3 5; 1 2], B = [1 3; 2 2]\nAB = [a b; c d] としたとき、dに当てはまる値を答えなさい。",
     answer: "7",
@@ -1160,7 +1160,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-003",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 3,
     prompt: "次の行列が定義されている。\nB = [1 3; 2 2], E = [1 0; 0 1]\nEB = [a b; c d] としたとき、cに当てはまる値を答えなさい。",
     answer: "2",
@@ -1172,7 +1172,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-004",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 4,
     prompt: "次の行列が定義されている。\nA = [3 5; 1 2]\nA^-1 = [a b; c d] としたとき、dに当てはまる値を答えなさい。",
     answer: "3",
@@ -1184,7 +1184,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-005",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 5,
     prompt: "米国の哲学者ジョン・サールによって提唱された概念で、『真に人間と同等の知能を持つ人工知能』を何というか。サールはこれを実現不可能であると主張している。",
     answer: "強いAI",
@@ -1195,7 +1195,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-006",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 6,
     prompt: "生物の脳の神経回路網を模した数理モデルの総称として適切なものを選びなさい。",
     answer: "ニューラルネットワーク",
@@ -1206,7 +1206,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-007",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 7,
     prompt: "機械学習では学習に利用できる（ア）が多ければ多いほど望ましい学習結果が得られる。（イ）の発展とともに利用可能な（ア）の種類と量が爆発的に増加した。正しい組み合わせを答えなさい。",
     answer: "ア = データ / イ = インターネット",
@@ -1217,7 +1217,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-008",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 8,
     prompt: "2012年、画像認識を競う競技会ILSVRCにて、カナダのトロント大学教授である（ウ）が率いるチームのSuperVisionが圧勝した。これが現代AIにおける（エ）ブームの火付け役となった。正しい組み合わせを答えなさい。",
     answer: "ウ = ジェフリー・ヒントン / エ = ディープラーニング",
@@ -1228,7 +1228,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-009",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 9,
     prompt: "手順に従って用意された処理をするだけのチャットボットは、知的な処理がなされているわけではないので（オ）と呼ばれる。（カ）は（オ）の元祖といわれ、チャットボットとの会話を本物の人間と話していると錯覚することを『（カ）効果』という。正しい組み合わせを答えなさい。",
     answer: "オ = 人工無脳 / カ = イライザ（ELIZA）",
@@ -1239,7 +1239,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-010",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 10,
     prompt: "以下のエキスパートシステムの図において、空欄Bと空欄Eに当てはまるものとして適切なものをそれぞれ選びなさい。",
     answer: "B = 知識ベース / E = ユーザインターフェース",
@@ -1250,7 +1250,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-011",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 11,
     prompt: "Rで A <- c(0,1,2,3) と定義されている。length(A) の実行結果を選びなさい。",
     answer: "> 4",
@@ -1261,7 +1261,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-012",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 12,
     prompt: "Rで A <- c(0,1,2,3)、B <- c(4,5,6,7) と定義されている。A + B の実行結果を選びなさい。",
     answer: "(4, 6, 8, 10)",
@@ -1273,7 +1273,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-013",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 13,
     prompt: "Rで B <- c(4,5,6,7) と定義されている。mean(B) の実行結果を選びなさい。",
     answer: "> 5.5",
@@ -1284,7 +1284,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-014",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 14,
     prompt: "Rで A <- c(0,1,2,3) と定義されている。min(A) の実行結果を選びなさい。",
     answer: "> 0",
@@ -1295,7 +1295,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-015",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 15,
     prompt: "Rで A <- c(0,1,2,3)、B <- c(4,5,6,7) と定義されている。A %*% B の実行結果を選びなさい。",
     answer: "38",
@@ -1307,7 +1307,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-016",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 16,
     prompt: "意味ネットワークにおける is-a 関係の適切な使い方を全て答えなさい。",
     answer: "パトカー is-a 自動車 / 自動車 is-a 乗り物",
@@ -1319,7 +1319,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-quiz2-017",
     source: "知識工学 小テスト2",
-    category: "knowledge",
+    category: "knowledge-quiz",
     number: 17,
     prompt: "意味ネットワークにおける part-of 関係の適切な使い方を全て答えなさい。",
     answer: "タイヤ part-of 自動車 / ハンドル part-of 自動車",
