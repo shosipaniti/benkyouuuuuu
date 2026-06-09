@@ -172,6 +172,115 @@
         margin-top: 10px;
       }
 
+      .detail-filters summary {
+        cursor: pointer;
+        color: var(--ink);
+        font-size: 0.88rem;
+        font-weight: 800;
+      }
+
+      .detail-filters summary::marker {
+        color: var(--accent);
+      }
+
+      .active-set-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 12px 14px;
+      }
+
+      .active-set-name {
+        display: block;
+        margin-top: 2px;
+        font-size: 1.04rem;
+      }
+
+      .active-set-counts {
+        display: block;
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .set-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .set-chooser {
+        display: grid;
+        gap: 14px;
+        margin-bottom: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: clamp(16px, 3vw, 24px);
+        box-shadow: var(--shadow);
+      }
+
+      .set-chooser-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .set-chooser-header h2 {
+        margin: 0;
+        font-size: 1.18rem;
+      }
+
+      .set-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
+      }
+
+      .set-card {
+        display: grid;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        padding: 12px;
+      }
+
+      .set-card.is-archived {
+        background: #f8faf7;
+      }
+
+      .set-card h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .set-card-meta {
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      .set-card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .set-empty {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
       .import-panel {
         display: grid;
         gap: 10px;
@@ -590,6 +699,22 @@
           grid-template-columns: 42px 1fr 42px;
         }
 
+        .active-set-bar,
+        .set-chooser-header {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .set-actions,
+        .set-card-actions {
+          flex-direction: column;
+        }
+
+        .set-actions button,
+        .set-card-actions button {
+          width: 100%;
+        }
+
         .actions .mark {
           grid-column: span 3;
         }
@@ -630,34 +755,69 @@
     </header>
 
     <main>
-      <aside aria-label="問題フィルター">
-        <label for="searchInput">検索</label>
-        <input id="searchInput" type="search" placeholder="問題文・答えで検索">
+      <aside aria-label="詳細フィルター">
+        <details id="filterDetails" class="detail-filters">
+          <summary>詳細フィルタ</summary>
 
-        <div class="filter">
-          <label for="categoryFilter">問題区分</label>
-          <select id="categoryFilter"></select>
-        </div>
+          <div class="filter">
+            <label for="searchInput">検索</label>
+            <input id="searchInput" type="search" placeholder="問題文・答えで検索">
+          </div>
 
-        <div class="filter">
-          <label for="sourceFilter">範囲</label>
-          <select id="sourceFilter"></select>
-        </div>
+          <div class="filter">
+            <label for="categoryFilter">問題区分</label>
+            <select id="categoryFilter"></select>
+          </div>
 
-        <div class="filter">
-          <label for="typeFilter">形式</label>
-          <select id="typeFilter"></select>
-        </div>
+          <div class="filter">
+            <label for="sourceFilter">範囲</label>
+            <select id="sourceFilter"></select>
+          </div>
 
-        <div class="filter">
-          <label for="statusFilter">進捗</label>
-          <select id="statusFilter"></select>
-        </div>
+          <div class="filter">
+            <label for="typeFilter">形式</label>
+            <select id="typeFilter"></select>
+          </div>
 
+          <div class="filter">
+            <label for="statusFilter">進捗</label>
+            <select id="statusFilter"></select>
+          </div>
+        </details>
       </aside>
 
       <section>
-        <div class="toolbar">
+        <section id="setChooser" class="set-chooser hidden" aria-label="学習セット選択">
+          <div class="set-chooser-header">
+            <div>
+              <p class="filter-title">学習セット</p>
+              <h2>今勉強するテストを選ぶ</h2>
+            </div>
+            <button id="closeSetChooserButton" type="button">閉じる</button>
+          </div>
+          <div>
+            <p class="filter-title">通常表示</p>
+            <div id="setList" class="set-grid"></div>
+          </div>
+          <div>
+            <p class="filter-title">アーカイブ</p>
+            <div id="archivedSetList" class="set-grid"></div>
+          </div>
+        </section>
+
+        <div id="activeSetBar" class="active-set-bar">
+          <div>
+            <span class="filter-title">現在の学習セット</span>
+            <strong id="activeSetName" class="active-set-name">未選択</strong>
+            <span id="activeSetCounts" class="active-set-counts">0問</span>
+          </div>
+          <div class="set-actions">
+            <button id="changeSetButton" type="button">セット変更</button>
+            <button id="archiveActiveSetButton" type="button">このテストを完了にする</button>
+          </div>
+        </div>
+
+        <div id="mainToolbar" class="toolbar">
           <div class="segmented" aria-label="表示切替">
             <button id="quizMode" class="is-active" type="button">一問一答</button>
             <button id="listMode" type="button">一覧</button>
@@ -719,7 +879,7 @@
           <div id="listItems" class="list"></div>
         </section>
 
-        <section class="import-panel" aria-label="問題データ追加">
+        <section id="importPanel" class="import-panel" aria-label="問題データ追加">
           <p class="filter-title">ファイルから追加</p>
           <input id="fileInput" type="file" accept=".json,.js,.csv,.md,.markdown,.txt,.html,.htm" multiple>
           <label for="fileKind">ファイルの種類</label>
@@ -757,9 +917,12 @@
       const categoryLabelsStorageKey = "study-quiz-standalone-category-labels-v1";
       const categoryOrderStorageKey = "study-quiz-standalone-category-order-v1";
       const deletedQuestionsStorageKey = "study-quiz-standalone-deleted-v1";
+      const activeSetStorageKey = "study-quiz-active-set-v1";
+      const archivedSetsStorageKey = "study-quiz-archived-sets-v1";
       const defaultCategoryOrder = ["quiz", "prediction", "economics-final", "audio", "audio-prediction", "knowledge", "knowledge-prediction", "machine-learning", "machine-learning-prediction"];
       let categoryLabels = loadCategoryLabels();
       let categoryOrder = loadCategoryOrder();
+      let archivedSets = new Set(loadArchivedSets());
 
       const quizQuestions = normalize(window.QUESTION_DATA || [], "quiz");
       const predictedQuestions = normalize(window.PREDICTED_QUESTION_DATA || [], "prediction");
@@ -771,6 +934,8 @@
       let validationIssues = validate(allQuestions);
 
       const state = {
+        activeSet: initialActiveSet(),
+        setChooserOpen: false,
         category: "all",
         source: "all",
         type: "all",
@@ -790,11 +955,13 @@
         responses: {},
         progress: loadProgress()
       };
+      state.setChooserOpen = !state.activeSet;
 
       const el = {
         totalCount: document.getElementById("totalCount"),
         knownCount: document.getElementById("knownCount"),
         reviewCount: document.getElementById("reviewCount"),
+        filterDetails: document.getElementById("filterDetails"),
         searchInput: document.getElementById("searchInput"),
         categoryFilter: document.getElementById("categoryFilter"),
         sourceFilter: document.getElementById("sourceFilter"),
@@ -823,11 +990,22 @@
         categoryDeleteList: document.getElementById("categoryDeleteList"),
         deleteStatus: document.getElementById("deleteStatus"),
         dataStatus: document.getElementById("dataStatus"),
+        setChooser: document.getElementById("setChooser"),
+        setList: document.getElementById("setList"),
+        archivedSetList: document.getElementById("archivedSetList"),
+        closeSetChooserButton: document.getElementById("closeSetChooserButton"),
+        activeSetBar: document.getElementById("activeSetBar"),
+        activeSetName: document.getElementById("activeSetName"),
+        activeSetCounts: document.getElementById("activeSetCounts"),
+        changeSetButton: document.getElementById("changeSetButton"),
+        archiveActiveSetButton: document.getElementById("archiveActiveSetButton"),
+        mainToolbar: document.getElementById("mainToolbar"),
         quizMode: document.getElementById("quizMode"),
         listMode: document.getElementById("listMode"),
         shuffleButton: document.getElementById("shuffleButton"),
         quizView: document.getElementById("quizView"),
         listView: document.getElementById("listView"),
+        importPanel: document.getElementById("importPanel"),
         quizCard: document.getElementById("quizCard"),
         meta: document.getElementById("meta"),
         images: document.getElementById("images"),
@@ -951,8 +1129,51 @@
         localStorage.setItem(deletedQuestionsStorageKey, JSON.stringify([...deletedQuestionIds]));
       }
 
+      function loadArchivedSets() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(archivedSetsStorageKey));
+          return Array.isArray(saved) ? saved : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveArchivedSets() {
+        localStorage.setItem(archivedSetsStorageKey, JSON.stringify([...archivedSets]));
+      }
+
+      function loadActiveSet() {
+        try {
+          return localStorage.getItem(activeSetStorageKey) || "";
+        } catch {
+          return "";
+        }
+      }
+
+      function saveActiveSet() {
+        if (state.activeSet) {
+          localStorage.setItem(activeSetStorageKey, state.activeSet);
+        } else {
+          localStorage.removeItem(activeSetStorageKey);
+        }
+      }
+
       function visibleQuestions(questions) {
         return questions.filter((question) => !deletedQuestionIds.has(question.id));
+      }
+
+      function categoryHasQuestions(category) {
+        return allQuestions.some((question) => question.category === category);
+      }
+
+      function categoryQuestions(category) {
+        return allQuestions.filter((question) => question.category === category);
+      }
+
+      function initialActiveSet() {
+        const saved = loadActiveSet();
+        if (saved && !archivedSets.has(saved) && categoryHasQuestions(saved)) return saved;
+        return "";
       }
 
       function categoryRank(category) {
@@ -996,6 +1217,7 @@
       function refreshQuestionData() {
         allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...importedQuestions]));
         validationIssues = validate(allQuestions);
+        ensureActiveSet();
         applyCategoryOrderToQuestions();
         if (state.index >= filtered().length) state.index = 0;
       }
@@ -1337,8 +1559,17 @@
         importedQuestions = [...importedQuestions, ...normalized];
         saveImportedQuestions();
         refreshQuestionData();
+        archivedSets.delete(category);
+        saveArchivedSets();
+        state.activeSet = category;
+        saveActiveSet();
         state.category = "all";
         state.source = "all";
+        state.type = "all";
+        state.status = "all";
+        state.query = "";
+        el.searchInput.value = "";
+        state.setChooserOpen = false;
         state.index = 0;
         state.revealed = false;
         el.importStatus.textContent = `${label}: ${normalized.length}問を${categoryLabels[category]}に追加しました。`;
@@ -1555,12 +1786,14 @@
 
       function filtered() {
         const query = state.query.trim().toLowerCase();
+        if (!state.activeSet) return [];
         return state.order
           .map((index) => allQuestions[index])
           .filter((question) => {
             const status = state.progress[question.id] || "new";
             const text = `${question.prompt} ${question.answer} ${question.source}`.toLowerCase();
-            return (state.category === "all" || question.category === state.category)
+            return question.category === state.activeSet
+              && (state.category === "all" || question.category === state.category)
               && (state.source === "all" || question.source === state.source)
               && (state.type === "all" || question.type === state.type)
               && (state.status === "all" || status === state.status)
@@ -1605,27 +1838,162 @@
         ];
       }
 
+      function resetDetailFilters() {
+        state.category = "all";
+        state.source = "all";
+        state.type = "all";
+        state.status = "all";
+        state.query = "";
+        el.searchInput.value = "";
+      }
+
+      function setStats(category) {
+        const questions = categoryQuestions(category);
+        const known = questions.filter((question) => state.progress[question.id] === "known").length;
+        const review = questions.filter((question) => state.progress[question.id] === "review").length;
+        return { total: questions.length, known, review, newCount: questions.length - known - review };
+      }
+
+      function activeCategories() {
+        return categoryEntries()
+          .map(([category, label]) => ({ category, label, ...setStats(category) }))
+          .filter((item) => item.total > 0);
+      }
+
+      function ensureActiveSet() {
+        if (state.activeSet && !archivedSets.has(state.activeSet) && categoryHasQuestions(state.activeSet)) return;
+        state.activeSet = "";
+        saveActiveSet();
+        state.setChooserOpen = true;
+        resetDetailFilters();
+      }
+
+      function selectLearningSet(category, restore = false) {
+        if (!categoryHasQuestions(category)) return;
+        if (restore) {
+          archivedSets.delete(category);
+          saveArchivedSets();
+        }
+        state.activeSet = category;
+        saveActiveSet();
+        resetDetailFilters();
+        state.setChooserOpen = false;
+        state.index = 0;
+        state.revealed = false;
+        state.editingId = "";
+        state.selectedDeleteIds.clear();
+        state.selectedDeleteCategories.clear();
+        resetChoiceOrder(filtered()[state.index]);
+        render();
+      }
+
+      function archiveLearningSet(category) {
+        if (!category || !categoryHasQuestions(category)) return;
+        const label = categoryLabels[category] || category;
+        if (!window.confirm(`${label}を完了にして、普段の一問一答から非表示にしますか？\n問題と進捗は残り、あとから戻せます。`)) return;
+        archivedSets.add(category);
+        saveArchivedSets();
+        if (state.activeSet === category) {
+          state.activeSet = "";
+          saveActiveSet();
+          state.setChooserOpen = true;
+          resetDetailFilters();
+          state.index = 0;
+        }
+        render();
+      }
+
+      function renderActiveSetBar(items) {
+        const hasActiveSet = Boolean(state.activeSet && categoryHasQuestions(state.activeSet));
+        el.activeSetName.textContent = hasActiveSet ? (categoryLabels[state.activeSet] || state.activeSet) : "学習セットを選択してください";
+        if (hasActiveSet) {
+          const stats = setStats(state.activeSet);
+          el.activeSetCounts.textContent = `${items.length}/${stats.total}問表示・${stats.known}習得・${stats.review}復習`;
+        } else {
+          el.activeSetCounts.textContent = "セットを選ぶと一問一答を始められます。";
+        }
+        el.archiveActiveSetButton.disabled = !hasActiveSet;
+      }
+
+      function createSetCard(item, archived = false) {
+        const card = document.createElement("article");
+        card.className = `set-card ${archived ? "is-archived" : ""}`;
+        const title = document.createElement("h3");
+        title.textContent = item.label;
+        const meta = document.createElement("div");
+        meta.className = "set-card-meta";
+        meta.textContent = `${item.total}問・${item.known}習得・${item.review}復習・${item.newCount}未着手`;
+        const actions = document.createElement("div");
+        actions.className = "set-card-actions";
+
+        const start = document.createElement("button");
+        start.type = "button";
+        start.className = "primary";
+        start.textContent = archived ? "戻して始める" : "このセットで始める";
+        start.addEventListener("click", () => selectLearningSet(item.category, archived));
+        actions.appendChild(start);
+
+        if (!archived) {
+          const archive = document.createElement("button");
+          archive.type = "button";
+          archive.textContent = "完了にする";
+          archive.addEventListener("click", () => archiveLearningSet(item.category));
+          actions.appendChild(archive);
+        }
+
+        card.append(title, meta, actions);
+        return card;
+      }
+
+      function renderSetChooser() {
+        el.setChooser.classList.toggle("hidden", !state.setChooserOpen);
+        el.closeSetChooserButton.hidden = !state.activeSet;
+        if (!state.setChooserOpen) return;
+
+        const categories = activeCategories();
+        const openSets = categories.filter((item) => !archivedSets.has(item.category));
+        const archived = categories.filter((item) => archivedSets.has(item.category));
+
+        if (openSets.length) {
+          el.setList.replaceChildren(...openSets.map((item) => createSetCard(item, false)));
+        } else {
+          const empty = document.createElement("p");
+          empty.className = "set-empty";
+          empty.textContent = "通常表示できる学習セットがありません。アーカイブから戻してください。";
+          el.setList.replaceChildren(empty);
+        }
+
+        if (archived.length) {
+          el.archivedSetList.replaceChildren(...archived.map((item) => createSetCard(item, true)));
+        } else {
+          const empty = document.createElement("p");
+          empty.className = "set-empty";
+          empty.textContent = "アーカイブ済みの学習セットはありません。";
+          el.archivedSetList.replaceChildren(empty);
+        }
+      }
+
       function renderFilters() {
+        const activeQuestions = state.activeSet ? categoryQuestions(state.activeSet) : [];
         setOptions(el.categoryFilter, state.category, [
-          ["all", "すべて"],
-          ...categoryEntries()
+          ["all", "現在のセット"],
+          ...(state.activeSet ? [[state.activeSet, categoryLabels[state.activeSet] || state.activeSet]] : [])
         ]);
 
         setOptions(el.importCategory, el.importCategory.value || "quiz", [
           ...importCategoryEntries()
         ]);
 
-        const sourceQuestions = allQuestions.filter((question) => state.category === "all" || question.category === state.category);
         setOptions(el.sourceFilter, state.source, [
           ["all", "すべて"],
-          ...unique(sourceQuestions.map((question) => question.source))
+          ...unique(activeQuestions.map((question) => question.source))
             .sort((a, b) => sourceRank(a) - sourceRank(b) || String(a).localeCompare(String(b), "ja", { numeric: true }))
             .map((source) => [source, source])
         ]);
 
         setOptions(el.typeFilter, state.type, [
           ["all", "すべて"],
-          ...unique(allQuestions.map((question) => question.type)).map((type) => [type, typeLabels[type] || type])
+          ...unique(activeQuestions.map((question) => question.type)).map((type) => [type, typeLabels[type] || type])
         ]);
 
         setOptions(el.statusFilter, state.status, [
@@ -2273,15 +2641,22 @@
       function render() {
         const items = filtered();
         renderFilters();
+        renderSetChooser();
+        renderActiveSetBar(items);
         renderStatus(items);
         renderCategoryNameInputs();
         renderDeletePanel();
-        el.quizView.classList.toggle("hidden", state.mode !== "quiz");
-        el.listView.classList.toggle("hidden", state.mode !== "list");
+        const showWorkspace = !state.setChooserOpen && Boolean(state.activeSet);
+        el.mainToolbar.classList.toggle("hidden", !showWorkspace);
+        el.importPanel.classList.toggle("hidden", !showWorkspace);
+        el.quizView.classList.toggle("hidden", !showWorkspace || state.mode !== "quiz");
+        el.listView.classList.toggle("hidden", !showWorkspace || state.mode !== "list");
         el.quizMode.classList.toggle("is-active", state.mode === "quiz");
         el.listMode.classList.toggle("is-active", state.mode === "list");
-        renderQuiz(items);
-        renderList(items);
+        if (showWorkspace) {
+          renderQuiz(items);
+          renderList(items);
+        }
       }
 
       function updateFilter(key, value) {
@@ -2393,6 +2768,19 @@
       el.sourceFilter.addEventListener("change", (event) => updateFilter("source", event.target.value));
       el.typeFilter.addEventListener("change", (event) => updateFilter("type", event.target.value));
       el.statusFilter.addEventListener("change", (event) => updateFilter("status", event.target.value));
+      el.changeSetButton.addEventListener("click", () => {
+        state.setChooserOpen = true;
+        state.editingId = "";
+        state.deleteMode = false;
+        state.categoryEditing = false;
+        render();
+      });
+      el.closeSetChooserButton.addEventListener("click", () => {
+        if (!state.activeSet) return;
+        state.setChooserOpen = false;
+        render();
+      });
+      el.archiveActiveSetButton.addEventListener("click", () => archiveLearningSet(state.activeSet));
       el.quizMode.addEventListener("click", () => updateFilter("mode", "quiz"));
       el.listMode.addEventListener("click", () => updateFilter("mode", "list"));
       el.shuffleButton.addEventListener("click", () => {
