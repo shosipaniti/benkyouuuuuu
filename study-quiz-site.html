@@ -960,12 +960,23 @@
         return index === -1 ? order.length : index;
       }
 
+      function sourceRank(source) {
+        const value = String(source || "");
+        if (value.includes("中間過去問")) return 0;
+        if (value.includes("過去問")) return 1;
+        if (value.includes("小テスト")) return 2;
+        if (value.includes("予想")) return 3;
+        return 4;
+      }
+
       function sortedQuestionIndexes() {
         return allQuestions
           .map((question, index) => ({ question, index }))
           .sort((a, b) => {
             const categoryDiff = categoryRank(a.question.category) - categoryRank(b.question.category);
             if (categoryDiff) return categoryDiff;
+            const sourceRankDiff = sourceRank(a.question.source) - sourceRank(b.question.source);
+            if (sourceRankDiff) return sourceRankDiff;
             const sourceDiff = String(a.question.source).localeCompare(String(b.question.source), "ja", { numeric: true });
             if (sourceDiff) return sourceDiff;
             const numberDiff = Number(a.question.number || 0) - Number(b.question.number || 0);
@@ -1574,7 +1585,9 @@
         const sourceQuestions = allQuestions.filter((question) => state.category === "all" || question.category === state.category);
         setOptions(el.sourceFilter, state.source, [
           ["all", "すべて"],
-          ...unique(sourceQuestions.map((question) => question.source)).map((source) => [source, source])
+          ...unique(sourceQuestions.map((question) => question.source))
+            .sort((a, b) => sourceRank(a) - sourceRank(b) || String(a).localeCompare(String(b), "ja", { numeric: true }))
+            .map((source) => [source, source])
         ]);
 
         setOptions(el.typeFilter, state.type, [
