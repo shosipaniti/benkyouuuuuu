@@ -930,7 +930,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-026",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 26,
     prompt: "囲碁や将棋のように状態空間が非常に大きい問題で、すべての状態を総当たりで調べる方法について正しいものを選びなさい。",
     answer: "組合せ爆発により現実的でないため、探索木を評価関数や枝刈りなどで絞りながら探索する",
@@ -942,7 +942,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-027",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 27,
     prompt: "探索問題に関する用語について、正しい組み合わせを答えなさい。",
     answer: "状態空間 = 到達可能で考察対象となる全状態の集合 / 探索木 = 状態遷移を木として表したもの / 組合せ爆発 = 状態数が急増して全探索が困難になること / 評価関数 = 状態の良さを数値化する関数",
@@ -954,7 +954,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-028",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 28,
     prompt: "探索方法について、正しい組み合わせを答えなさい。",
     answer: "深さ優先探索 = 進めるところまで深く進んでから戻る / 幅優先探索 = 同じ深さのノードを順に調べる / バックトラック = 行き詰まったら前の状態に戻って別の候補を試す",
@@ -966,7 +966,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-029",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 29,
     prompt: "階層的クラスタリングのウォード法について正しい説明を選びなさい。",
     answer: "クラスタ内平方和の増加が最も小さくなる組を順に結合する方法",
@@ -978,7 +978,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-030",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 30,
     prompt: "1次元上に A=1, B=2, C=5, D=9 の4つのデータがある。全て1点クラスタから始めてウォード法で階層的クラスタリングを行うとき、最初に結合される組を選びなさい。",
     answer: "AとB",
@@ -990,7 +990,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-031",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 31,
     prompt: "「エントロピーが大きいほど、データの分類はランダムで曖昧になっている」という説明は正しいか。",
     answer: "正しい",
@@ -1002,7 +1002,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-032",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 32,
     prompt: "2クラス分類で、どちらのデータ集合の方がエントロピーが大きいか。\nA: 赤5個・青5個\nB: 赤10個・青0個",
     answer: "A",
@@ -1014,7 +1014,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-033",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 33,
     prompt: "Rで a <- c(1,2,3)、b <- c(4,5,6) と定義されている。sum(a*b) の実行結果を答えなさい。",
     answer: "32",
@@ -1026,7 +1026,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-034",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 34,
     prompt: "Rで同じ長さの数値ベクトル a, b があるとき、sum(a*b) と同じ内積を表す式として最も直接的なものを選びなさい。",
     answer: "a %*% b",
@@ -1038,7 +1038,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-035",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 35,
     prompt: "次の行列Aについて、1列目と2列目の内積 sum(A[,1] * A[,2]) を求めなさい。\nA = [1 4; 2 5; 3 6]",
     answer: "32",
@@ -1050,7 +1050,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-036",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 36,
     prompt: "Rで a, b が同じ長さの数値ベクトルで、a %*% b が1×1の結果になるとき、sum(a*b) と mean(a %*% b) の関係について最も適切な説明を選びなさい。",
     answer: "数値として同じになる場合はあるが、内積を表す式としては a %*% b または sum(a*b) を選ぶのが基本",
@@ -1062,7 +1062,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
   {
     id: "knowledge-mid-037",
     source: "知識工学 中間 補強",
-    category: "knowledge",
+    category: "knowledge-review",
     number: 37,
     prompt: "囲碁のように組合せ爆発が大きいゲームで、探索木を広げながらシミュレーションを使って有望な手を評価する手法として適切なものを選びなさい。",
     answer: "モンテカルロ木探索",
