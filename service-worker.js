@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v42";
+const CACHE_NAME = "keizai-quiz-v43";
 const ASSETS = [
   "./",
   "./index.html",
@@ -14,6 +14,9 @@ const ASSETS = [
   "./assets/keizai-2-figure-1.png",
   "./assets/keizai-3-figure-1.jpg",
   "./assets/ref-audio-larynx-test-redacted.png",
+  "./assets/ref-audio-final-08-resonance.png",
+  "./assets/ref-audio-final-09-two-mass.png",
+  "./assets/ref-audio-final-10-rosenberg.png",
   "./assets/ref-audio-spectrum-cepstrum.svg",
   "./assets/ref-audio-vocal-tract.svg",
   "./assets/ref-audio-vowel-pentagon.svg",
