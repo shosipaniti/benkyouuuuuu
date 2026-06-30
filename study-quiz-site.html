@@ -929,8 +929,8 @@
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
-      const legacyCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学", "audio-prediction": "音声工学 予想問題", "audio-final": "音声工学 期末 過去問", "audio-final-prediction": "音声工学 期末 予想問題", knowledge: "知識工学", "knowledge-review": "知識工学 中間 補強", "knowledge-quiz": "知識工学 小テスト", "knowledge-prediction": "知識工学 予想問題", "machine-learning": "機械学習", "machine-learning-prediction": "機械学習 予想問題" };
-      const defaultCategoryLabels = { quiz: "経済学 中間 小テスト問題", prediction: "経済学 中間 予想問題", "economics-final": "経済学 期末 過去問", audio: "音声工学 中間", "audio-prediction": "音声工学 中間 予想問題", "audio-final": "音声工学 期末 過去問", "audio-final-prediction": "音声工学 期末 予想問題", knowledge: "知識工学 中間", "knowledge-review": "知識工学 中間 補強", "knowledge-quiz": "知識工学 小テスト", "knowledge-prediction": "知識工学 中間 予想問題", "machine-learning": "機械学習 中間", "machine-learning-prediction": "機械学習 中間 予想問題" };
+      const legacyCategoryLabels = { quiz: "小テスト問題", prediction: "予想問題", audio: "音声工学", "audio-prediction": "音声工学 予想問題", "audio-final": "音声工学 期末 過去問", "audio-final-prediction": "音声工学 期末 予想問題", "acoustics-final": "音響工学 期末 過去問", knowledge: "知識工学", "knowledge-review": "知識工学 中間 補強", "knowledge-quiz": "知識工学 小テスト", "knowledge-prediction": "知識工学 予想問題", "machine-learning": "機械学習", "machine-learning-prediction": "機械学習 予想問題" };
+      const defaultCategoryLabels = { quiz: "経済学 中間 小テスト問題", prediction: "経済学 中間 予想問題", "economics-final": "経済学 期末 過去問", audio: "音声工学 中間", "audio-prediction": "音声工学 中間 予想問題", "audio-final": "音声工学 期末 過去問", "audio-final-prediction": "音声工学 期末 予想問題", "acoustics-final": "音響工学 期末 過去問", knowledge: "知識工学 中間", "knowledge-review": "知識工学 中間 補強", "knowledge-quiz": "知識工学 小テスト", "knowledge-prediction": "知識工学 中間 予想問題", "machine-learning": "機械学習 中間", "machine-learning-prediction": "機械学習 中間 予想問題" };
       const storageKey = "study-quiz-standalone-progress-v1";
       const importedStorageKey = "study-quiz-standalone-imported-v1";
       const questionEditsStorageKey = "study-quiz-standalone-edits-v1";
@@ -939,7 +939,7 @@
       const deletedQuestionsStorageKey = "study-quiz-standalone-deleted-v1";
       const activeSetStorageKey = "study-quiz-active-set-v1";
       const archivedSetsStorageKey = "study-quiz-archived-sets-v1";
-      const defaultCategoryOrder = ["quiz", "prediction", "economics-final", "audio", "audio-prediction", "audio-final", "audio-final-prediction", "knowledge", "knowledge-review", "knowledge-quiz", "knowledge-prediction", "machine-learning", "machine-learning-prediction"];
+      const defaultCategoryOrder = ["quiz", "prediction", "economics-final", "audio", "audio-prediction", "audio-final", "audio-final-prediction", "acoustics-final", "knowledge", "knowledge-review", "knowledge-quiz", "knowledge-prediction", "machine-learning", "machine-learning-prediction"];
       let categoryLabels = loadCategoryLabels();
       let categoryOrder = loadCategoryOrder();
       let archivedSets = new Set(loadArchivedSets());
@@ -1882,6 +1882,7 @@
         if (category === "audio") return "音声工学 第1回〜第6回スライド（中間範囲）・中間過去問";
         if (category === "audio-final") return "音声工学 期末過去問（2020年8月5日）";
         if (category === "audio-final-prediction" && prefixedRound) return `音声工学 第${Number(prefixedRound[1])}回スライド（期末範囲）`;
+        if (category === "acoustics-final") return "音響工学 期末過去問（2021年度）・練習問題";
         if (category === "knowledge-prediction" && prefixedRound) return `知識工学 第${Number(prefixedRound[1])}回スライド`;
         if (category === "knowledge-quiz") return "知識工学 第1回〜第6回スライド（小テスト範囲）・小テスト";
         if (category === "knowledge-review") return "知識工学 第1回〜第6回スライド（中間範囲）・中間補強";
