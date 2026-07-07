@@ -688,15 +688,15 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     images: []
   },
   {
-    id: "audio-final-004",
+    id: "audio-final-004-v2",
     source: "音声工学 期末過去問 2020",
     category: "audio-final",
     number: 4,
     prompt: "母音音声y(t)は、声帯音源波x(t)と声道インパルス応答h(t)を畳み込むことで生成される。時間領域の式と、Y(ω)、X(ω)、H(ω)を用いた周波数領域の式を答えなさい。",
-    answer: "時間領域 = y=x＊h / 周波数領域 = Y=XH",
+    answer: "時間領域 = y(t)=x(t)＊h(t) / 周波数領域 = Y(ω)=X(ω)H(ω)",
     explanation: "時間領域の畳み込みは、フーリエ変換後の周波数領域では積になります。これは畳み込み定理です。",
     type: "matching",
-    choices: ["a: y=x＊h", "b: y=x+h", "c: Y=XH", "d: Y=X+H"],
+    choices: ["a: y(t)=x(t)＊h(t)", "b: y(t)=x(t)+h(t)", "c: Y(ω)=X(ω)H(ω)", "d: Y(ω)=X(ω)+H(ω)"],
     images: []
   },
   {

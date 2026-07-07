@@ -1765,8 +1765,12 @@
           .map((part) => part.trim())
           .filter(Boolean)
           .map((part) => {
-            const [label, value] = part.split("=").map((item) => item.trim());
-            return { label, value };
+            const separatorIndex = part.indexOf("=");
+            if (separatorIndex === -1) return { label: part, value: "" };
+            return {
+              label: part.slice(0, separatorIndex).trim(),
+              value: part.slice(separatorIndex + 1).trim()
+            };
           });
       }
 
@@ -1837,7 +1841,12 @@
       }
 
       function normalizeAnswer(value) {
-        return String(value).trim().replace(/\s+/g, "").toLowerCase();
+        return String(value)
+          .normalize("NFKC")
+          .trim()
+          .replace(/\s+/g, "")
+          .replace(/[×∙·・]/g, "*")
+          .toLowerCase();
       }
 
       function correctValues(question) {
@@ -1944,7 +1953,9 @@
         }
 
         if (question.type === "matching") {
-          correct = parseMatchingAnswer(question.answer).every((pair) => response.matching[pair.label] === pair.value);
+          correct = parseMatchingAnswer(question.answer).every(
+            (pair) => normalizeAnswer(response.matching[pair.label]) === normalizeAnswer(pair.value)
+          );
         } else if (question.type === "multiple") {
           correct = sameSet(
             response.selected.map(normalizeAnswer).sort(),
