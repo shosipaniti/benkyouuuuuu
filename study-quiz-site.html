@@ -465,6 +465,8 @@
         background: #f5f8fb;
         color: #243346;
         text-align: left;
+        overflow-wrap: anywhere;
+        white-space: normal;
       }
 
       .choice.is-selected {
@@ -476,7 +478,7 @@
 
       .matching-row {
         display: grid;
-        grid-template-columns: 58px 1fr;
+        grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1fr);
         gap: 10px;
         align-items: start;
         border: 1px solid var(--line);
@@ -494,12 +496,20 @@
         background: #edf5f1;
         color: var(--accent);
         font-weight: 700;
+        overflow-wrap: anywhere;
+        padding: 0 10px;
+        text-align: center;
       }
 
       .matching-options {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+      }
+
+      .matching-options .choice {
+        flex: 1 1 180px;
+        min-width: 0;
       }
 
       .feedback,
@@ -733,6 +743,15 @@
 
         .actions .mark {
           grid-column: span 3;
+        }
+
+        .matching-row {
+          grid-template-columns: 1fr;
+        }
+
+        .matching-label {
+          justify-content: flex-start;
+          text-align: left;
         }
 
         .list-tools {
@@ -1761,7 +1780,7 @@
 
       function parseMatchingAnswer(answer) {
         return String(answer)
-          .split("/")
+          .split(/\s+\/\s+/)
           .map((part) => part.trim())
           .filter(Boolean)
           .map((part) => {
