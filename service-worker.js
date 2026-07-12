@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v52";
+const CACHE_NAME = "keizai-quiz-v53";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const ASSETS = [
   "./questions.js",
   "./predicted_questions.js",
   "./study_extra_questions.js",
+  "./human_centered_final_guide.js",
   "./manifest.webmanifest",
   "./icon.svg",
   "./examples/question-template.csv",

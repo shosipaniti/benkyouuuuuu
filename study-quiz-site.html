@@ -572,6 +572,107 @@
         line-height: 1.55;
       }
 
+      .feedback-guide-toggle {
+        width: 100%;
+        min-height: 42px;
+        margin-top: 12px;
+        border: 1px solid #78a890;
+        background: #f7fbf8;
+        color: #1f5f46;
+        font-weight: 800;
+      }
+
+      .feedback-guide {
+        margin-top: 12px;
+        overflow: hidden;
+        border: 1px solid #c5ddd1;
+        border-radius: 8px;
+        background: #fff;
+        color: #22342b;
+      }
+
+      .feedback-guide-header {
+        padding: 12px 14px 0;
+      }
+
+      .feedback-guide-title {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .feedback-guide-lead {
+        margin: 8px 0 0;
+        font-size: 0.92rem;
+        line-height: 1.6;
+      }
+
+      .feedback-guide-tabs {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 12px 14px;
+        border-bottom: 1px solid #d8e7de;
+        scrollbar-width: thin;
+      }
+
+      .feedback-guide-tab {
+        flex: 0 0 auto;
+        min-height: 36px;
+        border: 1px solid #c5ddd1;
+        background: #f7fbf8;
+        color: #1f5f46;
+        font-size: 0.86rem;
+        font-weight: 700;
+      }
+
+      .feedback-guide-tab.is-active {
+        border-color: #246b4f;
+        background: #246b4f;
+        color: #fff;
+      }
+
+      .feedback-guide-panel {
+        padding: 14px;
+      }
+
+      .feedback-guide-source {
+        margin: 0;
+        color: #65766d;
+        font-size: 0.78rem;
+      }
+
+      .feedback-guide-section {
+        margin-top: 12px;
+        border-left: 3px solid #78a890;
+        padding-left: 10px;
+      }
+
+      .feedback-guide-section h4 {
+        margin: 0;
+        font-size: 0.92rem;
+      }
+
+      .feedback-guide-section ul {
+        margin: 6px 0 0;
+        padding-left: 1.15rem;
+      }
+
+      .feedback-guide-section li {
+        margin: 4px 0;
+        line-height: 1.5;
+      }
+
+      .feedback-guide-tip {
+        margin: 14px 0 0;
+        border: 1px solid #d7c78e;
+        border-radius: 6px;
+        background: #fffbed;
+        padding: 10px;
+        color: #6a5210;
+        font-size: 0.9rem;
+        line-height: 1.55;
+      }
+
       .answer {
         border-left: 5px solid var(--orange);
         background: #fff7f0;
@@ -945,6 +1046,7 @@
     <script src="questions.js"></script>
     <script src="predicted_questions.js"></script>
     <script src="study_extra_questions.js"></script>
+    <script src="human_centered_final_guide.js"></script>
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
@@ -983,6 +1085,8 @@
         mode: "quiz",
         index: 0,
         revealed: false,
+        humanCenteredGuideOpen: false,
+        humanCenteredGuideTab: 0,
         editingId: "",
         categoryEditing: false,
         deleteMode: false,
@@ -2395,6 +2499,87 @@
         el.dataStatus.title = validationIssues.join("\n");
       }
 
+      function humanCenteredGuide(question) {
+        const guide = window.HUMAN_CENTERED_FINAL_GUIDE;
+        if (question.category !== "human-centered-final" || !guide || !Array.isArray(guide.tabs) || !guide.tabs.length) return null;
+
+        const wrapper = document.createElement("div");
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "feedback-guide-toggle";
+        toggle.setAttribute("aria-expanded", String(state.humanCenteredGuideOpen));
+        toggle.textContent = state.humanCenteredGuideOpen ? "詳しく解説を閉じる" : "期末範囲を詳しく解説で見る";
+        toggle.addEventListener("click", () => {
+          state.humanCenteredGuideOpen = !state.humanCenteredGuideOpen;
+          render();
+        });
+        wrapper.append(toggle);
+
+        if (!state.humanCenteredGuideOpen) return wrapper;
+
+        const activeIndex = Math.min(Math.max(state.humanCenteredGuideTab, 0), guide.tabs.length - 1);
+        const activeTab = guide.tabs[activeIndex];
+        const guideBox = document.createElement("section");
+        guideBox.className = "feedback-guide";
+
+        const header = document.createElement("header");
+        header.className = "feedback-guide-header";
+        const heading = document.createElement("h3");
+        heading.className = "feedback-guide-title";
+        heading.textContent = guide.title;
+        const lead = document.createElement("p");
+        lead.className = "feedback-guide-lead";
+        lead.textContent = activeTab.lead;
+        header.append(heading, lead);
+
+        const tabs = document.createElement("div");
+        tabs.className = "feedback-guide-tabs";
+        tabs.setAttribute("role", "tablist");
+        guide.tabs.forEach((tab, index) => {
+          const tabButton = document.createElement("button");
+          tabButton.type = "button";
+          tabButton.className = `feedback-guide-tab ${index === activeIndex ? "is-active" : ""}`;
+          tabButton.setAttribute("role", "tab");
+          tabButton.setAttribute("aria-selected", String(index === activeIndex));
+          tabButton.textContent = tab.label;
+          tabButton.addEventListener("click", () => {
+            state.humanCenteredGuideTab = index;
+            render();
+          });
+          tabs.append(tabButton);
+        });
+
+        const panel = document.createElement("div");
+        panel.className = "feedback-guide-panel";
+        panel.setAttribute("role", "tabpanel");
+        const source = document.createElement("p");
+        source.className = "feedback-guide-source";
+        source.textContent = `講義資料: ${activeTab.sources}`;
+        panel.append(source);
+        activeTab.sections.forEach((section) => {
+          const sectionElement = document.createElement("section");
+          sectionElement.className = "feedback-guide-section";
+          const sectionHeading = document.createElement("h4");
+          sectionHeading.textContent = section.title;
+          const list = document.createElement("ul");
+          section.points.forEach((point) => {
+            const item = document.createElement("li");
+            item.textContent = point;
+            list.append(item);
+          });
+          sectionElement.append(sectionHeading, list);
+          panel.append(sectionElement);
+        });
+        const tip = document.createElement("p");
+        tip.className = "feedback-guide-tip";
+        tip.textContent = `記述対策: ${activeTab.examTip}`;
+        panel.append(tip);
+
+        guideBox.append(header, tabs, panel);
+        wrapper.append(guideBox);
+        return wrapper;
+      }
+
       function renderQuiz(items) {
         if (!items.length) {
           el.meta.replaceChildren();
@@ -2465,6 +2650,8 @@
           explanationValue.textContent = explanationText(question);
           explanationBox.append(explanationLabel, explanationValue);
           el.feedback.append(title, detail, answerBox, explanationBox);
+          const guide = humanCenteredGuide(question);
+          if (guide) el.feedback.append(guide);
         }
 
         el.answer.className = "answer hidden";
