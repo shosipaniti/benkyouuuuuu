@@ -641,6 +641,13 @@
         font-size: 0.78rem;
       }
 
+      .feedback-guide-related {
+        margin: 6px 0 0;
+        color: #1f5f46;
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
       .feedback-guide-section {
         margin-top: 12px;
         border-left: 3px solid #78a890;
@@ -1047,6 +1054,7 @@
     <script src="predicted_questions.js"></script>
     <script src="study_extra_questions.js"></script>
     <script src="human_centered_final_guide.js"></script>
+    <script src="audio_engineering_guides.js"></script>
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
@@ -1085,8 +1093,8 @@
         mode: "quiz",
         index: 0,
         revealed: false,
-        humanCenteredGuideOpen: false,
-        humanCenteredGuideTab: 0,
+        detailGuideOpen: false,
+        detailGuideTab: 0,
         editingId: "",
         categoryEditing: false,
         deleteMode: false,
@@ -2499,25 +2507,27 @@
         el.dataStatus.title = validationIssues.join("\n");
       }
 
-      function humanCenteredGuide(question) {
-        const guide = window.HUMAN_CENTERED_FINAL_GUIDE;
-        if (question.category !== "human-centered-final" || !guide || !Array.isArray(guide.tabs) || !guide.tabs.length) return null;
+      function detailedGuide(question) {
+        const guide = question.category === "human-centered-final"
+          ? window.HUMAN_CENTERED_FINAL_GUIDE
+          : (window.AUDIO_ENGINEERING_GUIDES || {})[question.category];
+        if (!guide || !Array.isArray(guide.tabs) || !guide.tabs.length) return null;
 
         const wrapper = document.createElement("div");
         const toggle = document.createElement("button");
         toggle.type = "button";
         toggle.className = "feedback-guide-toggle";
-        toggle.setAttribute("aria-expanded", String(state.humanCenteredGuideOpen));
-        toggle.textContent = state.humanCenteredGuideOpen ? "詳しく解説を閉じる" : "期末範囲を詳しく解説で見る";
+        toggle.setAttribute("aria-expanded", String(state.detailGuideOpen));
+        toggle.textContent = state.detailGuideOpen ? "詳しく解説を閉じる" : (guide.openLabel || "期末範囲を詳しく解説で見る");
         toggle.addEventListener("click", () => {
-          state.humanCenteredGuideOpen = !state.humanCenteredGuideOpen;
+          state.detailGuideOpen = !state.detailGuideOpen;
           render();
         });
         wrapper.append(toggle);
 
-        if (!state.humanCenteredGuideOpen) return wrapper;
+        if (!state.detailGuideOpen) return wrapper;
 
-        const activeIndex = Math.min(Math.max(state.humanCenteredGuideTab, 0), guide.tabs.length - 1);
+        const activeIndex = Math.min(Math.max(state.detailGuideTab, 0), guide.tabs.length - 1);
         const activeTab = guide.tabs[activeIndex];
         const guideBox = document.createElement("section");
         guideBox.className = "feedback-guide";
@@ -2543,7 +2553,7 @@
           tabButton.setAttribute("aria-selected", String(index === activeIndex));
           tabButton.textContent = tab.label;
           tabButton.addEventListener("click", () => {
-            state.humanCenteredGuideTab = index;
+            state.detailGuideTab = index;
             render();
           });
           tabs.append(tabButton);
@@ -2556,6 +2566,12 @@
         source.className = "feedback-guide-source";
         source.textContent = `講義資料: ${activeTab.sources}`;
         panel.append(source);
+        if (activeTab.related) {
+          const related = document.createElement("p");
+          related.className = "feedback-guide-related";
+          related.textContent = `対応問題: ${activeTab.related}`;
+          panel.append(related);
+        }
         activeTab.sections.forEach((section) => {
           const sectionElement = document.createElement("section");
           sectionElement.className = "feedback-guide-section";
@@ -2650,7 +2666,7 @@
           explanationValue.textContent = explanationText(question);
           explanationBox.append(explanationLabel, explanationValue);
           el.feedback.append(title, detail, answerBox, explanationBox);
-          const guide = humanCenteredGuide(question);
+          const guide = detailedGuide(question);
           if (guide) el.feedback.append(guide);
         }
 
