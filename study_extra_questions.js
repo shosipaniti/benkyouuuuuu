@@ -743,6 +743,58 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     images: []
   },
   {
+    id: "audio-final-2026-008",
+    source: "音声工学 期末過去問 2026",
+    category: "audio-final",
+    number: 8,
+    prompt: "音圧p(x,t)の時間偏微分∂p/∂tを、前進差分で近似する式として正しいものを選びなさい。",
+    answer: "{p(x,t+Δt)-p(x,t)}/Δt",
+    explanation: "前進差分は、現在時刻tの値と、1ステップ先t+Δtの値の差をΔtで割ります。時間を前へ進めた値を使うため『前進』差分です。",
+    slideReference: "音声工学 第08回スライド（差分法による時間領域シミュレーション）",
+    type: "single",
+    choices: ["{p(x,t+Δt)-p(x,t)}/Δt", "{p(x,t)-p(x,t-Δt)}/Δt", "{p(x,t+Δt)+p(x,t)}/Δt", "{p(x,t+Δt)-2p(x,t)+p(x,t-Δt)}/Δt"],
+    images: []
+  },
+  {
+    id: "audio-final-2026-009",
+    source: "音声工学 期末過去問 2026",
+    category: "audio-final",
+    number: 9,
+    prompt: "二次方程式ax²+bx+c=0の解x=(-b+√(b²-4ac))/(2a)について、桁落ちを避けるために変形した式として正しいものを選びなさい。",
+    answer: "-2c/(b+√(b²-4ac))",
+    explanation: "-bと√(b²-4ac)が近いと引き算で有効桁が失われます。分子・分母に共役な式を掛けて変形すると、引き算を避けた-2c/(b+√(b²-4ac))になります。",
+    slideReference: "音声工学 第09回スライド（桁落ちの回避）",
+    type: "single",
+    choices: ["-2c/(b+√(b²-4ac))", "2c/(b-√(b²-4ac))", "-2a/(b+√(b²-4ac))", "-b/(2a)+√(b²-4ac)"],
+    images: []
+  },
+  {
+    id: "audio-final-2026-010",
+    source: "音声工学 期末過去問 2026",
+    category: "audio-final",
+    number: 10,
+    prompt: "声が高くなると、なぜ音声スペクトルから声道の共鳴周波数（フォルマント）を確認しづらくなるか説明しなさい。",
+    answer: "声帯音源の倍音は基本周波数f0間隔の線スペクトルであり、声が高くなるとf0が上がって線スペクトルの間隔が広がる。そのため共鳴峰の周囲を十分に観測できず、フォルマントの位置を読み取りにくくなる。",
+    explanation: "記述では『高い声→f0上昇→倍音の間隔が広がる→共鳴の山を細かく読めない』という因果関係を書ければ大丈夫です。",
+    slideReference: "音声工学 第10回スライド（p.66：高い声のまとめ）",
+    type: "free",
+    choices: [],
+    images: []
+  },
+  {
+    id: "audio-final-2026-011",
+    source: "音声工学 期末過去問 2026",
+    category: "audio-final",
+    number: 11,
+    prompt: "これまでの講義で最も興味を持って学んだことを1つ挙げ、理由とともに記述しなさい。",
+    answer: "解答例: 声帯音源と声道のモデルを組み合わせて母音を生成できる点。発声器官の仕組みが、音響管・畳み込み・共鳴という工学的なモデルで説明でき、声の高さや母音の違いにもつながることが興味深い。",
+    explanation: "自由記述です。扱った内容を1つ具体的に挙げ、その仕組み・意外だった点・応用とのつながりを自分の言葉で書くとまとめやすくなります。",
+    slideReference: "音声工学 第01回〜第12回スライド",
+    type: "free",
+    choices: [],
+    images: []
+  },
+  {
     id: "audio-final-pred-08-001",
     source: "音声工学 期末予想 第08回",
     category: "audio-final-prediction",
