@@ -60,7 +60,8 @@
       <text x="1300" y="1195" font-size="38" font-weight="700">8. 等ラウドネス曲線</text>
       <text x="1325" y="1245">1) 1000 Hzの音圧レベルがphonと同じ値になる。</text>
       <text x="1325" y="1290">2) 求めたい周波数を横軸、同じphonの曲線をたどる。</text>
-      <text x="1325" y="1335">3) 縦軸の音圧レベルを読む。例: 1000 Hz・40 dB = 40 phon。</text>
+      <text x="1325" y="1335">3) 1000 Hz・40 dB = 40 phon。250 Hzは約50 dB。</text>
+      <text x="1325" y="1380">4) 125 Hzは約60 dB。10 dB差なら音圧は約3.16倍。</text>
     </g>
 
     <rect x="100" y="2210" width="2280" height="90" fill="none" stroke="#000000" stroke-width="2"/>
