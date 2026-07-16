@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2480" height="2480" viewBox="0 0 2480 2480">
+  <rect width="2480" height="2480" fill="#ffffff"/>
+  <g fill="#000000" font-family="Hiragino Sans, Noto Sans JP, sans-serif">
+    <text x="100" y="110" font-size="54" font-weight="700">音響工学基礎 期末 持込用まとめ: 計算例</text>
+    <text x="100" y="155" font-size="25">単位をSIへ直し、問題文で指定された音速・端補正・近似条件を最優先する。</text>
+    <line x1="100" y1="185" x2="2380" y2="185" stroke="#000000" stroke-width="3"/>
+    <line x1="1240" y1="230" x2="1240" y2="2240" stroke="#000000" stroke-width="2"/>
+
+    <g font-size="30">
+      <text x="100" y="280" font-size="38" font-weight="700">1. 音圧レベル: 80 dBから音圧pを出す</text>
+      <text x="125" y="330">1) 基準音圧: p0 = 2×10^-5 Pa。</text>
+      <text x="125" y="375">2) 逆算式: p = p0 × 10^(Lp/20)。</text>
+      <text x="125" y="420">3) Lp=80: 10^(80/20) = 10^4 = 10000。</text>
+      <text x="125" y="465">4) p = 2×10^-5 × 10000 = 2×10^-1 = 0.2 Pa。</text>
+      <text x="125" y="510">確認: 音圧10倍ごとに+20 dB。20/40/60/80 dBは10/100/1000/10000倍。</text>
+
+      <line x1="100" y1="550" x2="1180" y2="550" stroke="#000000" stroke-width="2"/>
+      <text x="100" y="600" font-size="38" font-weight="700">2. 球面波: 10 m・70 dBから20 mを出す</text>
+      <text x="125" y="650">1) 距離比: r2/r1 = 20/10 = 2。</text>
+      <text x="125" y="695">2) 球面波: L2 = L1 - 20log10(r2/r1)。</text>
+      <text x="125" y="740">3) L2 = 70 - 20log10(2) = 70 - 6.02 ≒ 64 dB。</text>
+      <text x="125" y="785">注意: 平面波なら距離減衰なしなので70 dBのまま。</text>
+
+      <line x1="100" y1="825" x2="1180" y2="825" stroke="#000000" stroke-width="2"/>
+      <text x="100" y="875" font-size="38" font-weight="700">3. dB合成: 60 dBと62 dBの無相関雑音</text>
+      <text x="125" y="925">1) 強さ比へ戻す: 10^(60/10)=1,000,000、10^(62/10)≈1,584,893。</text>
+      <text x="125" y="970">2) 加える: 1,000,000 + 1,584,893 = 2,584,893。</text>
+      <text x="125" y="1015">3) dBへ戻す: 10log10(2,584,893) ≒ 64.1 dB。</text>
+      <text x="125" y="1060">同じ60 dBが2つなら、10log10(2×10^6) = 63.0 dB（+3 dB）。</text>
+
+      <line x1="100" y1="1100" x2="1180" y2="1100" stroke="#000000" stroke-width="2"/>
+      <text x="100" y="1150" font-size="38" font-weight="700">4. 実効値</text>
+      <text x="125" y="1200">p_rms = p_peak/√2。最大値10なら10/1.414≒7.07、最大値8なら約5.66。</text>
+    </g>
+
+    <g font-size="30">
+      <text x="1300" y="280" font-size="38" font-weight="700">5. ヘルムホルツ: r=1 cm, l=2 cm, V=250 ml</text>
+      <text x="1325" y="330">1) SIへ: r=0.01 m、l=0.02 m、V=250×10^-6=2.5×10^-4 m³。</text>
+      <text x="1325" y="375">2) 口の面積: S = πr² = π×(0.01)² = 3.14×10^-4 m²。</text>
+      <text x="1325" y="420">3) 根号内: S/(lV) = (3.14×10^-4)/(0.02×2.5×10^-4) ≒62.8。</text>
+      <text x="1325" y="465">4) √62.8≒7.93、c/(2π)=340/(2π)≒54.1。</text>
+      <text x="1325" y="510">5) fr = 54.1×7.93≒429 Hz → 約430 Hz。</text>
+      <text x="1325" y="555">式: fr = c/(2π)√[S/(lV)]。cm・mlのまま代入しない。</text>
+
+      <line x1="1300" y1="595" x2="2380" y2="595" stroke="#000000" stroke-width="2"/>
+      <text x="1300" y="645" font-size="38" font-weight="700">6. 1オクターブ: 中心周波数4000 Hz</text>
+      <text x="1325" y="695">1) √2≒1.414を使う。</text>
+      <text x="1325" y="740">2) 下限 f1 = fm/√2 = 4000/1.414≒2828 Hz。</text>
+      <text x="1325" y="785">3) 上限 f2 = fm√2 = 4000×1.414≒5657 Hz。</text>
+      <text x="1325" y="830">4) 帯域幅Δf = f2-f1 = 5657-2828≒2829 Hz（約2828 Hz）。</text>
+
+      <line x1="1300" y1="870" x2="2380" y2="870" stroke="#000000" stroke-width="2"/>
+      <text x="1300" y="920" font-size="38" font-weight="700">7. 平均律: A=440 Hzから上のD</text>
+      <text x="1325" y="970">1) A→A#→B→C→C#→Dなので半音数n=5。</text>
+      <text x="1325" y="1015">2) f = 440×2^(5/12)。2^(5/12)≒1.335。</text>
+      <text x="1325" y="1060">3) f≒440×1.335=587.3 Hz → 約587 Hz。</text>
+      <text x="1325" y="1105">補足: Eならn=7で約659 Hz。1オクターブ上はn=12で2倍。</text>
+
+      <line x1="1300" y1="1145" x2="2380" y2="1145" stroke="#000000" stroke-width="2"/>
+      <text x="1300" y="1195" font-size="38" font-weight="700">8. 等ラウドネス曲線</text>
+      <text x="1325" y="1245">1) 1000 Hzの音圧レベルがphonと同じ値になる。</text>
+      <text x="1325" y="1290">2) 求めたい周波数を横軸、同じphonの曲線をたどる。</text>
+      <text x="1325" y="1335">3) 縦軸の音圧レベルを読む。例: 1000 Hz・40 dB = 40 phon。</text>
+    </g>
+
+    <rect x="100" y="2210" width="2280" height="90" fill="none" stroke="#000000" stroke-width="2"/>
+    <text x="125" y="2267" font-size="25">試験用メモ: 別の定義・端補正・音速・近似条件が指定されている場合は、必ず問題文の指定を優先する。</text>
+  </g>
+</svg>
