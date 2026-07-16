@@ -458,6 +458,22 @@
         margin-top: 20px;
       }
 
+      .choice-select {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid #c8d8e9;
+        border-left: 4px solid var(--blue);
+        border-radius: 8px;
+        background: #f5f8fb;
+        color: #243346;
+        padding: 0 12px;
+      }
+
+      .choice-select:focus-visible {
+        outline: 3px solid rgba(45, 95, 145, 0.24);
+        outline-offset: 2px;
+      }
+
       .choice {
         min-height: 46px;
         border: 1px solid #c8d8e9;
@@ -499,17 +515,6 @@
         overflow-wrap: anywhere;
         padding: 0 10px;
         text-align: center;
-      }
-
-      .matching-options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-
-      .matching-options .choice {
-        flex: 1 1 180px;
-        min-width: 0;
       }
 
       .feedback,
@@ -2840,7 +2845,26 @@
       function renderInteraction(question, response) {
         el.choices.replaceChildren();
 
-        if (question.type === "single" || question.type === "multiple") {
+        if (question.type === "single") {
+          const select = document.createElement("select");
+          select.className = "choice-select";
+          select.setAttribute("aria-label", "回答を選ぶ");
+          select.append(option("", "答えを選ぶ"));
+          randomizedChoices(question, response).forEach((choice) => {
+            select.append(option(choice, choice));
+          });
+          select.value = response.selected[0] || "";
+          select.addEventListener("change", () => {
+            response.checked = false;
+            state.revealed = false;
+            response.selected = select.value ? [select.value] : [];
+            render();
+          });
+          el.choices.appendChild(select);
+          return;
+        }
+
+        if (question.type === "multiple") {
           randomizedChoices(question, response).forEach((choice) => {
             const button = document.createElement("button");
             button.type = "button";
@@ -2869,21 +2893,21 @@
             const label = document.createElement("span");
             label.className = "matching-label";
             label.textContent = pair.label;
-            const options = document.createElement("div");
-            options.className = "matching-options";
+            const select = document.createElement("select");
+            select.className = "choice-select";
+            select.setAttribute("aria-label", `${pair.label}の回答を選ぶ`);
+            select.append(option("", "答えを選ぶ"));
             choices.forEach((choice) => {
-              const button = document.createElement("button");
-              button.type = "button";
-              button.className = `choice ${response.matching[pair.label] === choice.label ? "is-selected" : ""}`;
-              button.textContent = choice.label;
-              button.addEventListener("click", () => {
-                response.checked = false;
-                response.matching[pair.label] = choice.label;
-                render();
-              });
-              options.appendChild(button);
+              select.append(option(choice.label, choice.label));
             });
-            row.append(label, options);
+            select.value = response.matching[pair.label] || "";
+            select.addEventListener("change", () => {
+              response.checked = false;
+              state.revealed = false;
+              response.matching[pair.label] = select.value;
+              render();
+            });
+            row.append(label, select);
             el.choices.appendChild(row);
           });
           return;
