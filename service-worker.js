@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v61";
+const CACHE_NAME = "keizai-quiz-v62";
 const ASSETS = [
   "./",
   "./index.html",
@@ -35,7 +35,9 @@ const ASSETS = [
   "./assets/acoustics-final-cheatsheet-concepts.svg",
   "./assets/acoustics-final-cheatsheet-calculations.svg",
   "./assets/acoustics-final-cheatsheet-concepts.png",
-  "./assets/acoustics-final-cheatsheet-calculations.png"
+  "./assets/acoustics-final-cheatsheet-calculations.png",
+  "./assets/acoustics-final-cheatsheet-concepts.pdf",
+  "./assets/acoustics-final-cheatsheet-calculations.pdf"
 ];
 
 self.addEventListener("install", (event) => {
