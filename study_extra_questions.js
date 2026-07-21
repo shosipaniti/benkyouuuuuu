@@ -5031,5 +5031,113 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     type: "single",
     choices: ["資産価格がファンダメンタルズや理論値を超えて高騰している状態", "物価が一時的に下がる状態", "国債の利回りが0%になる状態", "全ての企業が配当を出す状態"],
     images: []
+  },
+  {
+    id: "knowledge-final-quiz5-001",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 21,
+    prompt: "ニューラルネットワークの中間層を多層にした手法の総称を何というか。",
+    answer: "深層学習",
+    explanation: "複数の中間層を持つニューラルネットワークで、特徴表現も含めて学習する手法の総称です。",
+    type: "single",
+    choices: ["深層学習", "教師あり学習", "パーセプトロン", "教師なし学習"],
+    images: []
+  },
+  {
+    id: "knowledge-final-quiz5-002",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 22,
+    prompt: "情報量を表す単位を、小さい順に並べなさい。",
+    answer: "1 = KB（キロバイト） / 2 = MB（メガバイト） / 3 = GB（ギガバイト） / 4 = TB（テラバイト）",
+    explanation: "接頭辞は kilo、mega、giga、tera の順に大きくなるため、KB→MB→GB→TBです。",
+    type: "matching",
+    choices: ["a: KB（キロバイト）", "b: MB（メガバイト）", "c: GB（ギガバイト）", "d: TB（テラバイト）"],
+    images: []
+  },
+  {
+    id: "knowledge-final-quiz5-003",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 23,
+    prompt: "次のパーセプトロンで、入力(x₁,x₂)=(1,0)のときの出力yを求めなさい。図のとおり、加重和がしきい値θより大きいときだけ1を出力する。",
+    answer: "1",
+    explanation: "加重和は-2+3×1+4×0=1です。しきい値0より大きいため、出力は1です。",
+    type: "single",
+    choices: ["0", "1"],
+    images: ["assets/ref-knowledge-quiz5-perceptron.png"]
+  },
+  {
+    id: "knowledge-final-quiz5-004",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 24,
+    prompt: "次の多層パーセプトロンで、入力(x₁,x₂)=(1,0)のときの最終出力zを求めなさい。",
+    answer: "1",
+    explanation: "第1層はy₁=0、y₂=1です。出力層の加重和は-1×0+4×1=4で、しきい値0より大きいためz=1です。",
+    type: "single",
+    choices: ["0", "1"],
+    images: ["assets/ref-knowledge-quiz5-multilayer-perceptron.png"]
+  },
+  {
+    id: "knowledge-final-quiz5-005",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 25,
+    prompt: "ニューラルネットワークがブラックボックス化しやすい主な理由として最も適切なものを選びなさい。",
+    answer: "多数の層・ニューロン・重みが複雑に組み合わさって計算されるため",
+    explanation: "多層の重みと非線形変換により判断の根拠が分散するため、人間が一つひとつを追跡しにくくなります。",
+    type: "single",
+    choices: ["学習データが不足するため", "教師信号を用いるため", "活性化関数を用いないため", "学習率が固定されているため", "多数の層・ニューロン・重みが複雑に組み合わさって計算されるため", "GPUを利用するため"],
+    images: []
+  },
+  {
+    id: "knowledge-final-quiz5-006",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 26,
+    prompt: "ニューラルネットワークのブラックボックス化によって生じる問題として最も適切なものを選びなさい。",
+    answer: "判断理由を説明することが難しくなる",
+    explanation: "高い精度が得られても、どの入力要因が判断につながったかを説明しにくいことが問題になります。",
+    type: "single",
+    choices: ["過学習になりやすくなる", "モデルサイズが小さくなる", "推論速度が遅くなる", "判断理由を説明することが難しくなる", "学習データが漏えいする", "モデルの学習ができなくなる"],
+    images: []
+  },
+  {
+    id: "knowledge-final-quiz5-007",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 27,
+    prompt: "ニューラルネットワークのブラックボックス化について最も適切な説明を選びなさい。",
+    answer: "ブラックボックス化したモデルでも高い予測性能を示すことがある",
+    explanation: "ブラックボックス化は精度の低さを意味しません。高性能でも判断根拠を説明しにくいことがあります。",
+    type: "single",
+    choices: ["ブラックボックス化したモデルでも高い予測性能を示すことがある", "ブラックボックス化は教師なし学習で発生する", "ブラックボックス化したモデルは精度が低いことを意味する", "ブラックボックス化とは、モデルの内部処理が暗号化されていることを意味する", "ブラックボックス化はニューラルネットワークでは発生しない", "ブラックボックス化はデータ数で決まる"],
+    images: []
+  },
+  {
+    id: "knowledge-final-quiz5-008",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 28,
+    prompt: "ニューラルネットワークのブラックボックス化への対策として最も適切なものを選びなさい。",
+    answer: "説明可能AI（Explainable AI：XAI）",
+    explanation: "XAIは、モデルの予測根拠や重要な入力要因を人に説明できるようにするための技術・考え方です。",
+    type: "single",
+    choices: ["転移学習", "強化学習", "データ圧縮", "教師なし学習", "説明可能AI（Explainable AI：XAI）", "次元削減"],
+    images: []
+  },
+  {
+    id: "knowledge-final-quiz5-009",
+    source: "知識工学 小テスト5",
+    category: "knowledge-final-quiz",
+    number: 29,
+    prompt: "ニューラルネットワークのブラックボックス化が特に問題となる場面として最も適切なものを選びなさい。",
+    answer: "AIによる医療診断や融資審査など、判断理由の説明が求められる場合",
+    explanation: "医療・金融などでは結果だけでなく、なぜその判断になったかの説明や検証が強く求められます。",
+    type: "single",
+    choices: ["AIによる医療診断や融資審査など、判断理由の説明が求められる場合", "データを並べ替える場合", "ファイルを圧縮する場合", "プログラムをコンパイルする場合", "数値計算を行う場合", "AIがゲームのスコアを予測する場合"],
+    images: []
   }
 ];
