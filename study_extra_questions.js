@@ -3068,7 +3068,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     explanation: "Rの添字は行、列の順なので、第2行第1列の値2を取り出します。",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-final-r-matrices.png"]
   },
   {
     id: "knowledge-final-2020-019",
@@ -3080,7 +3080,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     explanation: "第2列は3,2,1,2,0,1なので、その最大値は3です。",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-final-r-matrices.png"]
   },
   {
     id: "knowledge-final-2020-020",
@@ -3092,7 +3092,7 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     explanation: "Bの第1行は1,0,2なので、平均は(1+0+2)÷3=1です。",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-final-r-matrices.png"]
   },
   {
     id: "knowledge-final-2020-021",
@@ -3104,31 +3104,31 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     explanation: "第1列が1以上の行は2〜5行目で、その第2列は2,1,2,0です。最大値は2です。",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-final-r-matrices.png"]
   },
   {
     id: "knowledge-final-2020-022",
     source: "知識工学 期末過去問 2020",
     category: "knowledge-final",
     number: 22,
-    prompt: "問題画像のXを冒頭で定義された行列Aとみなす。Rでnum=c(1,2,3); max(A[num,3])の実行結果を答えなさい。",
+    prompt: "参照画像で定義された行列Aを使う。問題文のXはAの誤記として、Rでnum=c(1,2,3); max(A[num,3])の実行結果を答えなさい。",
     answer: "1",
     explanation: "1〜3行目の第3列は0,0,1なので、最大値は1です。画像中のXは未定義のためAの誤記として扱います。",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-final-r-matrices.png"]
   },
   {
     id: "knowledge-final-2020-023",
     source: "知識工学 期末過去問 2020",
     category: "knowledge-final",
     number: 23,
-    prompt: "問題画像のXを冒頭で定義された行列Aとみなす。Rでnum=c(2,4,6); sum(A[-num,4])の実行結果を答えなさい。",
+    prompt: "参照画像で定義された行列Aを使う。問題文のXはAの誤記として、Rでnum=c(2,4,6); sum(A[-num,4])の実行結果を答えなさい。",
     answer: "2",
     explanation: "2,4,6行目を除くと1,3,5行目が残り、第4列の合計は1+1+0=2です。画像中のXはAの誤記として扱います。",
     type: "text",
     choices: [],
-    images: []
+    images: ["assets/ref-knowledge-final-r-matrices.png"]
   },
   {
     id: "knowledge-final-2020-024",

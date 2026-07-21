@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v63";
+const CACHE_NAME = "keizai-quiz-v64";
 const ASSETS = [
   "./",
   "./index.html",
@@ -26,6 +26,7 @@ const ASSETS = [
   "./assets/ref-knowledge-decision-tree.svg",
   "./assets/ref-knowledge-electricity-tree.svg",
   "./assets/ref-knowledge-neural.svg",
+  "./assets/ref-knowledge-final-r-matrices.png",
   "./assets/ref-knowledge-quiz-expert-system.png",
   "./assets/ref-knowledge-quiz-tree.png",
   "./assets/ref-knowledge-quiz5-perceptron.png",
