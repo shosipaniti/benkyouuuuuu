@@ -3179,6 +3179,45 @@ window.STUDY_EXTRA_QUESTION_DATA = [
     images: []
   },
   {
+    id: "knowledge-final-2026-028",
+    source: "知識工学 期末 試験追加 2026",
+    category: "knowledge-final",
+    number: 28,
+    prompt: "パーセプトロンの出力を、z = -0.5 + x₁ + x₂ が 0 より大きいとき ŷ=1、それ以外は ŷ=0 とする。データ (x₁, x₂, 実際のy) が (0,0,0)、(1,0,1)、(0,1,0)、(1,1,1) の4件のとき、予測値と実際のyを比べた正解率を選びなさい。",
+    answer: "75%",
+    explanation: "予測値は順に0, 1, 1, 1で、実際のyが0, 1, 0, 1なので3件が一致します。正解率は一致数÷全件数=3÷4=75%です。講義では重み付き和を閾値と比較して0か1を出力します。",
+    slideReference: "知識工学 第9回・第10回（パーセプトロンの重み付き和と閾値判定）、第12回（予測精度・正解率）",
+    type: "single",
+    choices: ["50%", "75%", "80%", "100%"],
+    images: []
+  },
+  {
+    id: "knowledge-final-2026-029",
+    source: "知識工学 期末 試験追加 2026",
+    category: "knowledge-final",
+    number: 29,
+    prompt: "分類性能を表す指標を、その意味と対応させなさい。",
+    answer: "正解率 = 全予測のうち正しく分類できた割合 / 適合率 = 陽性と予測したもののうち実際に陽性だった割合 / 再現率 = 実際に陽性のもののうち陽性と予測できた割合 / F値 = 適合率と再現率の調和平均",
+    explanation: "正解率=(TP+TN)/(TP+TN+FP+FN)、適合率=TP/(TP+FP)、再現率=TP/(TP+FN)です。F値は適合率Pと再現率Rの片方だけが高くても低くなるよう、F1=2PR/(P+R)で両者をまとめます。",
+    slideReference: "知識工学 期末 試験追加 2026（分類性能評価）",
+    type: "matching",
+    choices: ["a: 全予測のうち正しく分類できた割合", "b: 陽性と予測したもののうち実際に陽性だった割合", "c: 実際に陽性のもののうち陽性と予測できた割合", "d: 適合率と再現率の調和平均", "e: 実際に陰性のもののうち陰性と予測できた割合"],
+    images: []
+  },
+  {
+    id: "knowledge-final-2026-030",
+    source: "知識工学 期末 試験追加 2026",
+    category: "knowledge-final",
+    number: 30,
+    prompt: "ある二値分類器の結果が、真陽性TP=30、偽陽性FP=10、偽陰性FN=20、真陰性TN=40だった。適合率・再現率・F値を対応させなさい。",
+    answer: "適合率 = 75% / 再現率 = 60% / F値 = 約66.7%",
+    explanation: "適合率はTP/(TP+FP)=30/40=75%、再現率はTP/(TP+FN)=30/50=60%です。F値は2×0.75×0.60/(0.75+0.60)=約0.667、つまり約66.7%です。",
+    slideReference: "知識工学 期末 試験追加 2026（分類性能評価）",
+    type: "matching",
+    choices: ["a: 75%", "b: 60%", "c: 約66.7%", "d: 50%", "e: 80%", "f: 約70.6%"],
+    images: []
+  },
+  {
     id: "knowledge-final-quiz-001",
     source: "知識工学 小テスト3",
     category: "knowledge-final-quiz",
