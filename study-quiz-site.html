@@ -131,6 +131,26 @@
         padding: 20px clamp(14px, 4vw, 38px) 42px;
       }
 
+      .semester-tabs {
+        display: flex;
+        gap: 6px;
+        padding: 14px clamp(14px, 4vw, 38px) 0;
+      }
+
+      .semester-tabs button {
+        min-width: 100px;
+        border-radius: 6px;
+      }
+
+      .semester-tabs button:focus-visible {
+        outline: 2px solid var(--blue);
+        outline-offset: 3px;
+      }
+
+      main > section {
+        min-width: 0;
+      }
+
       aside,
       .quiz-card,
       .list-card {
@@ -907,7 +927,12 @@
       </div>
     </header>
 
-    <main>
+    <div class="semester-tabs" role="tablist" aria-label="学期">
+      <button id="secondSemesterTab" type="button" role="tab" aria-selected="true" aria-controls="semesterPanel" class="is-active">後期</button>
+      <button id="firstSemesterTab" type="button" role="tab" aria-selected="false" aria-controls="semesterPanel" tabindex="-1">前期</button>
+    </div>
+
+    <main id="semesterPanel" role="tabpanel" aria-labelledby="secondSemesterTab">
       <aside aria-label="詳細フィルター">
         <details id="filterDetails" class="detail-filters">
           <summary>詳細フィルタ</summary>
@@ -1063,6 +1088,7 @@
     <script src="questions.js"></script>
     <script src="predicted_questions.js"></script>
     <script src="study_extra_questions.js"></script>
+    <script src="database_questions.js"></script>
     <script src="human_centered_final_guide.js"></script>
     <script src="economics_final_guide.js"></script>
     <script src="audio_engineering_guides.js"></script>
@@ -1079,7 +1105,12 @@
       const deletedQuestionsStorageKey = "study-quiz-standalone-deleted-v1";
       const activeSetStorageKey = "study-quiz-active-set-v1";
       const archivedSetsStorageKey = "study-quiz-archived-sets-v1";
+      const semesterStorageKey = "study-quiz-semester-v1";
+      const semesterSetsStorageKey = "study-quiz-semester-active-sets-v1";
       const defaultCategoryOrder = ["quiz", "prediction", "economics-final", "economics-final-prediction", "audio", "audio-prediction", "audio-final", "audio-final-prediction", "acoustics-final", "acoustics-final-prediction", "human-centered-final", "knowledge", "knowledge-review", "knowledge-quiz", "knowledge-prediction", "knowledge-final", "knowledge-final-quiz", "machine-learning", "machine-learning-prediction", "machine-learning-final"];
+      defaultCategoryLabels["database-quiz"] = "データベース 小テスト";
+      defaultCategoryOrder.unshift("database-quiz");
+      const defaultCategorySemesters = Object.fromEntries(defaultCategoryOrder.map((category) => [category, category === "database-quiz" ? "second" : "first"]));
       let categoryLabels = loadCategoryLabels();
       let categoryOrder = loadCategoryOrder();
       let archivedSets = new Set(loadArchivedSets());
@@ -1087,14 +1118,18 @@
       const quizQuestions = normalize(window.QUESTION_DATA || [], "quiz");
       const predictedQuestions = normalize(window.PREDICTED_QUESTION_DATA || [], "prediction");
       const extraQuestions = normalize(window.STUDY_EXTRA_QUESTION_DATA || [], "quiz");
+      const databaseQuestions = normalize(window.DATABASE_QUESTION_DATA || [], "database-quiz");
       let importedQuestions = loadImportedQuestions();
       let questionEdits = loadQuestionEdits();
       let deletedQuestionIds = new Set(loadDeletedQuestionIds());
-      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...importedQuestions]));
+      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...importedQuestions]));
       let validationIssues = validate(allQuestions);
+      let semesterActiveSets = loadSemesterActiveSets();
+      const initialSemester = loadSemester();
 
       const state = {
-        activeSet: initialActiveSet(),
+        semester: initialSemester,
+        activeSet: initialActiveSet(initialSemester),
         setChooserOpen: false,
         category: "all",
         source: "all",
@@ -1120,6 +1155,9 @@
       state.setChooserOpen = !state.activeSet;
 
       const el = {
+        firstSemesterTab: document.getElementById("firstSemesterTab"),
+        secondSemesterTab: document.getElementById("secondSemesterTab"),
+        semesterPanel: document.getElementById("semesterPanel"),
         totalCount: document.getElementById("totalCount"),
         knownCount: document.getElementById("knownCount"),
         reviewCount: document.getElementById("reviewCount"),
@@ -1313,11 +1351,42 @@
       }
 
       function saveActiveSet() {
+        semesterActiveSets[state.semester] = state.activeSet;
+        localStorage.setItem(semesterSetsStorageKey, JSON.stringify(semesterActiveSets));
         if (state.activeSet) {
           localStorage.setItem(activeSetStorageKey, state.activeSet);
         } else {
           localStorage.removeItem(activeSetStorageKey);
         }
+      }
+
+      function categorySemester(category) {
+        if (defaultCategorySemesters[category]) return defaultCategorySemesters[category];
+        const question = importedQuestions
+          .find((item) => item.category === category && ["first", "second"].includes(item.semester));
+        return question ? question.semester : "first";
+      }
+
+      function loadSemester() {
+        try {
+          return localStorage.getItem(semesterStorageKey) === "first" ? "first" : "second";
+        } catch {
+          return "second";
+        }
+      }
+
+      function loadSemesterActiveSets() {
+        let saved = {};
+        try {
+          const value = JSON.parse(localStorage.getItem(semesterSetsStorageKey));
+          if (value && typeof value === "object" && !Array.isArray(value)) saved = value;
+        } catch {}
+        const legacySet = loadActiveSet();
+        if (legacySet && categoryHasQuestions(legacySet)) {
+          const semester = categorySemester(legacySet);
+          if (!(semester in saved)) saved[semester] = legacySet;
+        }
+        return saved;
       }
 
       function visibleQuestions(questions) {
@@ -1332,9 +1401,9 @@
         return allQuestions.filter((question) => question.category === category);
       }
 
-      function initialActiveSet() {
-        const saved = loadActiveSet();
-        if (saved && !archivedSets.has(saved) && categoryHasQuestions(saved)) return saved;
+      function initialActiveSet(semester) {
+        const saved = semesterActiveSets[semester];
+        if (saved && categorySemester(saved) === semester && !archivedSets.has(saved) && categoryHasQuestions(saved)) return saved;
         return "";
       }
 
@@ -1377,7 +1446,7 @@
       }
 
       function refreshQuestionData() {
-        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...importedQuestions]));
+        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...importedQuestions]));
         validationIssues = validate(allQuestions);
         ensureActiveSet();
         applyCategoryOrderToQuestions();
@@ -1819,9 +1888,8 @@
       }
 
       function categoryForFileKind(fileKind, selectedCategory) {
-        if (fileKind === "quiz") return "quiz";
-        if (fileKind === "slides") return "prediction";
-        return selectedCategory;
+        if (selectedCategory && categorySemester(selectedCategory) === state.semester) return selectedCategory;
+        return state.semester === "second" ? "database-quiz" : (fileKind === "slides" ? "prediction" : "quiz");
       }
 
       function parseQuestionFile(text, fileName, category, fileKind) {
@@ -1864,7 +1932,7 @@
 
       function addImportedQuestions(questions, label, fileKind = el.fileKind.value) {
         const category = categoryForFileKind(fileKind, el.importCategory.value);
-        const normalized = normalize(questions, category)
+        const normalized = normalize(questions.map((question) => ({ ...question, category, semester: state.semester })), category)
           .filter((question) => String(question.prompt).trim() && String(question.answer).trim());
 
         if (!normalized.length) {
@@ -2126,7 +2194,8 @@
           .filter((question) => {
             const status = state.progress[question.id] || "new";
             const text = `${question.prompt} ${question.answer} ${question.source}`.toLowerCase();
-            return question.category === state.activeSet
+            return categorySemester(question.category) === state.semester
+              && question.category === state.activeSet
               && (state.category === "all" || question.category === state.category)
               && (state.source === "all" || question.source === state.source)
               && (state.type === "all" || question.type === state.type)
@@ -2152,13 +2221,21 @@
       }
 
       function categoryEntries() {
-        const values = orderedCategories(unique(allQuestions.map((question) => question.category)));
+        const values = orderedCategories(unique(allQuestions.map((question) => question.category)))
+          .filter((category) => categorySemester(category) === state.semester);
         return values.map((category) => [category, categoryLabels[category] || category]);
       }
 
       function importCategoryEntries() {
-        const values = orderedCategories(unique([...defaultCategoryOrder, ...allQuestions.map((question) => question.category)]));
+        const values = orderedCategories(unique([...defaultCategoryOrder, ...allQuestions.map((question) => question.category)]))
+          .filter((category) => categorySemester(category) === state.semester);
         return values.map((category) => [category, categoryLabels[category] || category]);
+      }
+
+      function setSemesterCategoryOrder(categories) {
+        const remaining = orderedCategories(unique([...categoryOrder, ...defaultCategoryOrder, ...allQuestions.map((question) => question.category)]))
+          .filter((category) => !categories.includes(category));
+        categoryOrder = [...categories, ...remaining];
       }
 
       function orderedCategories(values) {
@@ -2195,7 +2272,7 @@
       }
 
       function ensureActiveSet() {
-        if (state.activeSet && !archivedSets.has(state.activeSet) && categoryHasQuestions(state.activeSet)) return;
+        if (state.activeSet && categorySemester(state.activeSet) === state.semester && !archivedSets.has(state.activeSet) && categoryHasQuestions(state.activeSet)) return;
         state.activeSet = "";
         saveActiveSet();
         state.setChooserOpen = true;
@@ -2203,7 +2280,7 @@
       }
 
       function selectLearningSet(category, restore = false) {
-        if (!categoryHasQuestions(category)) return;
+        if (!categoryHasQuestions(category) || categorySemester(category) !== state.semester) return;
         if (restore) {
           archivedSets.delete(category);
           saveArchivedSets();
@@ -2219,6 +2296,41 @@
         state.selectedDeleteCategories.clear();
         resetChoiceOrder(filtered()[state.index]);
         render();
+      }
+
+      function selectSemester(semester) {
+        if (state.semester === semester) return;
+        saveActiveSet();
+        const wasChoosing = state.setChooserOpen;
+        state.semester = semester;
+        localStorage.setItem(semesterStorageKey, semester);
+        state.activeSet = initialActiveSet(semester);
+        saveActiveSet();
+        resetDetailFilters();
+        state.setChooserOpen = wasChoosing || !state.activeSet;
+        state.index = 0;
+        state.revealed = false;
+        state.detailGuideOpen = false;
+        state.editingId = "";
+        state.categoryEditing = false;
+        state.deleteMode = false;
+        state.selectedDeleteIds.clear();
+        state.selectedDeleteCategories.clear();
+        el.filterDetails.open = false;
+        el.importCategory.value = "";
+        el.importStatus.textContent = "";
+        resetChoiceOrder(filtered()[state.index]);
+        render();
+      }
+
+      function renderSemesterTabs() {
+        [ ["second", el.secondSemesterTab], ["first", el.firstSemesterTab] ].forEach(([semester, tab]) => {
+          const selected = state.semester === semester;
+          tab.classList.toggle("is-active", selected);
+          tab.setAttribute("aria-selected", String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          if (selected) el.semesterPanel.setAttribute("aria-labelledby", tab.id);
+        });
       }
 
       function archiveLearningSet(category) {
@@ -2314,9 +2426,10 @@
           ...(state.activeSet ? [[state.activeSet, categoryLabels[state.activeSet] || state.activeSet]] : [])
         ]);
 
-        setOptions(el.importCategory, el.importCategory.value || "quiz", [
-          ...importCategoryEntries()
-        ]);
+        const importEntries = importCategoryEntries();
+        const importCategory = importEntries.some(([category]) => category === el.importCategory.value)
+          ? el.importCategory.value : (state.activeSet || importEntries[0]?.[0]);
+        setOptions(el.importCategory, importCategory, importEntries);
 
         setOptions(el.sourceFilter, state.source, [
           ["all", "すべて"],
@@ -2420,7 +2533,7 @@
         const target = index + delta;
         if (index < 0 || target < 0 || target >= categories.length) return;
         [categories[index], categories[target]] = [categories[target], categories[index]];
-        categoryOrder = categories;
+        setSemesterCategoryOrder(categories);
         saveCategoryOrder();
         applyCategoryOrderToQuestions();
         el.categoryStatus.textContent = "表示順を変更しました。";
@@ -2436,7 +2549,7 @@
         if (index < 0 || target < 0) return;
         categories.splice(index, 1);
         categories.splice(target, 0, category);
-        categoryOrder = categories;
+        setSemesterCategoryOrder(categories);
         saveCategoryOrder();
         applyCategoryOrderToQuestions();
         el.categoryStatus.textContent = "表示順を変更しました。";
@@ -2508,9 +2621,10 @@
       }
 
       function renderStatus(items) {
-        const known = allQuestions.filter((question) => state.progress[question.id] === "known").length;
-        const review = allQuestions.filter((question) => state.progress[question.id] === "review").length;
-        el.totalCount.textContent = `${items.length}/${allQuestions.length}問`;
+        const semesterQuestions = allQuestions.filter((question) => categorySemester(question.category) === state.semester);
+        const known = semesterQuestions.filter((question) => state.progress[question.id] === "known").length;
+        const review = semesterQuestions.filter((question) => state.progress[question.id] === "review").length;
+        el.totalCount.textContent = `${items.length}/${semesterQuestions.length}問`;
         el.knownCount.textContent = `${known}習得`;
         el.reviewCount.textContent = `${review}復習`;
 
@@ -3086,6 +3200,7 @@
 
       function render() {
         const items = filtered();
+        renderSemesterTabs();
         renderFilters();
         renderSetChooser();
         renderActiveSetBar(items);
@@ -3116,8 +3231,10 @@
 
       el.searchInput.addEventListener("input", (event) => updateFilter("query", event.target.value));
       el.fileKind.addEventListener("change", () => {
-        if (el.fileKind.value === "quiz") el.importCategory.value = "quiz";
-        if (el.fileKind.value === "slides") el.importCategory.value = "prediction";
+        if (state.semester === "first") {
+          if (el.fileKind.value === "quiz") el.importCategory.value = "quiz";
+          if (el.fileKind.value === "slides") el.importCategory.value = "prediction";
+        }
         el.importStatus.textContent = el.fileKind.value === "slides"
           ? "授業スライドは予想問題として追加されます。"
           : "";
@@ -3191,7 +3308,7 @@
       el.saveCategoryNamesButton.addEventListener("click", () => {
         categoryLabels = { ...categoryLabels };
         captureCategoryEditorLabels();
-        categoryOrder = [...el.categoryEditorList.querySelectorAll("[data-category-row]")].map((row) => row.dataset.categoryRow);
+        setSemesterCategoryOrder([...el.categoryEditorList.querySelectorAll("[data-category-row]")].map((row) => row.dataset.categoryRow));
         saveCategoryLabels();
         saveCategoryOrder();
         applyCategoryOrderToQuestions();
@@ -3199,8 +3316,10 @@
         render();
       });
       el.resetCategoryNamesButton.addEventListener("click", () => {
-        categoryLabels = { ...defaultCategoryLabels };
-        categoryOrder = [...defaultCategoryOrder];
+        importCategoryEntries().forEach(([category]) => {
+          categoryLabels[category] = defaultCategoryLabels[category] || category;
+        });
+        setSemesterCategoryOrder(defaultCategoryOrder.filter((category) => categorySemester(category) === state.semester));
         saveCategoryLabels();
         saveCategoryOrder();
         applyCategoryOrderToQuestions();
@@ -3227,6 +3346,18 @@
         render();
       });
       el.archiveActiveSetButton.addEventListener("click", () => archiveLearningSet(state.activeSet));
+      el.secondSemesterTab.addEventListener("click", () => selectSemester("second"));
+      el.firstSemesterTab.addEventListener("click", () => selectSemester("first"));
+      [el.secondSemesterTab, el.firstSemesterTab].forEach((tab) => {
+        tab.addEventListener("keydown", (event) => {
+          if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+          event.preventDefault();
+          event.stopPropagation();
+          const semester = event.key === "Home" ? "second" : event.key === "End" ? "first" : (state.semester === "second" ? "first" : "second");
+          selectSemester(semester);
+          (semester === "second" ? el.secondSemesterTab : el.firstSemesterTab).focus();
+        });
+      });
       el.quizMode.addEventListener("click", () => updateFilter("mode", "quiz"));
       el.listMode.addEventListener("click", () => updateFilter("mode", "list"));
       el.shuffleButton.addEventListener("click", () => {
@@ -3247,7 +3378,7 @@
       el.reviewButton.addEventListener("click", () => mark("review"));
 
       document.addEventListener("keydown", (event) => {
-        if (state.mode !== "quiz") return;
+        if (state.mode !== "quiz" || state.setChooserOpen || !state.activeSet) return;
         if (event.target.matches("input, textarea, select, [contenteditable='true']")) return;
         if (event.key === "ArrowLeft") {
           event.preventDefault();

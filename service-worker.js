@@ -1,4 +1,4 @@
-const CACHE_NAME = "keizai-quiz-v66";
+const CACHE_NAME = "keizai-quiz-v67";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,11 @@ const ASSETS = [
   "./questions.js",
   "./predicted_questions.js",
   "./study_extra_questions.js",
+  "./database_questions.js",
+  "./assets/database-quiz1-table1.png",
+  "./assets/database-quiz1-table2.png",
+  "./assets/database-quiz1-table3.png",
+  "./assets/database-quiz1-table4.png",
   "./human_centered_final_guide.js",
   "./economics_final_guide.js",
   "./audio_engineering_guides.js",
@@ -35,7 +40,6 @@ const ASSETS = [
   "./assets/ref-ml-gradient-hessian.svg",
   "./assets/ref-ml-normal-distribution.svg",
   "./assets/ref-regression.svg",
-  "./assets/acoustics-final-cheatsheet.png",
   "./assets/acoustics-final-cheatsheet-concepts.svg",
   "./assets/acoustics-final-cheatsheet-calculations.svg",
   "./assets/acoustics-final-cheatsheet-concepts.png",
