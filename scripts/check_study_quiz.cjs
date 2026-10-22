@@ -13,6 +13,26 @@ async function startSet(page, name) {
     .getByRole("button", { name: "このセットで始める", exact: true }).click();
 }
 
+async function checkCurrentAnswer(page, question) {
+  if (question.type === "single") {
+    await page.locator("#choices select").selectOption(question.answer);
+  } else if (question.type === "multiple") {
+    for (const answer of question.answer.split(/\s+\/\s+/)) await page.locator("#choices").getByRole("button", { name: answer, exact: true }).click();
+  } else if (question.type === "matching") {
+    for (const pair of question.answer.split(/\s+\/\s+/)) {
+      const separator = pair.indexOf(" = ");
+      const label = pair.slice(0, separator);
+      const value = pair.slice(separator + 3);
+      await page.getByLabel(`${label}の回答を選ぶ`, { exact: true }).selectOption(value);
+    }
+  } else if (question.type === "text") {
+    await page.locator("#choices input").fill(question.answer);
+  }
+  await page.locator("#answerButton").click();
+  const feedback = await page.locator("#feedback").innerText();
+  assert(feedback.startsWith(question.type === "free" ? "模範解答" : "正解"), `${question.id}: ${feedback}`);
+}
+
 async function run() {
   const source = await fs.readFile(path.join(root, "study-quiz-site.html"), "utf8");
   for (const match of source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) new vm.Script(match[1]);
@@ -42,6 +62,9 @@ async function run() {
     return `データ${"ABC"[index]} = Clust${squaredDistances[0] < squaredDistances[1] ? 1 : 2}のクラスター`;
   });
   assert.equal(miningAnswer("data-mining-quiz2-012"), assignments.join(" / "));
+  vm.runInNewContext(await fs.readFile(path.join(root, "database_prediction_questions.js"), "utf8"), data);
+  const databasePredictions = data.window.DATABASE_PREDICTED_QUESTION_DATA;
+  assert.equal(databasePredictions.length, 153);
 
   const server = http.createServer(async (request, response) => {
     try {
@@ -68,7 +91,7 @@ async function run() {
     await page.goto(url);
     await page.waitForSelector("#setList .set-card");
     assert.equal(await page.locator("#secondSemesterTab").getAttribute("aria-selected"), "true");
-    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データマイニング 小テスト"]);
+    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データベース 予想問題", "データマイニング 小テスト"]);
     await startSet(page, "データベース 小テスト");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 小テスト");
     assert.equal(await page.evaluate(() => filtered().length), 28);
@@ -108,13 +131,13 @@ async function run() {
 
     await page.locator("#listMode").click();
     await page.locator("#toggleCategoryEditorButton").click();
-    assert.equal(await page.locator("[data-category-row]").count(), 2);
+    assert.equal(await page.locator("[data-category-row]").count(), 3);
     await page.locator("[data-category-name='database-quiz']").fill("データベース 後期");
     await page.locator("#saveCategoryNamesButton").click();
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 後期");
     await page.locator("#toggleCategoryEditorButton").click();
     await page.locator("#toggleDeleteModeButton").click();
-    assert.equal(await page.locator("#categoryDeleteList button").count(), 2);
+    assert.equal(await page.locator("#categoryDeleteList button").count(), 3);
     await page.locator("#selectVisibleButton").click();
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#deleteSelectedButton").click();
@@ -143,6 +166,37 @@ async function run() {
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.evaluate(() => filtered().length), 28);
+    await context.setOffline(false);
+
+    await page.locator("#changeSetButton").click();
+    await startSet(page, "データベース 予想問題");
+    assert.equal(await page.evaluate(() => filtered().length), 153);
+    for (let index = 0; index < databasePredictions.length; index += 1) {
+      await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
+      const question = await page.evaluate(() => filtered()[state.index]);
+      await checkCurrentAnswer(page, question);
+      await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
+    }
+    await page.locator("#filterDetails summary").click();
+    for (const lecture of [1, 2, 3, 4, 5]) {
+      const source = databasePredictions.find((q) => q.lecture === lecture).source;
+      await page.locator("#sourceFilter").selectOption(source);
+      assert.equal(await page.evaluate(() => filtered().length), databasePredictions.filter((q) => q.lecture === lecture).length);
+    }
+    await page.locator("#sourceFilter").selectOption("all");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => { state.index = filtered().findIndex((q) => q.images.length); state.revealed = false; render(); });
+    await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.screenshot({ path: path.join(root, "output/database-prediction-mobile.png"), fullPage: true });
+    await page.evaluate(() => { state.index = filtered().findIndex((q) => q.verification && q.verification.fixture === "staff"); state.revealed = false; render(); });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.screenshot({ path: path.join(root, "output/database-prediction-sql-mobile.png"), fullPage: true });
+    await context.setOffline(true);
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.locator("#activeSetName").innerText(), "データベース 予想問題");
+    assert.equal(await page.evaluate(() => filtered().length), 153);
     await context.setOffline(false);
 
     await page.locator("#changeSetButton").click();
@@ -216,7 +270,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 26 data-mining answers, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
+    console.log("PASS: 28 database + 153 database-prediction + 26 data-mining answers, written-answer reveal, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
