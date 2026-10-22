@@ -15,9 +15,12 @@ NODE = os.environ.get("NODE_BINARY", "node")
 RSCRIPT = os.environ.get("RSCRIPT_BINARY", shutil.which("Rscript"))
 questions = json.loads(subprocess.check_output([
     NODE, "-e",
-    'global.window={};require("./data_mining_prediction_questions.js");console.log(JSON.stringify(window.DATA_MINING_PREDICTED_QUESTION_DATA));',
+    'global.window={};require("./data_mining_prediction_questions.js");console.log(JSON.stringify({questions:window.DATA_MINING_PREDICTED_QUESTION_DATA,exercises:window.DATA_MINING_PREDICTION_EXERCISE_COVERAGE}));',
 ], cwd=ROOT))
+exercises = questions["exercises"]
+questions = questions["questions"]
 PAGE_COUNTS = {1: 68, 2: 51, 3: 42, 4: 63, 5: 49}
+assert len(questions) == 167
 assert len(questions) == len({q["id"] for q in questions})
 assert len(questions) == len({q["prompt"] for q in questions})
 assert all(sum(q["lecture"] == lecture for q in questions) >= 20 for lecture in PAGE_COUNTS)
@@ -91,6 +94,7 @@ for q in questions:
     case = q.get("verification")
     if q["type"] == "text":
         assert case, (label, "Numeric question lacks independent verification")
+        assert q["answerFormat"] == "number", label
     if not case:
         continue
     if "op" in case:
@@ -121,6 +125,18 @@ for i, ((q, case), line) in enumerate(zip(r_cases, lines)):
             numeric = round(numeric, case["digits"])
         assert math.isclose(numeric, float(q["answer"]), rel_tol=1e-6, abs_tol=1e-6), (q["id"], value, q["answer"])
 
+by_id = {q["id"]: q for q in questions}
+assert len(exercises) == 25
+assert len({(row["lecture"], row["task"]) for row in exercises}) == 25
+for row in exercises:
+    assert row["questionIds"], row
+    for key in row["questionIds"]:
+        q = by_id[key]
+        assert q["lecture"] == row["lecture"] and row["task"] in q["exerciseTasks"], row
+        assert q["exerciseReference"] in q["slideReference"], key
+for lecture, original_count in {1: 22, 2: 27, 3: 30, 4: 24, 5: 29}.items():
+    assert all(f"data-mining-pred-{lecture:02}-{number:03}" in by_id for number in range(1, original_count + 1))
+
 # Audit embedded figures and non-text numerical choices independently.
 merges = [("C", "E"), ("A", "B"), ("D", "CE"), ("DCE", "AB"), ("F", "DCEAB")]
 clusters = {name: {name} for name in "FDCEAB"}
@@ -149,5 +165,7 @@ for lecture in PAGE_COUNTS:
     doc.extend([f"## 第{lecture}回（{len(items)}問）", "", coverage[lecture], "", "| 問題ID | テーマ | PDFページ | 形式 |", "| --- | --- | --- | --- |"])
     doc.extend(f'| {q["id"]} | {q["topic"]} | {", ".join(map(str, q["pages"]))} | {q["type"]} |' for q in items)
     doc.append("")
+doc.extend(["## 演習課題提出シートとの対応", "", "第1〜5回の提出シートにある全25課題を確認し、既存の132問に35問を追加した。重なる技能は再収録せず、各課題の関連問題へ参照を付けた。提出シートの記入済み解答は公式解答として扱わない。元データがない集計結果は問題文の所与の値として読み取る問題にし、因果の断定や実行ごとに変わるクラスタ番号の丸暗記は出題しない。", "", "- 第1回の元得点列・気温CSVは未添付。提出シートの平均・標準偏差・相関を所与の出力として明示し、その解釈・丸め・仮説を問う。", "- 第2回の飲料生産量、第3回の得点と5点の座標は入力値から再計算。第2回のロット平均のσは対象を明示。", "- 第3〜4回のEatOut.csv・okashi.csvは未添付のため、全データでのクラスタ割当てを保証した正解として転記しない。クラスタ読取り・方法比較・Rコードを既存問題で扱い、PCAは提示した標準偏差から分散と寄与率を再計算する。", "- 第4回課題6の『都市名』はお菓子データでは個体名（お菓子名）として扱う。", "- 第5回のクロス集計の行和・列和・条件付き割合を再計算。元の個票がないため、QA2は同形式の練習データと明示して扱う。", "- 数値入力は0.840と0.84のような等価な表記を認める。丸め条件を満たさない近似値や単位付きの回答は自動で正解にしない。", "", "### 追加画像", "", "- assets/ref-dm-exercise2-ppm.png: 第2回提出シートword/media/image3.pngのグラフを直接抽出。", "- assets/ref-dm-exercise4-scatter.png: 第4回提出シートword/media/image3.pngのグラフを直接抽出。", "- 提出シート本体、個人名、学籍番号、ファイルのメタデータは公開しない。", "", "| 回 | 課題 | 対応する問題ID |", "| --- | --- | --- |"])
+doc.extend(f'| {row["lecture"]} | {row["task"]} | {", ".join(row["questionIds"])} |' for row in exercises)
 (ROOT / "docs/data-mining-prediction-coverage.md").write_text("\n".join(doc), encoding="utf-8")
 print(f"PASS: {len(questions)} questions; Python {python_count} calculations; R {len(r_cases)} cases; figures, choices, pages, uniqueness. Lectures: {dict(sorted(Counter(q['lecture'] for q in questions).items()))}")

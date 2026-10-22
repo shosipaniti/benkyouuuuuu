@@ -1,6 +1,6 @@
 # データマイニング予想問題の範囲対応
 
-第1〜5回から計132問。データマイニング小テストとは別の後期セット。用語選択、対応付け、図の読取り、数値計算、Rの実行結果、短文記述という知識工学の過去問の形式を参考にした予想であり、出題を保証しない。
+第1〜5回から計167問。データマイニング小テストとは別の後期セット。用語選択、対応付け、図の読取り、数値計算、Rの実行結果、短文記述という知識工学の過去問の形式を参考にした予想であり、出題を保証しない。
 
 ## 出題範囲と注意
 
@@ -29,9 +29,9 @@
 
 ## 検証結果
 
-Pythonによる数値再計算34件、実Rによる実行結果14件。両方に含まれる問題もある。図の枝・面積比、正答の選択肢内存在、ID・問題文重複、ページ範囲を検証。
+Pythonによる数値再計算39件、実Rによる実行結果33件。両方に含まれる問題もある。図の枝・面積比、正答の選択肢内存在、ID・問題文重複、ページ範囲を検証。
 
-## 第1回（22問）
+## 第1回（27問）
 
 定義、決定木・説明変数／目的変数、行列・R、平均・分散・不偏分散・標準偏差・共分散・相関、散布図、交絡・疑似相関・因果、相関行列（重要事項p.57、課題p.55〜56）
 
@@ -59,8 +59,13 @@ Pythonによる数値再計算34件、実Rによる実行結果14件。両方に
 | data-mining-pred-01-020 | 疑似相関 | 48, 49, 50, 53, 54 | single |
 | data-mining-pred-01-021 | 相関と因果の説明 | 47, 48, 49, 50, 54, 56 | free |
 | data-mining-pred-01-022 | 相関行列 | 56 | single |
+| data-mining-pred-01-023 | 提出シートの統計出力を読む | 38, 55 | single |
+| data-mining-pred-01-024 | 実習の相関係数の比較 | 35, 36, 37, 55 | single |
+| data-mining-pred-01-025 | 実習の相関行列の丸め | 35, 56 | text |
+| data-mining-pred-01-026 | 気温・鍋・患者数の関連 | 50, 53, 54, 56 | matching |
+| data-mining-pred-01-027 | 鍋と患者数の因果を考察 | 50, 53, 54, 56 | free |
 
-## 第2回（27問）
+## 第2回（35問）
 
 折れ線・棒グラフ、PPM全4象限と推移・比率計算、管理図・管理限界・偏り・種類・ロット平均、パレート・ABC・ロングテール・市場集中、外れ値・中央値（重要事項p.51、課題p.20〜22・48〜50）
 
@@ -93,8 +98,16 @@ Pythonによる数値再計算34件、実Rによる実行結果14件。両方に
 | data-mining-pred-02-025 | 外れ値に頑健な代表値 | 45, 46, 47 | single |
 | data-mining-pred-02-026 | 外れ値追加後の中央値 | 45, 46 | text |
 | data-mining-pred-02-027 | 平均だけで比較しない | 45, 46, 47 | free |
+| data-mining-pred-02-028 | 実習の為替グラフ | 9, 10, 11, 20 | single |
+| data-mining-pred-02-029 | 飲料の生産量合計 | 21 | text |
+| data-mining-pred-02-030 | ミネラルウォーターの成長比率 | 21 | text |
+| data-mining-pred-02-031 | 炭酸飲料の占有率 | 21 | text |
+| data-mining-pred-02-032 | 生産量ベクトルの計算コード | 21 | single |
+| data-mining-pred-02-033 | 飲料PPMの実図を読む | 14, 15, 21, 22 | single |
+| data-mining-pred-02-034 | 成長の大きい飲料 | 21, 22 | single |
+| data-mining-pred-02-035 | ロット平均の異常判定 | 26, 30, 49 | single |
 
-## 第3回（30問）
+## 第3回（36問）
 
 箱ひげ図、標準化・偏差値、学習3種、距離・最近傍・重心、樹形図、階層型の処理・特徴・統合基準、ウォード平方和、k-meansの割当て・更新・初期値依存性・R指定（重要事項p.42、課題p.27〜28・40〜41）
 
@@ -130,8 +143,14 @@ Pythonによる数値再計算34件、実Rによる実行結果14件。両方に
 | data-mining-pred-03-028 | Rのクラスタ抽出 | 37 | text |
 | data-mining-pred-03-029 | 階層型と非階層型の比較 | 34, 37, 38, 41 | free |
 | data-mining-pred-03-030 | Rでウォード法を指定 | 40 | single |
+| data-mining-pred-03-031 | 実習得点の平均 | 27 | text |
+| data-mining-pred-03-032 | 実習得点のR標準偏差 | 27 | text |
+| data-mining-pred-03-033 | 実習得点を標準化 | 8, 27 | text |
+| data-mining-pred-03-034 | 標準化と条件抽出 | 13, 27 | text |
+| data-mining-pred-03-035 | 標準化の処理をまとめる | 8, 27 | single |
+| data-mining-pred-03-036 | 4次元の5点の重心 | 26, 28 | single |
 
-## 第4回（24問）
+## 第4回（31問）
 
 作図・ラベル・色分け、PCAの目的・直交軸・次元縮約、得点・係数、寄与率・累積寄与率・採用数・標準偏差からの計算、R出力、クラスタとの併用・軸解釈（重要事項p.63、課題p.26〜27・59〜62）
 
@@ -161,8 +180,15 @@ Pythonによる数値再計算34件、実Rによる実行結果14件。両方に
 | data-mining-pred-04-022 | クラスタリングとの併用 | 59, 60, 62 | single |
 | data-mining-pred-04-023 | PCAの説明 | 35, 36, 40, 43, 46 | free |
 | data-mining-pred-04-024 | 寄与率と正解率の区別 | 46, 48 | single |
+| data-mining-pred-04-025 | 実習のラベル付き散布図 | 6, 7, 26 | single |
+| data-mining-pred-04-026 | 都市ラベルを色分けするコード | 6, 7, 60 | single |
+| data-mining-pred-04-027 | お菓子の第1主成分寄与率 | 44, 56, 61 | text |
+| data-mining-pred-04-028 | お菓子の累積寄与率 | 46, 57, 61 | text |
+| data-mining-pred-04-029 | お菓子を80%以上表現する次元 | 46, 57, 61 | text |
+| data-mining-pred-04-030 | お菓子を90%以上表現する次元 | 46, 57, 61 | text |
+| data-mining-pred-04-031 | Rの科学表記を読む | 56, 61 | single |
 
-## 第5回（29問）
+## 第5回（38問）
 
 ヒストグラム・度数・相対度数、正規分布・正規乱数、円グラフの作図と誤解、カテゴリ・リッカート・ローデータ、集計・列指定・R、モザイク・割合の分母、対応分析・行プロフィール・図の解釈、複数回答（重要事項p.49、課題p.30〜32・45〜48）
 
@@ -197,3 +223,57 @@ Pythonによる数値再計算34件、実Rによる実行結果14件。両方に
 | data-mining-pred-05-027 | 対応分析の解釈 | 41, 42, 46 | single |
 | data-mining-pred-05-028 | モザイクと対応分析 | 38, 40, 41, 46, 47 | free |
 | data-mining-pred-05-029 | 複数回答の扱い | 43, 44 | single |
+| data-mining-pred-05-030 | アンケートの回答総数 | 29, 32 | text |
+| data-mining-pred-05-031 | クロス集計の列合計 | 35, 37, 45 | text |
+| data-mining-pred-05-032 | 女性の球技構成比 | 35, 37, 48 | text |
+| data-mining-pred-05-033 | 同人数でも割合は違う | 35, 37, 38, 48 | single |
+| data-mining-pred-05-034 | 所属内のゴルフ選択率 | 35, 37, 48 | text |
+| data-mining-pred-05-035 | 対応分析までのデータ処理 | 37, 40, 42, 46 | single |
+| data-mining-pred-05-036 | 飲用目的の対応分析を考察 | 40, 41, 43, 44, 47 | free |
+| data-mining-pred-05-037 | 生データから属性別割合へ | 35, 37, 48 | text |
+| data-mining-pred-05-038 | 人数と割合を保存する際の注意 | 38, 48 | single |
+
+## 演習課題提出シートとの対応
+
+第1〜5回の提出シートにある全25課題を確認し、既存の132問に35問を追加した。重なる技能は再収録せず、各課題の関連問題へ参照を付けた。提出シートの記入済み解答は公式解答として扱わない。元データがない集計結果は問題文の所与の値として読み取る問題にし、因果の断定や実行ごとに変わるクラスタ番号の丸暗記は出題しない。
+
+- 第1回の元得点列・気温CSVは未添付。提出シートの平均・標準偏差・相関を所与の出力として明示し、その解釈・丸め・仮説を問う。
+- 第2回の飲料生産量、第3回の得点と5点の座標は入力値から再計算。第2回のロット平均のσは対象を明示。
+- 第3〜4回のEatOut.csv・okashi.csvは未添付のため、全データでのクラスタ割当てを保証した正解として転記しない。クラスタ読取り・方法比較・Rコードを既存問題で扱い、PCAは提示した標準偏差から分散と寄与率を再計算する。
+- 第4回課題6の『都市名』はお菓子データでは個体名（お菓子名）として扱う。
+- 第5回のクロス集計の行和・列和・条件付き割合を再計算。元の個票がないため、QA2は同形式の練習データと明示して扱う。
+- 数値入力は0.840と0.84のような等価な表記を認める。丸め条件を満たさない近似値や単位付きの回答は自動で正解にしない。
+
+### 追加画像
+
+- assets/ref-dm-exercise2-ppm.png: 第2回提出シートword/media/image3.pngのグラフを直接抽出。
+- assets/ref-dm-exercise4-scatter.png: 第4回提出シートword/media/image3.pngのグラフを直接抽出。
+- 提出シート本体、個人名、学籍番号、ファイルのメタデータは公開しない。
+
+| 回 | 課題 | 対応する問題ID |
+| --- | --- | --- |
+| 1 | 1 | data-mining-pred-01-008, data-mining-pred-01-011, data-mining-pred-01-013, data-mining-pred-01-018, data-mining-pred-01-023, data-mining-pred-01-024 |
+| 1 | 2 | data-mining-pred-01-019, data-mining-pred-01-020, data-mining-pred-01-022, data-mining-pred-01-025, data-mining-pred-01-026, data-mining-pred-01-027 |
+| 2 | 1 | data-mining-pred-02-001, data-mining-pred-02-002, data-mining-pred-02-028 |
+| 2 | 2 | data-mining-pred-02-007, data-mining-pred-02-008, data-mining-pred-02-029, data-mining-pred-02-030, data-mining-pred-02-031, data-mining-pred-02-032 |
+| 2 | 3 | data-mining-pred-02-004, data-mining-pred-02-009, data-mining-pred-02-033, data-mining-pred-02-034 |
+| 2 | 4 | data-mining-pred-02-012, data-mining-pred-02-013, data-mining-pred-02-014 |
+| 2 | 5 | data-mining-pred-02-017, data-mining-pred-02-018, data-mining-pred-02-035 |
+| 2 | 6 | data-mining-pred-02-019, data-mining-pred-02-020, data-mining-pred-02-021, data-mining-pred-02-022 |
+| 3 | 1 | data-mining-pred-03-002, data-mining-pred-03-005, data-mining-pred-03-031, data-mining-pred-03-032, data-mining-pred-03-033, data-mining-pred-03-034, data-mining-pred-03-035 |
+| 3 | 2 | data-mining-pred-03-012, data-mining-pred-03-036 |
+| 3 | 3 | data-mining-pred-03-015, data-mining-pred-03-016, data-mining-pred-03-020, data-mining-pred-03-030 |
+| 3 | 4 | data-mining-pred-03-025, data-mining-pred-03-026, data-mining-pred-03-029 |
+| 4 | 1 | data-mining-pred-04-019, data-mining-pred-04-025 |
+| 4 | 2 | data-mining-pred-04-020 |
+| 4 | 3 | data-mining-pred-04-016, data-mining-pred-04-021 |
+| 4 | 4 | data-mining-pred-04-018, data-mining-pred-04-022, data-mining-pred-04-026 |
+| 4 | 5 | data-mining-pred-04-017, data-mining-pred-04-027, data-mining-pred-04-028, data-mining-pred-04-029, data-mining-pred-04-030, data-mining-pred-04-031 |
+| 4 | 6 | data-mining-pred-04-014, data-mining-pred-04-021, data-mining-pred-04-022 |
+| 5 | 1 | data-mining-pred-05-009, data-mining-pred-05-010 |
+| 5 | 2 | data-mining-pred-05-001, data-mining-pred-05-012 |
+| 5 | 3 | data-mining-pred-05-016, data-mining-pred-05-030 |
+| 5 | 4 | data-mining-pred-05-017, data-mining-pred-05-022, data-mining-pred-05-031, data-mining-pred-05-032, data-mining-pred-05-033, data-mining-pred-05-034 |
+| 5 | 5 | data-mining-pred-05-024, data-mining-pred-05-027, data-mining-pred-05-035 |
+| 5 | 6 | data-mining-pred-05-028, data-mining-pred-05-029, data-mining-pred-05-036 |
+| 5 | 7 | data-mining-pred-05-018, data-mining-pred-05-020, data-mining-pred-05-037, data-mining-pred-05-038 |

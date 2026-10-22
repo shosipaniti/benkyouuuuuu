@@ -67,7 +67,7 @@ async function run() {
   assert.equal(databasePredictions.length, 153);
   vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_prediction_questions.js"), "utf8"), data);
   const miningPredictions = data.window.DATA_MINING_PREDICTED_QUESTION_DATA;
-  assert.equal(miningPredictions.length, 132);
+  assert.equal(miningPredictions.length, 167);
 
   const server = http.createServer(async (request, response) => {
     try {
@@ -244,7 +244,7 @@ async function run() {
 
     await page.locator("#changeSetButton").click();
     await startSet(page, "データマイニング 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 132);
+    assert.equal(await page.evaluate(() => filtered().length), 167);
     assert.equal(await page.evaluate(() => filtered().every((q) => q.category === "data-mining-prediction")), true);
     for (let index = 0; index < miningPredictions.length; index += 1) {
       await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
@@ -261,7 +261,7 @@ async function run() {
     }
     await page.locator("#sourceFilter").selectOption("all");
     await page.locator("#filterDetails summary").click();
-    for (const [name, topic] of [["dendrogram", "樹形図のクラスタ数"], ["mosaic", "モザイクの読取り"], ["calculation", "標準偏差から寄与率"]]) {
+    for (const [name, topic] of [["dendrogram", "樹形図のクラスタ数"], ["mosaic", "モザイクの読取り"], ["calculation", "標準偏差から寄与率"], ["exercise-ppm", "飲料PPMの実図を読む"], ["exercise-scatter", "実習のラベル付き散布図"], ["exercise-code", "都市ラベルを色分けするコード"], ["exercise-snack", "お菓子の累積寄与率"]]) {
       await page.evaluate((value) => { state.index = filtered().findIndex((q) => q.topic === value); state.revealed = false; render(); }, topic);
       await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
       const question = await page.evaluate(() => filtered()[state.index]);
@@ -271,13 +271,19 @@ async function run() {
     }
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.screenshot({ path: path.join(root, "output/data-mining-prediction-desktop.png"), fullPage: true });
+    await page.evaluate(() => { state.index = filtered().findIndex((q) => q.topic === "実習得点を標準化"); state.revealed = false; render(); });
+    for (const [input, expected] of [["0.840", true], [".84", true], ["８．４e−1", true], ["0.839551", false], ["0.85", false], ["", false], ["0.84点", false], ["0.84+0", false], ["Infinity", false]]) {
+      await page.locator("#choices input").fill(input);
+      await page.locator("#answerButton").click();
+      assert.equal((await page.locator("#feedback").innerText()).startsWith("正解"), expected, input);
+    }
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.locator("#activeSetName").innerText(), "データマイニング 予想問題");
     await context.setOffline(true);
     await page.reload();
     await page.waitForSelector("#prompt");
-    assert.equal(await page.evaluate(() => filtered().length), 132);
+    assert.equal(await page.evaluate(() => filtered().length), 167);
     await context.setOffline(false);
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#archiveActiveSetButton").click();
@@ -285,7 +291,7 @@ async function run() {
     assert(!(await page.locator("#setList h3").allTextContents()).includes("データマイニング 予想問題"));
     await page.locator("#archivedSetList .set-card").filter({ has: page.getByRole("heading", { name: "データマイニング 予想問題", exact: true }) })
       .getByRole("button", { name: "戻して始める", exact: true }).click();
-    assert.equal(await page.evaluate(() => filtered().length), 132);
+    assert.equal(await page.evaluate(() => filtered().length), 167);
 
     const migrationContext = await browser.newContext();
     const legacyPage = await migrationContext.newPage();
@@ -318,7 +324,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 153 database-prediction + 26 data-mining + 132 data-mining-prediction answers, source references, written-answer reveal, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
+    console.log("PASS: 28 database + 153 database-prediction + 26 data-mining + 167 data-mining-prediction answers, numeric-equivalence checks, source references, written-answer reveal, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

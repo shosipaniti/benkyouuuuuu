@@ -458,6 +458,7 @@
       .question {
         margin: 0;
         white-space: pre-line;
+        overflow-wrap: anywhere;
         font-size: clamp(1.08rem, 2vw, 1.32rem);
         line-height: 1.8;
       }
@@ -479,12 +480,15 @@
 
       .choices {
         display: grid;
+        grid-template-columns: minmax(0, 1fr);
         gap: 9px;
         margin-top: 20px;
       }
 
       .choice-select {
         width: 100%;
+        min-width: 0;
+        max-width: 100%;
         min-height: 48px;
         border: 1px solid #c8d8e9;
         border-left: 4px solid var(--blue);
@@ -592,6 +596,7 @@
       .feedback-answer-value {
         margin-top: 4px;
         white-space: pre-line;
+        overflow-wrap: anywhere;
         font-size: 1.12rem;
         font-weight: 700;
       }
@@ -2080,6 +2085,13 @@
         return [String(question.answer).trim()];
       }
 
+      function sameNumericAnswer(actual, expected) {
+        const a = normalizeAnswer(actual).replace(/−/g, "-");
+        const b = normalizeAnswer(expected).replace(/−/g, "-");
+        const numeric = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/;
+        return numeric.test(a) && numeric.test(b) && Number.isFinite(Number(a)) && Number(a) === Number(b);
+      }
+
       function sameSet(a, b) {
         return a.length === b.length && a.every((item) => b.includes(item));
       }
@@ -2190,7 +2202,8 @@
             correctValues(question).map(normalizeAnswer).sort()
           );
         } else if (question.type === "text" || question.type === "free") {
-          correct = normalizeAnswer(response.text) === normalizeAnswer(question.answer);
+          correct = normalizeAnswer(response.text) === normalizeAnswer(question.answer) ||
+            (question.answerFormat === "number" && sameNumericAnswer(response.text, question.answer));
         } else {
           correct = normalizeAnswer(response.selected[0] || "") === normalizeAnswer(question.answer);
         }
