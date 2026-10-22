@@ -8,6 +8,11 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
 const root = path.resolve(__dirname, "..");
 const mimeTypes = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".webmanifest": "application/manifest+json" };
 
+async function startSet(page, name) {
+  await page.locator("#setList .set-card").filter({ has: page.getByRole("heading", { name, exact: true }) })
+    .getByRole("button", { name: "このセットで始める", exact: true }).click();
+}
+
 async function run() {
   const source = await fs.readFile(path.join(root, "study-quiz-site.html"), "utf8");
   for (const match of source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) new vm.Script(match[1]);
@@ -21,6 +26,22 @@ async function run() {
     for (const answer of q.answer.split(/\s+\/\s+/)) assert(q.choices.includes(answer), q.id);
     for (const image of q.images) await fs.access(path.join(root, image));
   }
+  vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_questions.js"), "utf8"), data);
+  const miningQuestions = data.window.DATA_MINING_QUESTION_DATA;
+  assert.equal(miningQuestions.length, 26);
+  assert.equal(new Set(miningQuestions.map((q) => q.id)).size, 26);
+  assert.equal(new Set(miningQuestions.flatMap((q) => q.sourceQuestionIds)).size, 30);
+  const miningAnswer = (id) => miningQuestions.find((q) => q.id === id).answer;
+  assert.equal(miningAnswer("data-mining-quiz1-010"), `CL=${3.0.toFixed(1)}`);
+  assert.equal(miningAnswer("data-mining-quiz1-011"), `UCL=${(3 + 3 * 0.1).toFixed(1)}`);
+  assert.equal(miningAnswer("data-mining-quiz1-012"), `LCL=${(3 - 3 * 0.1).toFixed(1)}`);
+  assert.equal(miningAnswer("data-mining-quiz2-011"), String((0 + 0 + 6) / 3));
+  const centers = [[0, 4, 0], [5, 3, 5]];
+  const assignments = [[0, 3, 0], [3, 3, 0], [6, 3, 6]].map((point, index) => {
+    const squaredDistances = centers.map((center) => point.reduce((sum, value, axis) => sum + (value - center[axis]) ** 2, 0));
+    return `データ${"ABC"[index]} = Clust${squaredDistances[0] < squaredDistances[1] ? 1 : 2}のクラスター`;
+  });
+  assert.equal(miningAnswer("data-mining-quiz2-012"), assignments.join(" / "));
 
   const server = http.createServer(async (request, response) => {
     try {
@@ -47,8 +68,8 @@ async function run() {
     await page.goto(url);
     await page.waitForSelector("#setList .set-card");
     assert.equal(await page.locator("#secondSemesterTab").getAttribute("aria-selected"), "true");
-    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト"]);
-    await page.getByRole("button", { name: "このセットで始める", exact: true }).click();
+    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データマイニング 小テスト"]);
+    await startSet(page, "データベース 小テスト");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 小テスト");
     assert.equal(await page.evaluate(() => filtered().length), 28);
     assert.deepEqual(await page.evaluate(() => validationIssues), []);
@@ -87,19 +108,19 @@ async function run() {
 
     await page.locator("#listMode").click();
     await page.locator("#toggleCategoryEditorButton").click();
-    assert.equal(await page.locator("[data-category-row]").count(), 1);
+    assert.equal(await page.locator("[data-category-row]").count(), 2);
     await page.locator("[data-category-name='database-quiz']").fill("データベース 後期");
     await page.locator("#saveCategoryNamesButton").click();
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 後期");
     await page.locator("#toggleCategoryEditorButton").click();
     await page.locator("#toggleDeleteModeButton").click();
-    assert.equal(await page.locator("#categoryDeleteList button").count(), 1);
+    assert.equal(await page.locator("#categoryDeleteList button").count(), 2);
     await page.locator("#selectVisibleButton").click();
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#deleteSelectedButton").click();
     assert.equal(await page.evaluate(() => allQuestions.filter((q) => q.category === "database-quiz").length), 0);
     await page.evaluate(() => restoreDeletedQuestions());
-    await page.locator("#setList .set-card").getByRole("button", { name: "このセットで始める", exact: true }).click();
+    await startSet(page, "データベース 後期");
     await page.locator("#archiveActiveSetButton").click();
     assert.equal(await page.locator("#archivedSetList h3").innerText(), "データベース 後期");
     await page.getByRole("button", { name: "戻して始める", exact: true }).click();
@@ -124,6 +145,46 @@ async function run() {
     assert.equal(await page.evaluate(() => filtered().length), 28);
     await context.setOffline(false);
 
+    await page.locator("#changeSetButton").click();
+    await startSet(page, "データマイニング 小テスト");
+    assert.equal(await page.evaluate(() => filtered().length), 26);
+    for (let index = 0; index < miningQuestions.length; index += 1) {
+      await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
+      const question = await page.evaluate(() => filtered()[state.index]);
+      if (question.type === "single") {
+        await page.locator("#choices select").selectOption(question.answer);
+      } else if (question.type === "multiple") {
+        for (const answer of question.answer.split(/\s+\/\s+/)) await page.locator("#choices").getByRole("button", { name: answer, exact: true }).click();
+      } else if (question.type === "matching") {
+        for (const pair of question.answer.split(/\s+\/\s+/)) {
+          const [label, value] = pair.split(" = ");
+          await page.getByLabel(`${label}の回答を選ぶ`, { exact: true }).selectOption(value);
+        }
+      } else {
+        await page.locator("#choices input").fill(question.answer);
+      }
+      await page.locator("#answerButton").click();
+      assert((await page.locator("#feedback").innerText()).startsWith("正解"), question.id);
+    }
+    await page.locator("#filterDetails summary").click();
+    await page.locator("#sourceFilter").selectOption("データマイニング 小テスト1");
+    assert.equal(await page.evaluate(() => filtered().length), 13);
+    await page.locator("#sourceFilter").selectOption("データマイニング 小テスト2");
+    assert.equal(await page.evaluate(() => filtered().length), 13);
+    await page.locator("#sourceFilter").selectOption("all");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.evaluate(() => { state.index = filtered().findIndex((q) => q.id === "data-mining-quiz2-012"); render(); });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.screenshot({ path: path.join(root, "output/data-mining-mobile.png"), fullPage: true });
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.locator("#activeSetName").innerText(), "データマイニング 小テスト");
+    await context.setOffline(true);
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.evaluate(() => filtered().length), 26);
+    await context.setOffline(false);
+
     const migrationContext = await browser.newContext();
     const legacyPage = await migrationContext.newPage();
     await legacyPage.addInitScript(() => {
@@ -145,7 +206,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.equal(await legacyPage.locator("#knownCount").innerText(), "1習得");
     await legacyPage.locator("#secondSemesterTab").click();
-    await legacyPage.getByRole("button", { name: "このセットで始める", exact: true }).click();
+    await startSet(legacyPage, "データベース 小テスト");
     await legacyPage.locator("#importDetails summary").click();
     await legacyPage.locator("#pasteInput").fill("Q: 追加テスト\nA: 確認済み");
     await legacyPage.locator("#pasteButton").click();
@@ -155,7 +216,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 answers, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
+    console.log("PASS: 28 database + 26 data-mining answers, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

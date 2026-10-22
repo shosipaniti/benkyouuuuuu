@@ -1089,6 +1089,7 @@
     <script src="predicted_questions.js"></script>
     <script src="study_extra_questions.js"></script>
     <script src="database_questions.js"></script>
+    <script src="data_mining_questions.js"></script>
     <script src="human_centered_final_guide.js"></script>
     <script src="economics_final_guide.js"></script>
     <script src="audio_engineering_guides.js"></script>
@@ -1109,8 +1110,10 @@
       const semesterSetsStorageKey = "study-quiz-semester-active-sets-v1";
       const defaultCategoryOrder = ["quiz", "prediction", "economics-final", "economics-final-prediction", "audio", "audio-prediction", "audio-final", "audio-final-prediction", "acoustics-final", "acoustics-final-prediction", "human-centered-final", "knowledge", "knowledge-review", "knowledge-quiz", "knowledge-prediction", "knowledge-final", "knowledge-final-quiz", "machine-learning", "machine-learning-prediction", "machine-learning-final"];
       defaultCategoryLabels["database-quiz"] = "データベース 小テスト";
-      defaultCategoryOrder.unshift("database-quiz");
-      const defaultCategorySemesters = Object.fromEntries(defaultCategoryOrder.map((category) => [category, category === "database-quiz" ? "second" : "first"]));
+      defaultCategoryLabels["data-mining-quiz"] = "データマイニング 小テスト";
+      const secondSemesterCategories = ["database-quiz", "data-mining-quiz"];
+      defaultCategoryOrder.unshift(...secondSemesterCategories);
+      const defaultCategorySemesters = Object.fromEntries(defaultCategoryOrder.map((category) => [category, secondSemesterCategories.includes(category) ? "second" : "first"]));
       let categoryLabels = loadCategoryLabels();
       let categoryOrder = loadCategoryOrder();
       let archivedSets = new Set(loadArchivedSets());
@@ -1119,10 +1122,11 @@
       const predictedQuestions = normalize(window.PREDICTED_QUESTION_DATA || [], "prediction");
       const extraQuestions = normalize(window.STUDY_EXTRA_QUESTION_DATA || [], "quiz");
       const databaseQuestions = normalize(window.DATABASE_QUESTION_DATA || [], "database-quiz");
+      const dataMiningQuestions = normalize(window.DATA_MINING_QUESTION_DATA || [], "data-mining-quiz");
       let importedQuestions = loadImportedQuestions();
       let questionEdits = loadQuestionEdits();
       let deletedQuestionIds = new Set(loadDeletedQuestionIds());
-      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...importedQuestions]));
+      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...dataMiningQuestions, ...importedQuestions]));
       let validationIssues = validate(allQuestions);
       let semesterActiveSets = loadSemesterActiveSets();
       const initialSemester = loadSemester();
@@ -1446,7 +1450,7 @@
       }
 
       function refreshQuestionData() {
-        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...importedQuestions]));
+        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...dataMiningQuestions, ...importedQuestions]));
         validationIssues = validate(allQuestions);
         ensureActiveSet();
         applyCategoryOrderToQuestions();
