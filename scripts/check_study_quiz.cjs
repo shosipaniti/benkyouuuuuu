@@ -64,7 +64,7 @@ async function run() {
   assert.equal(miningAnswer("data-mining-quiz2-012"), assignments.join(" / "));
   vm.runInNewContext(await fs.readFile(path.join(root, "database_prediction_questions.js"), "utf8"), data);
   const databasePredictions = data.window.DATABASE_PREDICTED_QUESTION_DATA;
-  assert.equal(databasePredictions.length, 153);
+  assert.equal(databasePredictions.length, 183);
   vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_prediction_questions.js"), "utf8"), data);
   const miningPredictions = data.window.DATA_MINING_PREDICTED_QUESTION_DATA;
   assert.equal(miningPredictions.length, 167);
@@ -173,12 +173,15 @@ async function run() {
 
     await page.locator("#changeSetButton").click();
     await startSet(page, "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 153);
+    assert.equal(await page.evaluate(() => filtered().length), 183);
+    await page.setViewportSize({ width: 390, height: 844 });
     for (let index = 0; index < databasePredictions.length; index += 1) {
       await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
       const question = await page.evaluate(() => filtered()[state.index]);
       await checkCurrentAnswer(page, question);
+      assert((await page.locator("#feedback").innerText()).includes(question.slideReference), question.id);
       await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
     }
     await page.locator("#filterDetails summary").click();
     for (const lecture of [1, 2, 3, 4, 5]) {
@@ -195,11 +198,17 @@ async function run() {
     await page.evaluate(() => { state.index = filtered().findIndex((q) => q.verification && q.verification.fixture === "staff"); state.revealed = false; render(); });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({ path: path.join(root, "output/database-prediction-sql-mobile.png"), fullPage: true });
+    for (const [name, topic] of [["cd", "ボーカル参加曲を検索"], ["outer", "販売リストの4種の結合"], ["er", "店舗・注文・顧客の多重度"]]) {
+      await page.evaluate((value) => { state.index = filtered().findIndex((q) => q.topic === value); state.revealed = false; render(); }, topic);
+      await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      await page.screenshot({ path: path.join(root, `output/database-exercise-${name}-mobile.png`), fullPage: true });
+    }
     await context.setOffline(true);
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 153);
+    assert.equal(await page.evaluate(() => filtered().length), 183);
     await context.setOffline(false);
 
     await page.locator("#changeSetButton").click();
@@ -324,7 +333,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 153 database-prediction + 26 data-mining + 167 data-mining-prediction answers, numeric-equivalence checks, source references, written-answer reveal, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
+    console.log("PASS: 28 database + 183 database-prediction + 26 data-mining + 167 data-mining-prediction answers, numeric-equivalence checks, source references, written-answer reveal, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

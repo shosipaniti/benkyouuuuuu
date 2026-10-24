@@ -6,7 +6,7 @@
 
 SQLは問題文中に示したデータで検証する。講義のsample.db全件の値を暗記させる問題ではない。記述は同義の正解を認めるため自己採点とする。
 
-## 第1回（27問）
+## 第1回（30問）
 
 | 問題ID | テーマ | 参照ページ | 形式 |
 | --- | --- | --- | --- |
@@ -37,8 +37,11 @@ SQLは問題文中に示したデータで検証する。講義のsample.db全�
 | database-pred-01-025 | 関係モデルの提唱 | 49 | single |
 | database-pred-01-026 | データモデルの歴史 | 35 | matching |
 | database-pred-01-027 | 情報通信システムの構成 | 21, 22, 28 | multiple |
+| database-pred-01-028 | 財布の主キーを選ぶ | 66, 67, 70 | single |
+| database-pred-01-029 | 財布の総額 | 70 | single |
+| database-pred-01-030 | タプル数と紙幣硬貨の数 | 44, 70 | single |
 
-## 第2回（31問）
+## 第2回（36問）
 
 | 問題ID | テーマ | 参照ページ | 形式 |
 | --- | --- | --- | --- |
@@ -73,8 +76,13 @@ SQLは問題文中に示したデータで検証する。講義のsample.db全�
 | database-pred-02-029 | 表示と書き出し | 50, 52 | matching |
 | database-pred-02-030 | 命名規則の具体例 | 33, 34 | matching |
 | database-pred-02-031 | 予約語と識別子 | 30, 31 | single |
+| database-pred-02-032 | 演習の価格条件 | 39, 40 | single |
+| database-pred-02-033 | 生産地から都道府県を求める | 39, 40 | single |
+| database-pred-02-034 | 手持在庫の条件 | 55 | single |
+| database-pred-02-035 | 安い給与の責任者本人 | 55 | single |
+| database-pred-02-036 | 同じ上司番号での結合 | 55 | single |
 
-## 第3回（30問）
+## 第3回（39問）
 
 | 問題ID | テーマ | 参照ページ | 形式 |
 | --- | --- | --- | --- |
@@ -108,8 +116,17 @@ SQLは問題文中に示したデータで検証する。講義のsample.db全�
 | database-pred-03-028 | 出力名と並べ替え | 28, 29 | single |
 | database-pred-03-029 | ER図の使い分け | 72 | single |
 | database-pred-03-030 | 人工キーの定義 | 53 | single |
+| database-pred-03-031 | 店舗・注文・顧客の多重度 | 48 | matching |
+| database-pred-03-032 | 注文の外部キー | 48, 56, 70 | single |
+| database-pred-03-033 | 空のDBを開いたときの確認 | 74, 75, 76, 78, 82 | single |
+| database-pred-03-034 | 曲の作曲者を検索 | 71, 83 | single |
+| database-pred-03-035 | ボーカル参加曲を検索 | 71, 83 | single |
+| database-pred-03-036 | 作詞作曲が同一の曲 | 71, 84 | single |
+| database-pred-03-037 | 本人名義のCD収録曲 | 71, 84 | single |
+| database-pred-03-038 | CD番号も含めて結ぶ理由 | 71, 83 | single |
+| database-pred-03-039 | 作詞作曲条件のSQLを記述 | 71, 84 | free |
 
-## 第4回（17問）
+## 第4回（21問）
 
 | 問題ID | テーマ | 参照ページ | 形式 |
 | --- | --- | --- | --- |
@@ -130,8 +147,12 @@ SQLは問題文中に示したデータで検証する。講義のsample.db全�
 | database-pred-04-015 | SQLを記述する | 26, 30, 34 | free |
 | database-pred-04-016 | 結合SQLを記述する | 38, 43 | free |
 | database-pred-04-017 | SQLの修正と理由 | 25, 35, 36 | free |
+| database-pred-04-018 | 店舗5の売場の商品 | 55 | single |
+| database-pred-04-019 | 売場の所在地を補う経路 | 49, 50, 55 | single |
+| database-pred-04-020 | CHAPの商品がある売場 | 36 | single |
+| database-pred-04-021 | 入社時の年齢条件 | 55 | single |
 
-## 第5回（48問）
+## 第5回（57問）
 
 | 問題ID | テーマ | 参照ページ | 形式 |
 | --- | --- | --- | --- |
@@ -183,3 +204,52 @@ SQLは問題文中に示したデータで検証する。講義のsample.db全�
 | database-pred-05-046 | NULLの比較 | 57 | single |
 | database-pred-05-047 | 入れ子の集合質問 | 61 | single |
 | database-pred-05-048 | 副問い合わせ | 62 | single |
+| database-pred-05-049 | 演習の商品集合を計算 | 36 | matching |
+| database-pred-05-050 | 販売表と商品表の直積 | 37 | single |
+| database-pred-05-051 | 課題のSとTの結合 | 64 | single |
+| database-pred-05-052 | 課題の別属性による結合 | 64 | single |
+| database-pred-05-053 | 販売リストの4種の結合 | 68 | matching |
+| database-pred-05-054 | 結合相手のない販売を探す | 68 | single |
+| database-pred-05-055 | 都道府県別の人口平均 | 69 | single |
+| database-pred-05-056 | 注文と製品の内部結合 | 70, 71 | single |
+| database-pred-05-057 | 結合と集約は別の操作 | 70, 71 | single |
+
+## 演習課題提出シートとの対応
+
+第1〜5回の全22課題（第5回の時間のある人向け課題8・9も含む）を確認した。既存153問を保持し、具体例30問を追加して計183問にした。重複する出題は関連問題への課題参照で統合した。
+
+### 出題と検証の方針
+
+- 記入済み解答を公式解答とはみなさず、問題の入力値・SQLをSQLiteで検証する。
+- 第2回のcities/products、第5回の商品集合・直積・R/S/T・外部結合・注文表は、提出シートと講義スライドの入力を照合した。数値の違う別の例を混ぜない。
+- sample.dbやcd_jacket.dbの全データは未添付。社員・売場・CDの実行結果問題は、講義と同じスキーマの練習用データを問題文にすべて示し、そのデータでの正解を求める。sample.db全件の正解とは称しない。
+- 第1回課題2に混入したiris・ニューラルネットの文は財布の設問と無関係なので出題に取り込まない。
+- 第3回・第4回の列名のlylicist_id/composter_id/salalyやdepartment表、全角・曲がった引用符は、定義のlyricist_id/composer_id/salary/departmentsと半角引用符を使う。元の提出シートや既存問題の答えは書き換えない。
+- 第4回の『売場の住所』はstores.addressを意味することをスキーマで明記する。入社時年齢は年の差で判定する講義上の近似であり、誕生日による満年齢と区別する。
+- 第5回課題7の左・右・完全外部結合では未対応行をNULLで補い、一致する商品の複数販売を勝手に重複除去しない。課題9のJOINだけではPCの2件の注文を合計しない。
+- 提出シート本体、個人名・学籍番号、メタデータは公開しない。参照は授業回と課題番号で示す。
+
+| 回 | 課題 | 対応する問題ID |
+| --- | --- | --- |
+| 1 | 1 | database-pred-01-001, database-pred-01-002, database-pred-01-024 |
+| 1 | 2 | database-pred-01-021, database-pred-01-022, database-pred-01-028, database-pred-01-029, database-pred-01-030 |
+| 2 | 1 | database-pred-02-006, database-pred-02-007, database-pred-02-015, database-pred-02-032, database-pred-02-033 |
+| 2 | 2 | database-pred-02-027, database-pred-02-028 |
+| 2 | 3 | database-pred-02-015, database-pred-02-016, database-pred-02-034, database-pred-02-035, database-pred-02-036 |
+| 3 | 1 | database-pred-03-002, database-pred-03-009, database-pred-03-010, database-pred-03-013 |
+| 3 | 2 | database-pred-03-006, database-pred-03-020, database-pred-03-031, database-pred-03-032 |
+| 3 | 3 | database-pred-03-027, database-pred-03-028, database-pred-03-033 |
+| 3 | 4 | database-pred-03-015, database-pred-03-016, database-pred-03-023, database-pred-03-034, database-pred-03-035, database-pred-03-038 |
+| 3 | 5 | database-pred-03-016, database-pred-03-022, database-pred-03-036, database-pred-03-037, database-pred-03-039 |
+| 4 | 1 | database-pred-04-009, database-pred-04-010, database-pred-04-017, database-pred-04-020 |
+| 4 | 2 | database-pred-04-012, database-pred-04-016 |
+| 4 | 3 | database-pred-04-011, database-pred-04-013, database-pred-04-018, database-pred-04-019, database-pred-04-021 |
+| 5 | 1 | database-pred-05-004, database-pred-05-005, database-pred-05-006, database-pred-05-007, database-pred-05-049 |
+| 5 | 2 | database-pred-05-008, database-pred-05-050 |
+| 5 | 3 | database-pred-05-010, database-pred-05-014 |
+| 5 | 4 | database-pred-05-016, database-pred-05-017, database-pred-05-051, database-pred-05-052 |
+| 5 | 5 | database-pred-05-026, database-pred-05-035, database-pred-05-036, database-pred-05-037, database-pred-05-038 |
+| 5 | 6 | database-pred-05-041 |
+| 5 | 7 | database-pred-05-042, database-pred-05-043, database-pred-05-044, database-pred-05-045, database-pred-05-053, database-pred-05-054 |
+| 5 | 8 | database-pred-05-039, database-pred-05-040, database-pred-05-055 |
+| 5 | 9 | database-pred-05-018, database-pred-05-056, database-pred-05-057 |

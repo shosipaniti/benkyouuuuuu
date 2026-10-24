@@ -217,6 +217,108 @@
   single(5, "入れ子の集合質問", [61], "『book売場がある店舗』の集合と『furniture売場がある店舗』の集合の両方に属する店舗を求める演算を選びなさい。", "INTERSECT", ["UNION", "EXCEPT", "CROSS JOIN"], "両方の条件を満たす店舗の共通集合です。同一店舗の売場同士の自己結合で表せる場合もあります。");
   single(5, "副問い合わせ", [62], "deptのname='book'に対応するidがちょうど1つである。SELECT name,salary FROM emp WHERE dept_id=(SELECT id FROM dept WHERE name='book'); の意味を選びなさい。", "bookという部署に所属する社員の名前と給与を出す", ["全社員の給与平均を出す", "bookという名前の社員を出す", "部署の名前を全件削除する"], "内側のSELECTが部署IDを求め、外側で所属部署が一致する社員を選びます。複数IDになる場合までこの単一値比較で扱えるという意味ではありません。");
 
+  // Append exercise variants without renumbering the existing questions.
+  Object.assign(fixtures, {
+    exerciseWallet: { wallet: { columns: ["money", "num"], rows: [[5000, 2], [1000, 4], [500, 3], [100, 1]] } },
+    exerciseCd: {
+      artists: { columns: ["id", "name"], rows: [[1, "椎名林檎"], [2, "歌手B"], [3, "作曲家C"]] },
+      cds: { columns: ["id", "title", "artist_id"], rows: [["C1", "アルバムA", 1], ["C2", "アルバムB", 2]] },
+      music: { columns: ["id", "title", "composer_id", "lyricist_id"], rows: [[1, "曲A", 3, 1], [2, "曲B", 1, 1], [3, "曲C", 3, 3]] },
+      tracks: { columns: ["cd_id", "track_number", "music_id"], rows: [["C1", 1, 1], ["C1", 2, 2], ["C2", 1, 3], ["C2", 2, 1]] },
+      play: { columns: ["cd_id", "track_number", "artist_id", "role"], rows: [["C1", 1, 2, "vocal"], ["C1", 1, 3, "guitar"], ["C1", 2, 1, "vocal"], ["C2", 1, 2, "vocal"], ["C2", 2, 2, "vocal"]] }
+    },
+    exerciseSets: {
+      ra: { columns: ["id", "name", "price"], rows: [["R001", "プリンタ1", 49800], ["C001", "パソコン1", 148000], ["H002", "HDD1", 39800], ["M001", "Camera1", 38800], ["M005", "Camera5", 49800]] },
+      rb: { columns: ["id", "name", "price"], rows: [["R001", "プリンタ1", 49800], ["C003", "パソコン3", 188000], ["H001", "HDD2", 9800], ["M002", "Camera2", 58800], ["M005", "Camera5", 49800]] }
+    },
+    exerciseProduct: {
+      r: { columns: ["sale_id", "sold_on", "product_id"], rows: [["D001", "2013-10-01", "C003"], ["D002", "2013-10-01", "H002"], ["D003", "2013-10-01", "H001"]] },
+      s: { columns: ["product_id", "name", "price"], rows: [["R001", "プリンタ1", 49800], ["C003", "パソコン1", 148000]] }
+    },
+    exerciseJoins: {
+      r: { columns: ["a", "b"], rows: [["a", 1], ["a", 4], ["b", 1]] },
+      s: { columns: ["c", "d"], rows: [["a", 2], ["a", 3], ["b", 4]] },
+      t: { columns: ["e", "f"], rows: [["b", 5], ["b", 6], ["c", 7]] }
+    },
+    exerciseOuter: {
+      r: { columns: ["sale_id", "sold_on", "employee_id", "product_id"], rows: [["D001", "2013-10-01", "P001", "C003"], ["D002", "2013-10-01", "P003", "H002"], ["D003", "2013-10-01", "P005", "H001"], ["D004", "2013-10-01", "P002", "M002"], ["D005", "2013-10-01", "P001", "R001"], ["D006", "2013-10-01", "P003", "C003"], ["D007", "2013-10-01", "P003", "C001"], ["D008", "2013-10-01", "P002", "M002"]] },
+      s: { columns: ["product_id", "name", "price"], rows: [["R001", "プリンタ1", 49800], ["C003", "パソコン1", 148000], ["H001", "HDD1", 39800], ["M002", "Camera2", 58800], ["M005", "Camera5", 49800]] }
+    },
+    exerciseOrders: {
+      orders: { columns: ["ordered_on", "product_id", "quantity"], rows: [["2021-04-10", "P2", 120], ["2021-04-15", "P1", 100], ["2021-04-22", "P4", 50], ["2021-04-30", "P8", 80], ["2021-04-06", "P1", 100], ["2021-04-08", "P3", 70]] },
+      products: { columns: ["id", "name"], rows: [["P1", "PC"], ["P2", "テレビ"], ["P3", "掃除機"], ["P4", "冷蔵庫"], ["P5", "エアコン"], ["P6", "電話機"], ["P7", "時計"]] }
+    }
+  });
+  function exercise(lecture, task, create) {
+    const start = questions.length;
+    create();
+    for (const q of questions.slice(start)) q.exerciseTasks = [task];
+  }
+  exercise(1, 2, () => single(1, "財布の主キーを選ぶ", [66, 67, 70], "wallet(money,num)には(5000,2),(1000,4),(500,3),(100,1)を格納する。今後も金種ごとに1行とする。適切な主キーを選びなさい。", "money", ["num", "合計金額だけ", "主キーは必要なだけ重複してよい"], "金種moneyは要件上1行を識別します。枚数numは別の金種で同じ値になり得るので、今だけ重複していなくても主キーには不適切です。"));
+  exercise(1, 2, () => sql(1, "財布の総額", [70], "exerciseWallet", ["wallet"], "SELECT SUM(money*num) FROM wallet;", "15600", ["6600", "10", "4"], "5000×2+1000×4+500×3+100×1=15600円。金種だけの合計や枚数だけの合計とは違います。SUMは後の講義で扱う、この関係表現の応用練習です。"));
+  exercise(1, 2, () => sql(1, "タプル数と紙幣硬貨の数", [44, 70], "exerciseWallet", ["wallet"], "SELECT SUM(num) FROM wallet;", "10", ["4", "15600", "6600"], "紙幣・硬貨の個数は2+4+3+1=10。一方、関係のタプル数は金種ごとの4行です。現物の個数と表の行数を区別します。"));
+
+  exercise(2, 1, () => sql(2, "演習の価格条件", [39, 40], "cities", ["products"], "SELECT name FROM products WHERE unit_price>1000 ORDER BY id;", "半製品D・製品E・製品F", ["部品A・部品B・部品C", "製品E・製品F", "半製品Dだけ"], "2000,3500,4900の3製品が条件を満たします。inventoryは在庫数、unit_priceは単価なので列を取り違えないようにします。出力順を固定するためORDER BYを加えています。", "column"));
+  exercise(2, 1, () => sql(2, "生産地から都道府県を求める", [39, 40], "cities", ["cities", "products"], "SELECT c.prefecture FROM cities c JOIN products p ON c.name=p.origin WHERE p.id='0003';", "愛知県", ["神奈川県", "東京都", "千葉県"], "製品0003のoriginは名古屋市。その都市名をcities.nameへ結び、prefectureの愛知県を出力します。出力列に欲しい情報がなくても関連表を経由して補えます。"));
+  exercise(2, 3, () => sql(2, "手持在庫の条件", [55], "staff", ["items"], "SELECT name FROM items WHERE qoh<200 ORDER BY id;", "本・机・菓子・棚", ["本・菓子", "ボールだけ", "机・棚"], "qohは手持在庫です。100,20,50,10は200未満で、400のボールだけが除かれます。これは問題中の練習用データの結果で、sample.db全件の結果とは区別します。", "column"));
+  exercise(2, 3, () => sql(2, "安い給与の責任者本人", [55], "staff", ["departments", "employees"], "SELECT d.name FROM departments d JOIN employees e ON d.manager_id=e.id WHERE e.salary<10000 ORDER BY d.id;", "食品", ["書籍・家具", "家具だけ", "書籍・食品"], "manager_idを社員本人のidへ結びます。責任者の給与が10000未満なのは、佐藤9000が責任者の食品です。給与10000ちょうどは含めません。", "column"));
+  exercise(2, 3, () => sql(2, "同じ上司番号での結合", [55], "staff", ["departments", "employees"], "SELECT e.name FROM departments d JOIN employees e ON d.manager_id=e.manager_id WHERE e.salary<10000 ORDER BY d.id,e.id;", "佐藤・高橋", ["佐藤だけ", "山田・鈴木", "山本だけ"], "書籍の責任者番号1と同じmanager_idを持つ安い給与の社員は佐藤、家具の責任者番号3に対しては高橋です。責任者本人のidで結ぶ前問とは意味が違います。", "column"));
+
+  exercise(3, 2, () => match(3, "店舗・注文・顧客の多重度", [48], "1つの注文を1店舗が受け付け、1人の顧客が発注する。各店舗・顧客は複数の注文と対応できる。左から右を見た関係の多重度を対応させなさい。", [["店舗→注文", "1対多"], ["顧客→注文", "1対多"], ["注文→店舗", "多対1"], ["注文→顧客", "多対1"]], ["常に1対1"], "注文を中心に、店舗と顧客がそれぞれ親になります。この条件だけでは各店舗・顧客に最低1件の注文が必要とは限りません。"));
+  exercise(3, 2, () => single(3, "注文の外部キー", [48, 56, 70], "店舗stores(id)、顧客customers(id)、注文orders(id,...)をテーブル化する。各注文の店舗と顧客を記録する基本設計を選びなさい。", "ordersにstore_idとcustomer_idを持たせ、各親のidを参照する", ["storesの1列に全注文番号をカンマ区切りで詰める", "customersの主キーを毎回注文金額へ変更する", "店舗名と顧客名だけを注文の主キーにする"], "多側のordersへ2つの外部キーを置きます。店舗や顧客の名前を重複保存するのでなくIDで参照し、注文自体は注文IDで識別します。"));
+  exercise(3, 3, () => single(3, "空のDBを開いたときの確認", [74, 75, 76, 78, 82], "cd_jacket.dbを開いて.tablesに何も出なかった。適切な対応を選びなさい。", "DBのパスとファイル名を確認し、新規DBなら定義SQLを読み込んでから挿入SQLを実行する", [".tablesに何もなくても既存データは必ず正しく開けている", "SELECTだけを何度も実行すれば表が自動作成される", "ファイル名を間違えるとSQLiteは必ず起動を拒否する"], "存在しないパスのファイル名を指定して空のDBを開いた可能性があります。定義には.read create_table.sql、挿入には.read insert_into.sqlを使い、.tablesとSELECTで段階ごとに確認します。"));
+  exercise(3, 4, () => sql(3, "曲の作曲者を検索", [71, 83], "exerciseCd", ["artists", "music"], "SELECT m.title FROM artists a JOIN music m ON a.id=m.composer_id WHERE a.name='椎名林檎' ORDER BY m.id;", "曲B", ["曲A・曲B", "曲A・曲C", "曲Aだけ"], "composer_idが椎名林檎のid=1に一致するのは曲Bだけです。曲Aの作詞者は1ですが作曲者は3なので、この条件では入りません。", "column"));
+  exercise(3, 4, () => sql(3, "ボーカル参加曲を検索", [71, 83], "exerciseCd", ["play", "tracks", "music"], "SELECT DISTINCT m.title FROM play p JOIN tracks t ON p.cd_id=t.cd_id AND p.track_number=t.track_number JOIN music m ON t.music_id=m.id WHERE p.artist_id=2 AND p.role='vocal' ORDER BY m.id;", "曲A・曲C", ["曲Bだけ", "曲A・曲B", "曲Cだけ"], "歌手2のvocal参加はC1の1曲目=曲A、C2の1曲目=曲C、C2の2曲目=曲A。DISTINCTで同じ曲Aを1回にします。CD全体の名義・作詞者・作曲者とは別の経路です。", "column"));
+  exercise(3, 5, () => sql(3, "作詞作曲が同一の曲", [71, 84], "exerciseCd", ["music"], "SELECT title FROM music WHERE lyricist_id=composer_id ORDER BY id;", "曲B・曲C", ["曲Aだけ", "曲A・曲B", "すべての曲"], "曲Bは両方1、曲Cは両方3。曲Aは作曲3・作詞1で一致しません。列名は定義のlyricist_id、composer_idを使います。", "column"));
+  exercise(3, 5, () => sql(3, "本人名義のCD収録曲", [71, 84], "exerciseCd", ["cds", "tracks", "music"], "SELECT m.title FROM cds c JOIN tracks t ON c.id=t.cd_id JOIN music m ON t.music_id=m.id WHERE c.artist_id=1 ORDER BY t.track_number;", "曲A・曲B", ["曲Bだけ", "曲A・曲C", "曲Cだけ"], "名義artist_id=1のCDはC1で、そのトラック1,2の曲A・曲Bを出力します。artist_id=1が作曲・歌唱した曲だけという意味ではありません。", "column"));
+  exercise(3, 4, () => sql(3, "CD番号も含めて結ぶ理由", [71, 83], "exerciseCd", ["play", "tracks"], "SELECT COUNT(*) FROM play p JOIN tracks t ON p.cd_id=t.cd_id AND p.track_number=t.track_number WHERE p.cd_id='C1' AND p.role='vocal';", "2", ["4", "1", "5"], "C1のvocalはトラック1と2に各1件で2行です。track_numberだけで結ぶと、C2の同番号トラックにも結び付いて4行となります。複合キーの両方を結合条件にします。"));
+  exercise(3, 5, () => free(3, "作詞作曲条件のSQLを記述", [71, 84], "music(id,title,composer_id,lyricist_id)で、作詞者と作曲者が同じ曲のタイトルを求めるSQLを書きなさい。並び順の指定は不要。", "SELECT title FROM music WHERE composer_id=lyricist_id;", "同じテーブルの2列を比較すれば足ります。lylicist_idやcomposter_idではなく、スキーマで示したlyricist_idとcomposer_idを使います。同義のSQLは模範解答と照合して自己採点します。", { verification: { fixture: "exerciseCd", mode: "written", expectedRows: [["曲B"], ["曲C"]] } }));
+
+  exercise(4, 3, () => sql(4, "店舗5の売場の商品", [55], "staff", ["departments", "items"], "SELECT i.name FROM departments d JOIN items i ON d.id=i.department_id WHERE d.store_id=5 ORDER BY i.id;", "本・ボール", ["本・菓子", "机・棚", "本だけ"], "店舗5の売場は書籍と玩具です。その売場ID10,30にある本とボールを選びます。店舗番号と売場番号は別の番号です。", "column"));
+  exercise(4, 3, () => single(4, "売場の所在地を補う経路", [49, 50, 55], "departments(id,store_id)、stores(id,address)、items(department_id)がある。売場の商品に、その売場の所在地も添えるための正しい結合を選びなさい。", "items.department_id=departments.id、departments.store_id=stores.id", ["items.department_id=stores.idだけで結ぶ", "departments.id=stores.idだけで結ぶ", "addressと商品価格が等しい行を結ぶ"], "商品→売場→店舗の外部キーをたどります。住所はこのスキーマではstoresにあります。売場IDと店舗IDがたまたま同じ数値でも、役割が違うので直接結んではいけません。"));
+  exercise(4, 1, () => sql(4, "CHAPの商品がある売場", [36], "staff", ["departments", "items", "suppliers"], "SELECT DISTINCT d.name FROM departments d JOIN items i ON d.id=i.department_id JOIN suppliers r ON r.id=i.supplier_id WHERE r.name='CHAP' ORDER BY d.id;", "書籍・玩具", ["家具・食品", "書籍だけ", "食品だけ"], "CHAPの仕入先番号は1で、本とボールを供給しています。それぞれ書籍と玩具の売場です。表名はdepartments、文字列の引用符は半角の'で記述します。", "column"));
+  exercise(4, 3, () => sql(4, "入社時の年齢条件", [55], "staff", ["employees"], "SELECT name FROM employees WHERE start_year-birth_year>=23 ORDER BY id;", "鈴木・山本", ["山田・佐藤", "田中・高橋", "全社員"], "このスキーマは年だけを持つので、講義と同様に入社年−生年で判定します。差は22,19,28,20,20,31で、23以上は鈴木と山本です。誕生日による厳密な満年齢を判定するには日付情報が必要です。", "column"));
+
+  exercise(5, 1, () => match(5, "演習の商品集合を計算", [36], `次の関係は集合として扱う。各演算の結果のタプル数を対応させなさい。\n${tables("exerciseSets", ["ra", "rb"])}`, [["ra∪rb", "8行"], ["ra∩rb", "2行"], ["ra−rb", "3行"], ["rb−ra", "3行"]], ["5行", "10行"], "共通のタプルはR001とM005の2つ。和は5+5−2=8行、片側だけはそれぞれ5−2=3行です。IDだけでなくタプル全体の一致で数えます。", { verification: { fixture: "exerciseSets", mode: "matching", checks: [
+    { label: "ra∪rb", query: "SELECT * FROM ra UNION SELECT * FROM rb;", mode: "rowCount" },
+    { label: "ra∩rb", query: "SELECT * FROM ra INTERSECT SELECT * FROM rb;", mode: "rowCount" },
+    { label: "ra−rb", query: "SELECT * FROM ra EXCEPT SELECT * FROM rb;", mode: "rowCount" },
+    { label: "rb−ra", query: "SELECT * FROM rb EXCEPT SELECT * FROM ra;", mode: "rowCount" }
+  ] } }));
+  exercise(5, 2, () => sql(5, "販売表と商品表の直積", [37], "exerciseProduct", ["r", "s"], "SELECT * FROM r CROSS JOIN s;", "6行", ["1行", "3行", "5行"], "販売3行と商品2行の全組合せなので3×2=6行。商品番号が等しくない組も残ります。同じ商品番号だけを残す操作は、条件を付けた結合です。", "rowCount"));
+  exercise(5, 4, () => sql(5, "課題のSとTの結合", [64], "exerciseJoins", ["s", "t"], "SELECT * FROM s JOIN t ON s.c=t.e;", "2行", ["3行", "5行", "6行"], "sのc=bは(b,4)の1行、tのe=bは(b,5),(b,6)の2行。1×2=2行です。講義の別の例と行の内容が違うので、6行と暗記しないことが重要です。", "rowCount"));
+  exercise(5, 4, () => sql(5, "課題の別属性による結合", [64], "exerciseJoins", ["r", "s"], "SELECT '('||r.a||','||r.b||','||s.c||','||s.d||')' FROM r JOIN s ON r.b=s.d;", "(a,4,b,4)", ["(a,1,a,2)", "(b,1,b,4)", "(a,4,a,3)"], "r.bとs.dの共通の値は4だけです。rの(a,4)とsの(b,4)が結び付きます。aとcを比較する条件ではないので、文字が異なっても構いません。||は表示用に文字を連結しています。"));
+  exercise(5, 7, () => match(5, "販売リストの4種の結合", [68], `r.product_id=s.product_idを条件とする。各結合の結果の行数を対応させなさい。\n${tables("exerciseOuter", ["r", "s"])}`, [["内部結合", "6行"], ["左外部結合（rを保持）", "8行"], ["右外部結合（sを保持）", "7行"], ["完全外部結合", "9行"]], ["5行", "13行"], "一致する販売は6件、rだけにある販売はH002とC001の2件、sだけにある商品はM005の1件。内部6、左6+2=8、右6+1=7、完全6+2+1=9。C003やM002の複数の販売を勝手に重複削除しません。", { verification: { fixture: "exerciseOuter", mode: "matching", checks: [
+    { label: "内部結合", query: "SELECT * FROM r JOIN s ON r.product_id=s.product_id;", mode: "rowCount" },
+    { label: "左外部結合（rを保持）", query: "SELECT * FROM r LEFT JOIN s ON r.product_id=s.product_id;", mode: "rowCount" },
+    { label: "右外部結合（sを保持）", query: "SELECT * FROM r RIGHT JOIN s ON r.product_id=s.product_id;", mode: "rowCount" },
+    { label: "完全外部結合", query: "SELECT * FROM r FULL JOIN s ON r.product_id=s.product_id;", mode: "rowCount" }
+  ] } }));
+  exercise(5, 7, () => sql(5, "結合相手のない販売を探す", [68], "exerciseOuter", ["r", "s"], "SELECT r.sale_id FROM r LEFT JOIN s ON r.product_id=s.product_id WHERE s.product_id IS NULL ORDER BY r.sale_id;", "D002・D007", ["D001・D006", "D004・D008", "M005だけ"], "r側のH002とC001にはs側の商品がなく、D002とD007が残ります。NULLの判定はIS NULLを使い、=NULLとはしません。M005は逆にs側だけにある商品です。", "column"));
+  exercise(5, 8, () => sql(5, "都道府県別の人口平均", [69], "cities", ["cities"], "SELECT AVG(population) FROM cities WHERE prefecture='神奈川県' GROUP BY prefecture;", "260.0", ["372.5", "147.5", "520.0"], "神奈川県の横浜市372.5と川崎市147.5を平均し、(372.5+147.5)/2=260。県全体の人口ではなく、この表に収録した都市の平均人口です。"));
+  exercise(5, 9, () => sql(5, "注文と製品の内部結合", [70, 71], "exerciseOrders", ["orders", "products"], "SELECT p.name,o.quantity FROM orders o JOIN products p ON o.product_id=p.id;", "5行", ["4行", "6行", "7行"], "6注文のうちP8だけ製品表にないため内部結合では落ちます。PCの100台の注文は別の日に2件あり、通常のSELECTでは両方残ります。", "rowCount"));
+  exercise(5, 9, () => sql(5, "結合と集約は別の操作", [70, 71], "exerciseOrders", ["orders", "products"], "SELECT o.quantity FROM orders o JOIN products p ON o.product_id=p.id WHERE p.name='PC' ORDER BY o.ordered_on;", "100・100", ["200", "100だけ", "80・100"], "JOINだけでは注文が商品別に合計されません。PCの2件を1行200台にするには、GROUP BYとSUMなどの集約が必要です。DISTINCTも指定していないので100を2行出します。", "column"));
+
+  const relatedTopics = {
+    1: { 1: ["DBの応用", "永続化", "DBを使う利点"], 2: ["財布の関係表現", "重複を避ける設計"] },
+    2: { 1: ["SELECTの構造", "エイリアス", "結合条件"], 2: ["ドットコマンド", "SQLiteの起動"], 3: ["マネージャ本人と部下", "結合条件"] },
+    3: { 1: ["設計の4原則", "ゴルフの導出値", "ゴルフの設計改善", "悪い設計の説明"], 2: ["多重度", "外部キーの置き場所"], 3: ["挿入の順序", "出力名と並べ替え"], 4: ["作曲・作詞と演奏の区別", "結合経路の意味", "複合外部キーのSQL"], 5: ["CDスキーマのキー", "結合経路の意味"] },
+    4: { 1: ["自己結合と比較", "SQLの修正と理由", "部下を選ぶ結合"], 2: ["価格の境界", "結合SQLを記述する"], 3: ["3表の経路", "仕入先経由の選択"] },
+    5: { 1: ["和集合の計算", "共通集合の計算", "差集合の計算", "差の向き"], 2: ["直積の行数と次数"], 3: ["SQLと関係代数", "射影による件数変化"], 4: ["等結合の行数", "別の属性で結合"], 5: ["最大値", "最小値", "COUNTの違い", "条件付きMAX", "条件付きAVG"], 6: ["集約結果の比較"], 7: ["内部結合の欠落", "左外部結合", "右外部結合", "完全外部結合"], 8: ["降順", "グループ平均"], 9: ["結合による行の増加", "DISTINCT"] }
+  };
+  const exerciseCoverage = [];
+  for (const [lecture, tasks] of Object.entries(relatedTopics)) {
+    for (const [task, topics] of Object.entries(tasks)) {
+      const items = questions.filter((q) => q.lecture === Number(lecture) && (topics.includes(q.topic) || (q.exerciseTasks || []).includes(Number(task))));
+      for (const q of items) q.exerciseTasks = [...new Set([...(q.exerciseTasks || []), Number(task)])].sort((a, b) => a - b);
+      exerciseCoverage.push({ lecture: Number(lecture), task: Number(task), questionIds: items.map((q) => q.id) });
+    }
+  }
+  for (const q of questions.filter((q) => q.exerciseTasks)) {
+    q.exerciseReference = `第${q.lecture}回 演習課題提出シート 課題${q.exerciseTasks.join(", ")}（関連する練習を含む）`;
+    q.slideReference += ` ／ ${q.exerciseReference}`;
+  }
+  window.DATABASE_PREDICTION_EXERCISE_COVERAGE = exerciseCoverage;
   window.DATABASE_PREDICTION_FIXTURES = fixtures;
   window.DATABASE_PREDICTED_QUESTION_DATA = questions;
 })();
