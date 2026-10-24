@@ -627,6 +627,7 @@
       }
 
       .feedback-guide-header {
+        display: block;
         padding: 12px 14px 0;
       }
 
@@ -702,6 +703,24 @@
       .feedback-guide-section li {
         margin: 4px 0;
         line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
+
+      .feedback-guide-section ol {
+        margin: 6px 0 0;
+        padding-left: 1.4rem;
+      }
+
+      .feedback-guide-code {
+        max-width: 100%;
+        padding: 12px;
+        background: #f3f5f4;
+        border: 1px solid #d8e1dc;
+        border-radius: 6px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        font-size: 0.82rem;
+        line-height: 1.6;
       }
 
       .feedback-guide-tip {
@@ -1100,6 +1119,7 @@
     <script src="human_centered_final_guide.js"></script>
     <script src="economics_final_guide.js"></script>
     <script src="audio_engineering_guides.js"></script>
+    <script src="second_semester_guides.js"></script>
     <script>
       const supportedTypes = ["single", "multiple", "matching", "text", "free"];
       const typeLabels = { single: "選択", multiple: "複数選択", matching: "対応", text: "入力", free: "自由記述" };
@@ -1156,6 +1176,7 @@
         revealed: false,
         detailGuideOpen: false,
         detailGuideTab: 0,
+        detailGuideQuestionId: "",
         editingId: "",
         categoryEditing: false,
         deleteMode: false,
@@ -2664,24 +2685,35 @@
       }
 
       function detailedGuide(question) {
-        const guide = ["economics-final", "economics-final-prediction"].includes(question.category)
+        const semesterGuide = (window.SECOND_SEMESTER_STUDY_GUIDES || {})[question.category];
+        const guide = semesterGuide || (["economics-final", "economics-final-prediction"].includes(question.category)
           ? window.ECONOMICS_FINAL_GUIDE
           : question.category === "human-centered-final"
             ? window.HUMAN_CENTERED_FINAL_GUIDE
-            : (window.AUDIO_ENGINEERING_GUIDES || {})[question.category];
+            : (window.AUDIO_ENGINEERING_GUIDES || {})[question.category]);
         if (!guide || !Array.isArray(guide.tabs) || !guide.tabs.length) return null;
+        if (semesterGuide && state.detailGuideQuestionId !== question.id) {
+          state.detailGuideQuestionId = question.id;
+          state.detailGuideTab = Math.max(0, guide.tabs.findIndex((tab) => tab.id === guide.questionTabIds[question.id]));
+          state.detailGuideOpen = false;
+        }
 
         const wrapper = document.createElement("div");
         const toggle = document.createElement("button");
         toggle.type = "button";
         toggle.className = "feedback-guide-toggle";
         toggle.setAttribute("aria-expanded", String(state.detailGuideOpen));
+        toggle.setAttribute("aria-controls", "detailed-guide-content");
         toggle.textContent = state.detailGuideOpen ? "詳しく解説を閉じる" : (guide.openLabel || "期末範囲を詳しく解説で見る");
         toggle.addEventListener("click", () => {
           state.detailGuideOpen = !state.detailGuideOpen;
           render();
+          document.querySelector(".feedback-guide-toggle")?.focus({ preventScroll: true });
         });
-        wrapper.append(toggle);
+        const content = document.createElement("div");
+        content.id = "detailed-guide-content";
+        content.hidden = !state.detailGuideOpen;
+        wrapper.append(toggle, content);
 
         if (!state.detailGuideOpen) return wrapper;
 
@@ -2703,23 +2735,44 @@
         const tabs = document.createElement("div");
         tabs.className = "feedback-guide-tabs";
         tabs.setAttribute("role", "tablist");
+        tabs.setAttribute("aria-label", `${guide.title}の解説テーマ`);
+        const activateTab = (index) => {
+          state.detailGuideTab = index;
+          render();
+          const selected = document.getElementById(`detailed-guide-tab-${index}`);
+          selected?.focus({ preventScroll: true });
+          selected?.scrollIntoView({ block: "nearest", inline: "nearest" });
+        };
         guide.tabs.forEach((tab, index) => {
           const tabButton = document.createElement("button");
           tabButton.type = "button";
           tabButton.className = `feedback-guide-tab ${index === activeIndex ? "is-active" : ""}`;
           tabButton.setAttribute("role", "tab");
+          tabButton.id = `detailed-guide-tab-${index}`;
+          tabButton.tabIndex = index === activeIndex ? 0 : -1;
+          tabButton.setAttribute("aria-controls", "detailed-guide-panel");
           tabButton.setAttribute("aria-selected", String(index === activeIndex));
           tabButton.textContent = tab.label;
-          tabButton.addEventListener("click", () => {
-            state.detailGuideTab = index;
-            render();
+          tabButton.addEventListener("click", () => activateTab(index));
+          tabButton.addEventListener("keydown", (event) => {
+            let next;
+            if (event.key === "ArrowRight") next = (index + 1) % guide.tabs.length;
+            if (event.key === "ArrowLeft") next = (index - 1 + guide.tabs.length) % guide.tabs.length;
+            if (event.key === "Home") next = 0;
+            if (event.key === "End") next = guide.tabs.length - 1;
+            if (next === undefined) return;
+            event.preventDefault();
+            event.stopPropagation();
+            activateTab(next);
           });
           tabs.append(tabButton);
         });
 
         const panel = document.createElement("div");
         panel.className = "feedback-guide-panel";
+        panel.id = "detailed-guide-panel";
         panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", `detailed-guide-tab-${activeIndex}`);
         const source = document.createElement("p");
         source.className = "feedback-guide-source";
         source.textContent = `講義資料: ${activeTab.sources}`;
@@ -2735,22 +2788,30 @@
           sectionElement.className = "feedback-guide-section";
           const sectionHeading = document.createElement("h4");
           sectionHeading.textContent = section.title;
-          const list = document.createElement("ul");
-          section.points.forEach((point) => {
+          const list = document.createElement(section.steps ? "ol" : "ul");
+          (section.steps || section.points || []).forEach((point) => {
             const item = document.createElement("li");
             item.textContent = point;
             list.append(item);
           });
           sectionElement.append(sectionHeading, list);
+          if (section.code) {
+            const pre = document.createElement("pre");
+            pre.className = "feedback-guide-code";
+            const code = document.createElement("code");
+            code.textContent = section.code;
+            pre.append(code);
+            sectionElement.append(pre);
+          }
           panel.append(sectionElement);
         });
         const tip = document.createElement("p");
         tip.className = "feedback-guide-tip";
-        tip.textContent = `記述対策: ${activeTab.examTip}`;
+        tip.textContent = `${guide.tipLabel || "記述対策"}: ${activeTab.examTip}`;
         panel.append(tip);
 
         guideBox.append(header, tabs, panel);
-        wrapper.append(guideBox);
+        content.append(guideBox);
         return wrapper;
       }
 

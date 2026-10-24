@@ -31,6 +31,66 @@ async function checkCurrentAnswer(page, question) {
   await page.locator("#answerButton").click();
   const feedback = await page.locator("#feedback").innerText();
   assert(feedback.startsWith(question.type === "free" ? "模範解答" : "正解"), `${question.id}: ${feedback}`);
+  if (["database-prediction", "data-mining-prediction"].includes(question.category)) {
+    assert.equal(await page.locator("#feedback .feedback-guide-toggle").count(), 1, question.id);
+  }
+}
+
+async function checkDetailedGuide(page, category, topic) {
+  await page.evaluate((value) => {
+    state.index = filtered().findIndex((q) => q.topic === value);
+    if (state.index < 0) throw new Error(`Missing guide test topic: ${value}`);
+    const question = filtered()[state.index];
+    delete state.responses[question.id];
+    state.revealed = false;
+    render();
+  }, topic);
+  assert.equal(await page.locator("#feedback .feedback-guide-toggle").count(), 0);
+  const question = await page.evaluate(() => filtered()[state.index]);
+  await checkCurrentAnswer(page, question);
+  const guide = await page.evaluate((key) => window.SECOND_SEMESTER_STUDY_GUIDES[key], category);
+  const expectedIndex = guide.tabs.findIndex((tab) => tab.id === guide.questionTabIds[question.id]);
+  const toggle = page.locator("#feedback .feedback-guide-toggle");
+  assert.equal(await toggle.getAttribute("aria-expanded"), "false");
+  await toggle.click();
+  const tabs = page.locator(".feedback-guide-tabs [role=tab]");
+  const selected = page.locator(".feedback-guide-tabs [aria-selected=true]");
+  assert.equal(await selected.innerText(), guide.tabs[expectedIndex].label);
+  assert.equal(await page.locator("#detailed-guide-panel").getAttribute("aria-labelledby"), `detailed-guide-tab-${expectedIndex}`);
+  for (let index = 0; index < guide.tabs.length; index += 1) {
+    await tabs.nth(index).click();
+    assert.equal(await selected.innerText(), guide.tabs[index].label);
+    assert.equal(await selected.getAttribute("tabindex"), "0");
+    assert.equal(await page.locator(".feedback-guide-tabs [tabindex='-1']").count(), guide.tabs.length - 1);
+    assert.equal(await page.locator(".feedback-guide-lead").innerText(), guide.tabs[index].lead);
+    assert((await page.locator(".feedback-guide-source").innerText()).includes(guide.tabs[index].sources));
+    assert.equal(await page.locator("#detailed-guide-panel ol").count(), guide.tabs[index].sections.filter((section) => section.steps).length);
+    assert.deepEqual(await page.locator(".feedback-guide-code code").allTextContents(), guide.tabs[index].sections.filter((section) => section.code).map((section) => section.code));
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${category}/${guide.tabs[index].id}`);
+  }
+  await selected.press("Home");
+  assert.equal(await selected.innerText(), guide.tabs[0].label);
+  await selected.press("ArrowLeft");
+  assert.equal(await selected.innerText(), guide.tabs.at(-1).label);
+  await selected.press("ArrowRight");
+  assert.equal(await selected.innerText(), guide.tabs[0].label);
+  await selected.press("End");
+  assert.equal(await selected.innerText(), guide.tabs.at(-1).label);
+  assert.equal(await selected.evaluate((element) => element === document.activeElement), true);
+  assert.equal(await page.evaluate(() => filtered()[state.index].id), question.id);
+  await toggle.click();
+  assert.equal(await toggle.getAttribute("aria-expanded"), "false");
+  await toggle.click();
+  assert.equal(await selected.innerText(), guide.tabs.at(-1).label);
+  await tabs.nth(expectedIndex).click();
+  await page.locator(".feedback-guide").screenshot({ path: path.join(root, `output/${category}-guide-${innerWidthLabel(await page.viewportSize())}.png`) });
+  await page.evaluate(() => { state.index = (state.index + 1) % filtered().length; state.revealed = false; render(); });
+  await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+  assert.equal(await toggle.getAttribute("aria-expanded"), "false");
+}
+
+function innerWidthLabel(viewport) {
+  return viewport.width < 600 ? "mobile" : "desktop";
 }
 
 async function run() {
@@ -204,11 +264,17 @@ async function run() {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       await page.screenshot({ path: path.join(root, `output/database-exercise-${name}-mobile.png`), fullPage: true });
     }
+    await checkDetailedGuide(page, "database-prediction", "販売リストの4種の結合");
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await checkDetailedGuide(page, "database-prediction", "ボーカル参加曲を検索");
     await context.setOffline(true);
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 予想問題");
     assert.equal(await page.evaluate(() => filtered().length), 183);
+    await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+    await page.locator("#feedback .feedback-guide-toggle").click();
+    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 9);
     await context.setOffline(false);
 
     await page.locator("#changeSetButton").click();
@@ -280,6 +346,9 @@ async function run() {
     }
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.screenshot({ path: path.join(root, "output/data-mining-prediction-desktop.png"), fullPage: true });
+    await checkDetailedGuide(page, "data-mining-prediction", "標準偏差から寄与率");
+    await page.setViewportSize({ width: 390, height: 844 });
+    await checkDetailedGuide(page, "data-mining-prediction", "標準偏差から寄与率");
     await page.evaluate(() => { state.index = filtered().findIndex((q) => q.topic === "実習得点を標準化"); state.revealed = false; render(); });
     for (const [input, expected] of [["0.840", true], [".84", true], ["８．４e−1", true], ["0.839551", false], ["0.85", false], ["", false], ["0.84点", false], ["0.84+0", false], ["Infinity", false]]) {
       await page.locator("#choices input").fill(input);
@@ -293,6 +362,9 @@ async function run() {
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.evaluate(() => filtered().length), 167);
+    await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+    await page.locator("#feedback .feedback-guide-toggle").click();
+    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 8);
     await context.setOffline(false);
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#archiveActiveSetButton").click();
@@ -301,6 +373,20 @@ async function run() {
     await page.locator("#archivedSetList .set-card").filter({ has: page.getByRole("heading", { name: "データマイニング 予想問題", exact: true }) })
       .getByRole("button", { name: "戻して始める", exact: true }).click();
     assert.equal(await page.evaluate(() => filtered().length), 167);
+
+    await page.locator("#firstSemesterTab").click();
+    for (const name of ["経済学 期末 予想問題", "音声工学 期末 過去問", "人間中心設計 期末 過去問"]) {
+      if (!(await page.locator("#setList").isVisible())) await page.locator("#changeSetButton").click();
+      await startSet(page, name);
+      await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+      const toggle = page.locator("#feedback .feedback-guide-toggle");
+      if (await toggle.getAttribute("aria-expanded") === "false") await toggle.click();
+      assert((await page.locator(".feedback-guide-section").count()) > 0, name);
+      const selected = page.locator(".feedback-guide-tabs [aria-selected=true]");
+      await selected.press("End");
+      assert.equal(await selected.evaluate((element) => element === document.activeElement), true);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, name);
+    }
 
     const migrationContext = await browser.newContext();
     const legacyPage = await migrationContext.newPage();
@@ -333,7 +419,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 183 database-prediction + 26 data-mining + 167 data-mining-prediction answers, numeric-equivalence checks, source references, written-answer reveal, calculation checks, matching, semester isolation, legacy migration, progress, filters, category edits, deletion, archive/restore, import, mobile layout and offline reload.");
+    console.log("PASS: 28 database + 183 database-prediction + 26 data-mining + 167 data-mining-prediction answers, all 17 detailed-guide tabs, relevant default tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
