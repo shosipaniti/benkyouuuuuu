@@ -145,7 +145,7 @@ async function run() {
   assert.equal(miningAnswer("data-mining-quiz2-012"), assignments.join(" / "));
   vm.runInNewContext(await fs.readFile(path.join(root, "database_prediction_questions.js"), "utf8"), data);
   const databasePredictions = data.window.DATABASE_PREDICTED_QUESTION_DATA;
-  assert.equal(databasePredictions.length, 183);
+  assert.equal(databasePredictions.length, 205);
   vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_prediction_questions.js"), "utf8"), data);
   const miningPredictions = data.window.DATA_MINING_PREDICTED_QUESTION_DATA;
   assert.equal(miningPredictions.length, 167);
@@ -255,23 +255,24 @@ async function run() {
     assert.equal(await page.evaluate(() => filtered().length), 28);
     await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
     await page.locator("#feedback .feedback-guide-toggle").click();
-    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 9);
+    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 11);
     await context.setOffline(false);
 
     await page.locator("#changeSetButton").click();
     await startSet(page, "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 183);
+    assert.equal(await page.evaluate(() => filtered().length), 205);
     await page.setViewportSize({ width: 390, height: 844 });
     for (let index = 0; index < databasePredictions.length; index += 1) {
       await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
       const question = await page.evaluate(() => filtered()[state.index]);
       await checkCurrentAnswer(page, question);
+      if (question.lecture === 6) await checkGuideDefault(page, question);
       assert((await page.locator("#feedback").innerText()).includes(question.slideReference), question.id);
       await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
     }
     await page.locator("#filterDetails summary").click();
-    for (const lecture of [1, 2, 3, 4, 5]) {
+    for (const lecture of [1, 2, 3, 4, 5, 6]) {
       const source = databasePredictions.find((q) => q.lecture === lecture).source;
       await page.locator("#sourceFilter").selectOption(source);
       assert.equal(await page.evaluate(() => filtered().length), databasePredictions.filter((q) => q.lecture === lecture).length);
@@ -292,16 +293,18 @@ async function run() {
       await page.screenshot({ path: path.join(root, `output/database-exercise-${name}-mobile.png`), fullPage: true });
     }
     await checkDetailedGuide(page, "database-prediction", "販売リストの4種の結合");
+    await checkDetailedGuide(page, "database-prediction", "特定学生の得点と合否を更新");
+    await checkDetailedGuide(page, "database-prediction", "受注明細の無損失分解");
     await page.setViewportSize({ width: 1280, height: 900 });
     await checkDetailedGuide(page, "database-prediction", "ボーカル参加曲を検索");
     await context.setOffline(true);
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 183);
+    assert.equal(await page.evaluate(() => filtered().length), 205);
     await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
     await page.locator("#feedback .feedback-guide-toggle").click();
-    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 9);
+    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 11);
     await context.setOffline(false);
 
     await page.locator("#changeSetButton").click();
@@ -454,7 +457,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 183 database-prediction + 26 data-mining + 167 data-mining-prediction answers, all 54 quiz guide defaults, all 17 shared detailed-guide tabs in quizzes and predictions, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all four sets.");
+    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction answers, all 54 quiz and 22 lecture-6 guide defaults, all 19 shared detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all four sets.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

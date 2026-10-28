@@ -1,7 +1,7 @@
 (() => {
   const questions = [];
   const counts = {};
-  const titles = { 1: "DBの基礎・関係データモデル", 2: "SQLの基本・SQLite", 3: "概念設計・論理設計", 4: "問い合わせの組み立て", 5: "関係代数・集約・外部結合" };
+  const titles = { 1: "DBの基礎・関係データモデル", 2: "SQLの基本・SQLite", 3: "概念設計・論理設計", 4: "問い合わせの組み立て", 5: "関係代数・集約・外部結合", 6: "更新・関数従属性・無損失分解" };
   const fixtures = {
     staff: {
       employees: { columns: ["id", "name", "salary", "manager_id", "birth_year", "start_year"], rows: [[1, "山田", 12000, 1, 1988, 2010], [2, "佐藤", 9000, 1, 1990, 2009], [3, "鈴木", 15000, 3, 1992, 2020], [4, "田中", 10000, 3, 1980, 2000], [5, "高橋", 8000, 3, 1995, 2015], [6, "山本", 20000, 1, 1988, 2019]] },
@@ -37,7 +37,7 @@
   function add(round, topic, pages, prompt, answer, type, choices, explanation, extra = {}) {
     const number = (counts[round] || 0) + 1;
     counts[round] = number;
-    questions.push({ id: `database-pred-${String(round).padStart(2, "0")}-${String(number).padStart(3, "0")}`, source: `予想 第${round}回 ${titles[round]}`, category: "database-prediction", semester: "second", number, topic, lecture: round, pages, prompt, answer, type, choices, explanation, slideReference: `データベース工学 第${round}回 p.${pages.join(", ")}（PDFのページ番号）`, images: [], ...extra });
+    questions.push({ id: `database-pred-${String(round).padStart(2, "0")}-${String(number).padStart(3, "0")}`, source: `予想 第${round}回 ${titles[round]}`, category: "database-prediction", semester: "second", number, topic, lecture: round, pages, prompt, answer, type, choices, explanation, slideReference: pages.length ? `データベース工学 第${round}回 p.${pages.join(", ")}（PDFのページ番号）` : `データベース工学 第${round}回 演習課題提出シート`, images: [], ...extra });
   }
   const single = (r, t, p, q, a, others, e, x) => add(r, t, p, q, a, "single", [a, ...others], e, x);
   const input = (r, t, p, q, a, e, x) => add(r, t, p, q, String(a), "text", [], e, x);
@@ -299,12 +299,68 @@
   exercise(5, 9, () => sql(5, "注文と製品の内部結合", [70, 71], "exerciseOrders", ["orders", "products"], "SELECT p.name,o.quantity FROM orders o JOIN products p ON o.product_id=p.id;", "5行", ["4行", "6行", "7行"], "6注文のうちP8だけ製品表にないため内部結合では落ちます。PCの100台の注文は別の日に2件あり、通常のSELECTでは両方残ります。", "rowCount"));
   exercise(5, 9, () => sql(5, "結合と集約は別の操作", [70, 71], "exerciseOrders", ["orders", "products"], "SELECT o.quantity FROM orders o JOIN products p ON o.product_id=p.id WHERE p.name='PC' ORDER BY o.ordered_on;", "100・100", ["200", "100だけ", "80・100"], "JOINだけでは注文が商品別に合計されません。PCの2件を1行200台にするには、GROUP BYとSUMなどの集約が必要です。DISTINCTも指定していないので100を2行出します。", "column"));
 
+  const examColumns = ["id", "name", "grade", "department", "faculty", "score", "result"];
+  const examRows = [[1234, "南波 六太", 1, "A学科", "X学部", 60, "未定"], [1235, "伊藤 せりか", 2, "B学科", "X学部", 85, "未定"], [1236, "南波 日々人", 2, "A学科", "X学部", 90, "未定"], [1237, "真壁 ケンジ", 3, "B学科", "X学部", 75, "未定"], [1238, "吾妻 滝生", 3, "C学科", "Y学部", 34, "未定"], [1239, "紫 三世", 3, "D学科", "Y学部", 80, "未定"]];
+  const bonusRows = examRows.map((row) => [...row.slice(0, 5), row[5] + (row[4] === "X学部" ? 3 : 0), row[5] >= 60 ? "合格" : "不合格"]);
+  const correctedRows = bonusRows.map((row) => row[0] === 1238 ? [...row.slice(0, 5), 65, "合格"] : [...row]);
+  Object.assign(fixtures, {
+    exerciseExam: { exam_results: { columns: examColumns, rows: examRows } },
+    exerciseExamBonus: { exam_results: { columns: examColumns, rows: bonusRows } },
+    exerciseExamCorrected: { exam_results: { columns: examColumns, rows: correctedRows } },
+    exerciseSalesFD: { orders: { columns: ["order_no", "order_date", "customer_code", "customer_name", "product_code", "product_name", "unit_price", "quantity"], rows: [[203, "2020-07-19", "001", "A社", "A002", "ファイル", 400, 10], [203, "2020-07-19", "001", "A社", "C003", "ボールペン", 200, 20], [203, "2020-07-19", "001", "A社", "C005", "鉛筆", 30, 15], [305, "2020-09-20", "002", "B社", "A001", "A4印刷用紙", 500, 30], [401, "2020-09-27", "008", "C社", "B012", "ホチキス", 500, 5], [401, "2020-09-27", "008", "C社", "B013", "テープのり", 200, 6]] } },
+    exerciseLoansFD: { loans: { columns: ["loan_code", "loan_date", "student_code", "student_name", "faculty", "entry_year"], rows: [[2201, "09/20", "0001", "野比のび太", "工", 2018], [2202, "09/21", "0002", "源静香", "先進工", 2016], [2203, "09/21", "0003", "剛田武", "創造工", 2017], [2204, "09/22", "0004", "骨川スネ夫", "社シス", 2016], [2205, "09/22", "0005", "出木杉英才", "先進工", 2015], [2206, "09/23", "0005", "出木杉英才", "先進工", 2015], [2207, "09/23", "0006", "剛田武", "工", 2016], [2208, "09/23", "0001", "野比のび太", "工", 2018]] } },
+    exerciseDetailsFD: {
+      order_lines: { columns: ["order_no", "line_no", "product_code", "product_name", "quantity"], rows: [["015867", 1, "TV20006", "20型テレビ", 20], ["015867", 2, "TV20005", "24型テレビ", 10], ["015867", 3, "TV20007", "28型テレビ", 5], ["015868", 1, "TV20005", "24型テレビ", 8]] },
+      details: { columns: ["order_no", "line_no", "product_code", "quantity"], rows: [["015867", 1, "TV20006", 20], ["015867", 2, "TV20005", 10], ["015867", 3, "TV20007", 5], ["015868", 1, "TV20005", 8]] },
+      products: { columns: ["product_code", "product_name"], rows: [["TV20005", "24型テレビ"], ["TV20006", "20型テレビ"], ["TV20007", "28型テレビ"]] }
+    }
+  });
+  const classify = "UPDATE exam_results SET result='合格' WHERE score>=60;\nUPDATE exam_results SET result='不合格' WHERE score<60;";
+  const bonus = "UPDATE exam_results SET score=score+3 WHERE faculty='X学部';";
+  const correction = "UPDATE exam_results SET score=65, result='合格' WHERE id=1238;";
+  const examSelect = "SELECT * FROM exam_results ORDER BY id;";
+  const orderRules = "列の対応はorder_no=受注No.、order_date=受注日、customer_code=顧客コード、customer_name=顧客名、product_code=商品コード、product_name=商品名、unit_price=単価、quantity=数量。\n業務上、受注No.ごとに受注日と顧客コードが1つ決まり、顧客コードごとに顧客名が1つ決まる。商品コードごとに商品名と単価が1つ決まる。同じ受注No.の商品コードは1回だけ現れ、その組ごとに数量が決まる。";
+  const orderFDs = [{ left: ["order_no"], right: ["order_date", "customer_code"] }, { left: ["customer_code"], right: ["customer_name"] }, { left: ["product_code"], right: ["product_name", "unit_price"] }, { left: ["order_no", "product_code"], right: ["quantity"] }];
+  const loanRules = "列の対応はloan_code=貸出コード、loan_date=日付、student_code=学生コード、student_name=学生名、faculty=学部、entry_year=入学年度。\n貸出コードは貸出1件を識別し、日付と学生コードを決める。学生コードは学生1人を識別し、学生名・学部・入学年度を決める。同じ学生は複数回借りられ、同姓同名の学生も存在し得る。";
+  const loanFDs = [{ left: ["loan_code"], right: ["loan_date", "student_code"] }, { left: ["student_code"], right: ["student_name", "faculty", "entry_year"] }];
+  const reconstructed = "SELECT d.order_no,d.line_no,d.product_code,p.product_name,d.quantity FROM details d JOIN products p ON d.product_code=p.product_code ORDER BY d.order_no,d.line_no;";
+
+  exercise(6, 1, () => single(6, "第6回のSQLite起動設定", [], "新しいDBを開くコマンドsqlite3 -column -header DBE06_04.dbについて、正しい説明を選びなさい。", "-columnは列をそろえた表示、-headerは列見出しの表示を指定する", ["-columnがexam_results表を自動作成し、-headerが行を挿入する", "DBファイルを開くだけで演習の6行が自動登録される", "表示オプションが主キーを設定する"], "表示設定とテーブル定義・データ挿入は別です。オプションの先頭は半角の-を使います。SQLiteの起動時バージョン表示は環境によって異なるため、特定の版番号を暗記しません。"));
+  exercise(6, 1, () => match(6, "第6回の作成と挿入の順序", [], "空のDBを開いた後の操作を、役割と対応させなさい。配布SQLのファイル名を使う。", [[".read DBE06_04_create_table.sql", "exam_resultsの構造を作る"], [".tables と .schema", "表一覧と定義を確認する"], [".read DBE06_04_insert_table.sql", "初期レコードを挿入する"], ["SELECT * FROM exam_results;", "保存されたレコードを確認する"]], ["合否を自動判定する"], "定義→構造確認→挿入→内容確認と進めます。.readなどのドットコマンドと、末尾に;を付けるSQL文を区別します。同じINSERTを何度も実行すると主キー重複などが起こり得ます。"));
+  exercise(6, 2, () => free(6, "合否を更新するSQL", [], `${tables("exerciseExam", ["exam_results"])}\nscoreはNULLを含まない。60点以上を合格、それ未満を不合格にする2つのUPDATE文を書きなさい。`, classify, "UPDATE 表 SET 列=値 WHERE 条件;です。60点ちょうどを含めるので>=60。SELECTは閲覧だけで、resultを書き換えません。文字列は半角のシングルクォートで囲みます。", { verification: { fixture: "exerciseExam", mode: "mutation", query: examSelect, expectedRows: examRows.map((row) => [...row.slice(0, 6), row[5] >= 60 ? "合格" : "不合格"]) } }));
+  exercise(6, 2, () => single(6, "X学部への加点UPDATE", [], `${tables("exerciseExam", ["exam_results"])}\nX学部の学生だけに3点加えるSQLを選びなさい。`, bonus, ["UPDATE exam_results SET score=3 WHERE faculty='X学部';", "UPDATE exam_results SET score=score+3;", "UPDATE exam_results SET score=score+3 WHERE department='X学部';"], "score=score+3は現在値に3を加えます。score=3は3点への置換です。WHEREを省くとY学部にも加点され、departmentで学部を比較すると対象を取り違えます。", { verification: { fixture: "exerciseExam", mode: "mutation-choice", query: examSelect, expectedRows: examRows.map((row) => [...row.slice(0, 5), row[5] + (row[4] === "X学部" ? 3 : 0), row[6]]) } }));
+  exercise(6, 3, () => match(6, "合否判定と加点後の得点", [], `${tables("exerciseExam", ["exam_results"])}\nまず60点以上を合格、それ未満を不合格にし、その後X学部へ3点を1回だけ加点した。各idの得点を対応させなさい。`, [["1234", "63"], ["1235", "88"], ["1236", "93"], ["1237", "78"], ["1238", "34"], ["1239", "80"]], ["65", "83"], "X学部の先頭4人だけに3点を加えます。Y学部の1238と1239は34点と80点のままです。この入力では加点で合否の境界を越える人はいません。", { verification: { fixture: "exerciseExam", mode: "matching", setup: `${classify}\n${bonus}`, checks: bonusRows.map((row) => ({ label: String(row[0]), query: `SELECT score FROM exam_results WHERE id=${row[0]};`, mode: "scalar" })) } }));
+  exercise(6, 3, () => free(6, "特定学生の得点と合否を更新", [], `${tables("exerciseExamBonus", ["exam_results"])}\nid=1238の学生だけを65点・合格へ修正する1つのUPDATE文を書きなさい。`, correction, "2列を変える場合はSET score=65, result='合格'とカンマで並べます。WHERE id=1238で1人を特定します。scoreだけ変えてもresultは自動では変わりません。", { verification: { fixture: "exerciseExamBonus", mode: "mutation", query: examSelect, expectedRows: correctedRows } }));
+  exercise(6, 3, () => sql(6, "最終更新後の合格者COUNT", [], "exerciseExamCorrected", ["exam_results"], "SELECT COUNT(*) FROM exam_results WHERE result='合格';", "6", ["4", "5", "7"], "当初不合格だった1238も65点・合格へ修正済みなので6人全員です。最初の表や加点だけの段階と混ぜないようにします。"));
+  exercise(6, 3, () => single(6, "加点UPDATEの再実行", [], "X学部のある学生が60点である。UPDATE exam_results SET score=score+3 WHERE faculty='X学部';を同じDBで2回実行した。この学生の得点を選びなさい。", "66", ["63", "3", "60"], "1回目は60+3=63、2回目は63+3=66です。繰り返しても同じ結果になる置換とは違い、加点の再実行は累積します。", { verification: { fixture: "exerciseExam", mode: "scalar", setup: `${bonus}\n${bonus}`, query: "SELECT score FROM exam_results WHERE id=1234;" } }));
+  exercise(6, 4, () => free(6, "第6回のX学部AVG", [], `${tables("exerciseExamCorrected", ["exam_results"])}\nこの最終更新後の表から、X学部の平均点を求めるSQL文を書きなさい。`, "SELECT AVG(score) FROM exam_results WHERE faculty='X学部';", "X学部は63,88,93,78点で、(63+88+93+78)/4=322/4=80.5点です。修正された1238はY学部なので平均には入りません。", { verification: { fixture: "exerciseExamCorrected", mode: "written", expectedRows: [[80.5]] } }));
+  exercise(6, 4, () => sql(6, "第6回の上位IDのMAX", [], "exerciseExamCorrected", ["exam_results"], "SELECT MAX(score) FROM exam_results WHERE id>=1236;", "93", ["90", "80", "65"], "対象は1236,1237,1238,1239で、得点93,78,65,80の最大は93です。idの条件で絞ってからscoreの最大を取ります。"));
+  exercise(6, 4, () => free(6, "第6回の学部と学年のAVG", [], `${tables("exerciseExamCorrected", ["exam_results"])}\nX学部かつ2年生の平均点を求めるSQL文を書きなさい。`, "SELECT AVG(score) FROM exam_results WHERE faculty='X学部' AND grade=2;", "学部と学年の両条件をANDで満たす1235と1236を選び、(88+93)/2=90.5点です。ORではX学部全員など別の対象まで含みます。", { verification: { fixture: "exerciseExamCorrected", mode: "written", expectedRows: [[90.5]] } }));
+  exercise(6, 5, () => single(6, "受注の複合主キー", [], `${tables("exerciseSalesFD", ["orders"])}\n${orderRules}\n受注明細1行を識別する主キーを選びなさい。列名はorder_no=受注No.、product_code=商品コードである。`, "order_noとproduct_codeの組", ["order_noだけ", "product_codeだけ", "unit_priceだけ"], "受注203は3商品、受注401は2商品を含むので受注No.だけでは明細を識別できません。同じ商品を別の受注でも注文できるため商品コードだけでも不十分です。業務条件に基づいて組をキーにします。", { verification: { fixture: "exerciseSalesFD", table: "orders", mode: "fd-key", dependencies: orderFDs, key: ["order_no", "product_code"] } }));
+  const orderChecks = [
+    { choice: "受注No.→受注日", left: ["order_no"], right: ["order_date"] }, { choice: "受注No.→顧客コード", left: ["order_no"], right: ["customer_code"] }, { choice: "顧客コード→顧客名", left: ["customer_code"], right: ["customer_name"] }, { choice: "商品コード→商品名", left: ["product_code"], right: ["product_name"] }, { choice: "商品コード→単価", left: ["product_code"], right: ["unit_price"] }, { choice: "{受注No.,商品コード}→数量", left: ["order_no", "product_code"], right: ["quantity"] }, { choice: "単価→商品名", left: ["unit_price"], right: ["product_name"] }, { choice: "受注No.→商品コード", left: ["order_no"], right: ["product_code"] }, { choice: "商品コード→受注No.", left: ["product_code"], right: ["order_no"] }
+  ];
+  exercise(6, 5, () => multi(6, "受注の基本的な関数従属性", [], `${tables("exerciseSalesFD", ["orders"])}\n${orderRules}\nこれらの条件から成立するFDを選択肢の中から全て選びなさい。FDは左辺の値が同じなら右辺の値も同じになるという意味である。`, orderChecks.slice(0, 6).map((check) => check.choice), orderChecks.slice(6).map((check) => check.choice), "受注、顧客、商品、明細の各単位で何が決まるかを分けます。例えば受注No.→顧客名も推移的に導けますが、この問題の選択肢にはありません。ここで選ぶ基本FDだけが、論理的に成立するFDの全てという意味ではありません。", { verification: { fixture: "exerciseSalesFD", table: "orders", mode: "fd", dependencies: orderFDs, checks: orderChecks } }));
+  exercise(6, 5, () => single(6, "関数従属性の反例を見つける", [], `${tables("exerciseSalesFD", ["orders"])}\nこの表で『単価→商品名』が成立しないことを示す組を選びなさい。`, "単価500のA4印刷用紙とホチキス", ["受注203の3行は受注日が同じ", "商品コードC003の商品名はボールペン", "単価30の鉛筆は1行しかない"], "左辺が同じなのに右辺が異なる2行があれば反例です。500円で商品名が2種類あるため、単価だけでは商品名は決まりません。", { verification: { fixture: "exerciseSalesFD", mode: "scalar", query: "SELECT COUNT(DISTINCT product_name) FROM orders WHERE unit_price=500;", expectedValue: "2" } }));
+  exercise(6, 5, () => free(6, "関数従属性の推移", [], "受注No.→顧客コード、顧客コード→顧客名が成立する。受注No.と顧客名の間に導けるFDと、その理由を説明しなさい。", "受注No.→顧客名。受注No.で顧客コードが一意に決まり、その顧客コードで顧客名も一意に決まるため。", "X→YとY→ZからX→Zを導くのが推移です。逆向きの顧客名→受注No.までは導けません。同じ顧客が何回も注文する場合があります。"));
+  exercise(6, 6, () => single(6, "貸出関係の主キー", [], `${tables("exerciseLoansFD", ["loans"])}\n${loanRules}\n貸出記録の主キーを選びなさい。`, "loan_code（貸出コード）", ["student_code（学生コード）", "student_name（学生名）", "loan_date（日付）"], "学生0001と0005は複数回貸出され、同じ日にも複数の記録があります。貸出1件を識別するのは貸出コードです。", { verification: { fixture: "exerciseLoansFD", table: "loans", mode: "fd-key", dependencies: loanFDs, key: ["loan_code"] } }));
+  const loanChecks = [
+    { choice: "貸出コード→日付", left: ["loan_code"], right: ["loan_date"] }, { choice: "貸出コード→学生コード", left: ["loan_code"], right: ["student_code"] }, { choice: "学生コード→学生名", left: ["student_code"], right: ["student_name"] }, { choice: "学生コード→学部", left: ["student_code"], right: ["faculty"] }, { choice: "学生コード→入学年度", left: ["student_code"], right: ["entry_year"] }, { choice: "学生コード→貸出コード", left: ["student_code"], right: ["loan_code"] }, { choice: "学生名→学生コード", left: ["student_name"], right: ["student_code"] }, { choice: "日付→貸出コード", left: ["loan_date"], right: ["loan_code"] }
+  ];
+  exercise(6, 6, () => multi(6, "貸出関係の基本的な関数従属性", [], `${tables("exerciseLoansFD", ["loans"])}\n${loanRules}\n業務条件から成立するFDを選択肢の中から全て選びなさい。`, loanChecks.slice(0, 5).map((check) => check.choice), loanChecks.slice(5).map((check) => check.choice), "貸出の属性は貸出コードから、学生の属性は学生コードから決まります。貸出コード→学生名なども推移的に導けます。同姓同名の剛田武がいるので学生名は学生コードを決めません。", { verification: { fixture: "exerciseLoansFD", table: "loans", mode: "fd", dependencies: loanFDs, checks: loanChecks } }));
+  exercise(6, 6, () => sql(6, "貸出表の同姓同名とキー", [], "exerciseLoansFD", ["loans"], "SELECT COUNT(DISTINCT student_code) FROM loans WHERE student_name='剛田武';", "2", ["1", "3", "8"], "剛田武には学生コード0003と0006があり、学部と入学年度も違います。同じ名前だけで同一人物と判断してはいけません。"));
+  exercise(6, 7, () => match(6, "受注明細の無損失分解", [], `${tables("exerciseDetailsFD", ["order_lines"])}\n商品コード→商品名に基づいて分解する。order_no=受注番号、line_no=明細番号、quantity=数量である。各関係に残す属性を対応させなさい。`, [["明細側", "order_no, line_no, product_code, quantity"], ["商品側", "product_code, product_name"]], ["order_no, line_no, quantityだけ", "product_name, quantityだけ"], "商品名を商品側へ移し、共通のproduct_codeを両側へ残します。数量は注文の明細ごとの値なので明細側に残します。これは指定されたFDに基づく分解で、全ての正規化が完了したという意味ではありません。"));
+  exercise(6, 7, () => sql(6, "受注明細の分解後の商品数", [], "exerciseDetailsFD", ["order_lines"], "SELECT COUNT(*) FROM (SELECT DISTINCT product_code, product_name FROM order_lines);", "3", ["2", "4", "12"], "TV20005の24型テレビが2つの明細に現れるため、商品側では1行にまとめます。商品側3行、明細側4行です。関係代数の射影では重複を除くことにも対応します。"));
+  exercise(6, 7, () => sql(6, "受注明細を結合して復元", [], "exerciseDetailsFD", ["details", "products"], "SELECT * FROM details d JOIN products p ON d.product_code=p.product_code;", "4行", ["3行", "7行", "12行"], "各明細の商品コードに対して商品側は1行なので、4明細がそのまま4行で復元されます。24型テレビの数量10と8は異なる明細として残し、勝手に合計しません。", "rowCount"));
+  exercise(6, 7, () => free(6, "無損失分解の理由", [], `${tables("exerciseDetailsFD", ["order_lines"])}\n商品コード→商品名が成立する。明細(order_no,line_no,product_code,quantity)と商品(product_code,product_name)への分解が無損失である理由を説明しなさい。`, "共通属性の商品コードが商品側の全属性を決定するため、商品コードで自然結合すれば元の明細と商品名の組を過不足なく復元できる。", "無損失とは、分解してから結合して元の関係へ戻せることです。行数が同じだけでは十分ではなく、タプル全体が一致する必要があります。共通の商品コードを削除すると、どの商品名を戻すべきか対応を失います。", { verification: { fixture: "exerciseDetailsFD", mode: "lossless", query: reconstructed, originalTable: "order_lines", parts: ["details", "products"], determinant: ["product_code"] } }));
+
   const relatedTopics = {
     1: { 1: ["DBの応用", "永続化", "DBを使う利点"], 2: ["財布の関係表現", "重複を避ける設計"] },
     2: { 1: ["SELECTの構造", "エイリアス", "結合条件"], 2: ["ドットコマンド", "SQLiteの起動"], 3: ["マネージャ本人と部下", "結合条件"] },
     3: { 1: ["設計の4原則", "ゴルフの導出値", "ゴルフの設計改善", "悪い設計の説明"], 2: ["多重度", "外部キーの置き場所"], 3: ["挿入の順序", "出力名と並べ替え"], 4: ["作曲・作詞と演奏の区別", "結合経路の意味", "複合外部キーのSQL"], 5: ["CDスキーマのキー", "結合経路の意味"] },
     4: { 1: ["自己結合と比較", "SQLの修正と理由", "部下を選ぶ結合"], 2: ["価格の境界", "結合SQLを記述する"], 3: ["3表の経路", "仕入先経由の選択"] },
-    5: { 1: ["和集合の計算", "共通集合の計算", "差集合の計算", "差の向き"], 2: ["直積の行数と次数"], 3: ["SQLと関係代数", "射影による件数変化"], 4: ["等結合の行数", "別の属性で結合"], 5: ["最大値", "最小値", "COUNTの違い", "条件付きMAX", "条件付きAVG"], 6: ["集約結果の比較"], 7: ["内部結合の欠落", "左外部結合", "右外部結合", "完全外部結合"], 8: ["降順", "グループ平均"], 9: ["結合による行の増加", "DISTINCT"] }
+    5: { 1: ["和集合の計算", "共通集合の計算", "差集合の計算", "差の向き"], 2: ["直積の行数と次数"], 3: ["SQLと関係代数", "射影による件数変化"], 4: ["等結合の行数", "別の属性で結合"], 5: ["最大値", "最小値", "COUNTの違い", "条件付きMAX", "条件付きAVG"], 6: ["集約結果の比較"], 7: ["内部結合の欠落", "左外部結合", "右外部結合", "完全外部結合"], 8: ["降順", "グループ平均"], 9: ["結合による行の増加", "DISTINCT"] },
+    6: { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }
   };
   const exerciseCoverage = [];
   for (const [lecture, tasks] of Object.entries(relatedTopics)) {
@@ -316,7 +372,7 @@
   }
   for (const q of questions.filter((q) => q.exerciseTasks)) {
     q.exerciseReference = `第${q.lecture}回 演習課題提出シート 課題${q.exerciseTasks.join(", ")}（関連する練習を含む）`;
-    q.slideReference += ` ／ ${q.exerciseReference}`;
+    q.slideReference = q.pages.length ? `${q.slideReference} ／ ${q.exerciseReference}` : `データベース工学 ${q.exerciseReference}`;
   }
   window.DATABASE_PREDICTION_EXERCISE_COVERAGE = exerciseCoverage;
   window.DATABASE_PREDICTION_FIXTURES = fixtures;

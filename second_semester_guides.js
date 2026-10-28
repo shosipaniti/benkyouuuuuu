@@ -4,7 +4,7 @@
   const sqlCheck = (fixture, expectedRows) => ({ engine: "sqlite", fixture, expectedRows });
   const rCheck = (expected) => ({ engine: "r", expected });
   function tab(subject, id, label, references, lead, sections, examTip) {
-    return { id, label, references, sources: references.map((ref) => `${subject} 第${ref.lecture}回 p.${ref.pages.join(", ")}`).join(" ／ ") + "（PDFのページ番号）", lead, sections, examTip };
+    return { id, label, references, sources: references.map((ref) => ref.tasks ? `${subject} 第${ref.lecture}回 演習課題提出シート 課題${ref.tasks.join(", ")}` : `${subject} 第${ref.lecture}回 p.${ref.pages.join(", ")}`).join(" ／ ") + (references.some((ref) => ref.pages) ? "（PDFのページ番号）" : ""), lead, sections, examTip };
   }
   const db = (id, label, refs, lead, sections, tip) => tab("データベース工学", id, label, refs, lead, sections, tip);
   const dm = (id, label, refs, lead, sections, tip) => tab("データマイニング", id, label, refs, lead, sections, tip);
@@ -81,7 +81,23 @@
         steps("新しいDBを使える状態にする", ["ファイル名と保存場所を確認してSQLiteで開きます。間違った名前を指定し、意図せず空のDBを開いている場合にも注意します。", "定義SQLを読み込み、.tablesと.schemaで構造を確認します。", "挿入SQLを読み込み、SELECTで中身を確認します。外部キーを有効にしているなら、参照される親のレコードを先に登録するなど順序も確認します。"], ".read create_table.sql\n.tables\n.schema employees\n.read insert_into.sql\nSELECT * FROM employees;"),
         section("キー制約と型の注意", ["主キーは一意性を、外部キーは参照先との整合性を確認するための制約です。SQLiteではPRAGMA foreign_keys=ONで外部キーを有効にして扱います。", "SQLiteの整数のINTEGER PRIMARY KEYには自動採番の特別な扱いがあります。文字列の主キーでNULLを確実に禁止するならNOT NULLも明示するなど、DBMSの仕様を確認します。", "SQLiteの通常の表では型名が値の扱いに影響する一方、他のDBMSと同じ厳密さで全ての代入を拒否するとは限りません。型名だけで挙動を断定しないようにします。"]),
         section("エラーを読む手順", ["no such tableならDBのパス、表名、定義の実行を確認します。no such columnなら.schemaで列名と綴りを確認します。", "FOREIGN KEY constraint failedなら、指定した参照先があるか確認します。主キーの重複なら同じIDの二重登録を調べます。", "DELETEは表内の行を削除し、DROP TABLEは表そのものを削除します。復習用でも、対象を確認せず実データへ実行しないようにします。"])
-      ], "構造、内容、表示のどれを変える操作かを区別し、.schemaと小さなSELECTで確認します。")
+      ], "構造、内容、表示のどれを変える操作かを区別し、.schemaと小さなSELECTで確認します。"),
+
+    db("update", "UPDATEの手順", [{ lecture: 6, tasks: [2, 3, 4] }],
+      "どの段階の表を使っているかを確認してから、対象の行と変更する列を分けます。更新後の集計には、更新後の値を使います。", [
+        section("WHEREとSETを分ける", ["UPDATE exam_results SET score=score+3 WHERE faculty='X学部';では、WHEREが対象の学生、SETがその学生に対する変更です。", "score=3は3点への置換、score=score+3は現在値への加点です。同じ加点を2回実行すると合計6点増えます。", "WHEREを省くと全行が対象になります。変更前に同じWHEREのSELECTを実行すると、対象を確認できます。文字列は半角のシングルクォートで囲みます。"]),
+        steps("第6回の更新を順に追う", ["初期得点はid順に60,85,90,75,34,80です。まず60点以上の5人を合格、34点の1人を不合格にします。", "X学部の先頭4人だけへ3点加え、63,88,93,78,34,80点になります。", "id=1238を65点・合格へ修正すると、最終得点は63,88,93,78,65,80。6人全員が合格です。", "scoreとresultは別の列です。この表には合否の自動更新を定義していないため、得点だけ修正しても合否は自動では変わりません。"], "UPDATE exam_results SET result='合格' WHERE score>=60;\nUPDATE exam_results SET result='不合格' WHERE score<60;\nUPDATE exam_results SET score=score+3 WHERE faculty='X学部';\nUPDATE exam_results SET score=65, result='合格' WHERE id=1238;\nSELECT id, score, result FROM exam_results ORDER BY id;", { engine: "sqlite", fixture: "exerciseExam", query: "SELECT id,score,result FROM exam_results ORDER BY id;", expectedRows: [[1234, 63, "合格"], [1235, 88, "合格"], [1236, 93, "合格"], [1237, 78, "合格"], [1238, 65, "合格"], [1239, 80, "合格"]] }),
+        steps("更新後の表で集計する", ["X学部は63,88,93,78なので、AVG(score)は322/4=80.5点です。", "id>=1236は93,78,65,80点なので、MAX(score)は93点です。", "X学部かつ2年生は88,93点なので、両条件をANDでつなぎ、平均は181/2=90.5点です。"]),
+        section("実行順を読み落とさない", ["合否判定の後に得点を変えても、先に保存したresultが自動で再判定されるわけではありません。例えば59点を合否判定した後に3点加えるなら、62点になっても明示的な再判定が必要です。", "今回の元データには加点で60点の境界を越える学生はいません。それでも手順として、どの列をいつ更新したかを区別して追います。", "練習の再実行は、初期状態へ戻したDBで行うか、前の更新が残っていることを考慮します。"])
+      ], "初期値→合否判定→学部別加点→特定行の修正→集計という順で、表の状態を書き出します。"),
+
+    db("dependencies", "関数従属と分解", [{ lecture: 6, tasks: [5, 6, 7] }],
+      "何の値が分かれば何が一意に決まるかを考えます。行の識別、属性間の決まり、分解後の復元を順に確認します。", [
+        section("関数従属性の読み方", ["X→Yは、Xの値が同じ2行ではYの値も同じになるという決まりです。XとYの間に計算式が必要という意味ではありません。", "YがXに含まれるFDは自明です。例えば{受注No.,商品コード}→商品コード。商品コード→商品名は自明ではありません。", "X→YとY→ZがあればX→Zも導けます。受注No.→顧客コード、顧客コード→顧客名から受注No.→顧客名が成立します。逆向きは自動では成立しません。", "表の少数の行で重複がないだけでは、今後もそのFDが成立するとは証明できません。業務条件で決めます。一方、同じXに異なるYがある2行は反例になります。"]),
+        steps("受注と貸出のキーを決める", ["受注明細では、受注No.だけだと同じ受注の商品を区別できません。商品コードだけでも別の受注に現れ得ます。1受注で同じ商品は1明細という条件なら、両者の組がキーです。", "受注No.は受注日と顧客コードを、顧客コードは顧客名を、商品コードは商品名と単価を決めます。数量は{受注No.,商品コード}で決まります。", "貸出では貸出コードが日付と学生コードを、学生コードが学生名・学部・入学年度を決めます。学生は何度も借りられるので学生コードだけは貸出のキーではありません。", "同姓同名の剛田武が2人いるため、学生名から学生コードは決まりません。単価500の商品も2種類あり、単価から商品名は決まりません。"]),
+        steps("商品コード→商品名で分解する", ["元の受注明細は(受注番号,明細番号,商品コード,商品名,数量)です。商品名を取り出して、商品(商品コード,商品名)を作ります。", "明細側には(受注番号,明細番号,商品コード,数量)を残します。商品コードは双方に残し、数量を落とさないようにします。", "元は4明細ですが、TV20005が2明細にあるため、商品側は3行になります。商品コードで結ぶと4明細とその商品名を過不足なく復元できます。"], "SELECT d.order_no, d.line_no, d.product_code,\n       p.product_name, d.quantity\nFROM details d\nJOIN products p ON d.product_code=p.product_code\nORDER BY d.order_no, d.line_no;", { engine: "sqlite", fixture: "exerciseDetailsFD", expectedRows: [["015867", 1, "TV20006", "20型テレビ", 20], ["015867", 2, "TV20005", "24型テレビ", 10], ["015867", 3, "TV20007", "28型テレビ", 5], ["015868", 1, "TV20005", "24型テレビ", 8]] }),
+        section("無損失を確認する", ["分解した2関係の共通属性が、その片方の全属性を決定することが、FDに基づく二分解の無損失条件です。今回は共通の商品コードが商品側を決めます。", "無損失とは、分解後に自然結合して元の関係へ戻せることです。行数が一致するだけではなく、元のタプルと一致する必要があります。", "ここでは指定されたFDによる分解を扱います。FDで一度分けたから、全ての正規化が完了したとは限りません。"])
+      ], "同じ左辺なら右辺も同じかを確認し、キーと業務条件を整理してから、共通属性で元へ戻せる分解を作ります。")
   ];
 
   const miningTabs = [
@@ -157,16 +173,18 @@
   }
   window.SECOND_SEMESTER_STUDY_GUIDES = {
     "database-prediction": guide("データベースの基礎とSQL", databaseTabs, window.DATABASE_PREDICTED_QUESTION_DATA || [], [
+      ["dependencies", /関数従属|無損失|受注|貸出/],
       ["cd", /CD|作曲|作詞|ボーカル|本人名義|演奏|複合外部キーのSQL/],
       ["outer", /外部結合|内部結合|4種の結合|結合相手|NULLの比較/],
       ["aggregate", /COUNT|AVG|MAX|MIN|GROUP BY|HAVING|集約|集計|最大値|最小値|グループ平均|都道府県別の人口平均|財布の総額|紙幣硬貨/],
+      ["update", /更新|UPDATE|加点/],
       ["algebra", /集合|直積|射影|関係代数|関係完備|和両立|商の|質問木|等結合|別の属性で結合|結合の成り立ち|結合の利用パターン|単項|課題の/],
       ["select", /文字列結合|副問い合わせ|降順|句を書く順番|出力名と並べ替え/],
       ["sqlite", /SQLite|ドットコマンド|DDL|型|命名|INSERT|UPDATE|DELETE|DROP|予約語|人工キー|挿入|間接実行|空のDB/],
       ["design", /設計|ER図|多重度|多の意味|実体|ゴルフ|大会|要件|冗長|エンティティ|外部キーの置き場所|注文の外部キー/],
       ["relations", /主キー|外部キー|複合キー|キー制約/],
       ["join", /結合|上司|部下|責任者|マネージャ|仕入先|生産地|売場|店舗5|3表の経路/]
-    ], { 1: "relations", 2: "select", 3: "design", 4: "select", 5: "algebra" }),
+    ], { 1: "relations", 2: "select", 3: "design", 4: "select", 5: "algebra", 6: "update" }),
     "data-mining-prediction": guide("データマイニングの基礎と計算", miningTabs, window.DATA_MINING_PREDICTED_QUESTION_DATA || [], [
       ["control", /管理図|管理限界|ロット平均|異常傾向/],
       ["correlation", /相関|共分散|因果|交絡|疑似|気温・鍋|患者|データマイニングの定義|説明変数|決定木/],
