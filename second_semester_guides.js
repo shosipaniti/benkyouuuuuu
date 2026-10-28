@@ -10,8 +10,9 @@
   const dm = (id, label, refs, lead, sections, tip) => tab("データマイニング", id, label, refs, lead, sections, tip);
 
   const databaseTabs = [
-    db("relations", "関係とキー", [{ lecture: 1, pages: [26, 28, 44, 60, 64, 66, 68, 69, 70] }],
+    db("relations", "関係とキー", [{ lecture: 1, pages: [17, 18, 23, 26, 28, 44, 60, 64, 66, 68, 69, 70] }],
       "表を読むときは、1行が何を表し、どの値でその行を識別できるかを決めます。行数と現物の個数を分けて考えるところから始めます。", [
+        section("データを保存して共有する理由", ["通常のプログラム内の変数は、終了後も値を残す仕組みではありません。ファイルやDBへ保存し、プログラムが終了しても利用できるようにすることを永続化といいます。", "普通のファイルでも永続化できますが、複数のプログラムによる同時更新などの制御を自分で実装すると複雑になります。DBMSの管理機能を利用することで、データ破損のリスクを抑えられます。", "データ中心アプローチでは、共有するデータベースを先に設計し、それを使うプログラムを設計します。データは個々のプログラムから独立して管理します。", "関係データベースではSQLを使って検索や更新などを指示します。SELECTは検索、INSERTは行の追加、UPDATEは更新、DELETEは行の削除です。"]),
         section("表の構造と中身を分ける", ["関係は表、属性は列、タプルは1行に対応します。次数は列の数であり、行の数ではありません。", "スキーマは関係名と属性などの構造、インスタンスはある時点の行の集合です。1行を追加しても列構成が同じならスキーマは変わりません。", "データベースは共有するデータを保存し、DBMSは検索や更新などを管理するソフトウェアです。メタデータには表名、列名、型、制約などを含みます。"]),
         section("主キーと外部キーの役割", ["主キーは行を一意に識別する属性です。現在たまたま重複していないだけでなく、今後も一意になるという要件を確認します。", "複合キーは複数列の組で識別します。社員が年1回受ける健診なら、社員番号だけでも受検年だけでも足りず、両者の組を使います。", "外部キーは他の行を参照します。多くの社員が同じ部署を参照できるため、外部キーの値は重複しても構いません。"]),
         steps("財布の表から総額を求める", ["wallet(money,num)の4行は(5000,2),(1000,4),(500,3),(100,1)。1行は1枚の紙幣でなく、1つの金種です。", "各行で金種×枚数を計算すると10000,4000,1500,100円になります。", "行ごとの金額を足して15600円。行数は4、紙幣と硬貨の合計個数は10で、それぞれ別の数です。"], "SELECT SUM(money*num) AS total\nFROM wallet;", sqlCheck("exerciseWallet", [[15600]])),
@@ -177,5 +178,70 @@
       ["pca", /主成分|PCA|寄与率|合成変数|負荷量|次元|軸の意味|捨てる情報|都市ラベル|お菓子/],
       ["cross", /クロス|対応分析|モザイク|プロフィール|カテゴリ|データの種類|リッカート|列名|集計|度数|条件付き割合|セルの割合|構成比で|複数回答|アンケート|球技|同人数|所属内|属性別|人数と割合/]
     ], { 1: "statistics", 2: "charts", 3: "clustering", 4: "pca", 5: "charts" })
+  };
+  const guides = window.SECOND_SEMESTER_STUDY_GUIDES;
+  guides["database-quiz"] = {
+    ...guides["database-prediction"],
+    questionTabIds: {
+      "database-quiz1-001": "relations",
+      "database-quiz1-002": "relations",
+      "database-quiz1-003": "relations",
+      "database-quiz1-004": "relations",
+      "database-quiz1-005": "relations",
+      "database-quiz1-006": "relations",
+      "database-quiz1-007": "relations",
+      "database-quiz1-008": "relations",
+      "database-quiz1-009": "relations",
+      "database-quiz1-010": "select",
+      "database-quiz1-011": "join",
+      "database-quiz1-012": "relations",
+      "database-quiz1-013": "select",
+      "database-quiz2-001": "select",
+      "database-quiz2-002": "select",
+      "database-quiz2-003": "select",
+      "database-quiz2-004": "join",
+      "database-quiz2-005": "join",
+      "database-quiz2-006": "design",
+      "database-quiz2-007": "design",
+      "database-quiz2-008": "design",
+      "database-quiz2-009": "design",
+      "database-quiz2-010": "design",
+      "database-quiz2-011": "design",
+      "database-quiz2-012": "design",
+      "database-quiz2-013": "relations",
+      "database-quiz2-014": "design",
+      "database-quiz2-015": "sqlite"
+    }
+  };
+  guides["data-mining-quiz"] = {
+    ...guides["data-mining-prediction"],
+    questionTabIds: {
+      "data-mining-quiz1-001": "correlation",
+      "data-mining-quiz1-002": "charts",
+      "data-mining-quiz1-003": "charts",
+      "data-mining-quiz1-004": "charts",
+      "data-mining-quiz1-005": "correlation",
+      "data-mining-quiz1-006": "statistics",
+      "data-mining-quiz1-007": "charts",
+      "data-mining-quiz1-008": "charts",
+      "data-mining-quiz1-009": "control",
+      "data-mining-quiz1-010": "control",
+      "data-mining-quiz1-011": "control",
+      "data-mining-quiz1-012": "control",
+      "data-mining-quiz1-013": "control",
+      "data-mining-quiz2-001": "clustering",
+      "data-mining-quiz2-002": "pca",
+      "data-mining-quiz2-003": "clustering",
+      "data-mining-quiz2-004": "cross",
+      "data-mining-quiz2-005": "cross",
+      "data-mining-quiz2-006": "statistics",
+      "data-mining-quiz2-011": "distance",
+      "data-mining-quiz2-012": "clustering",
+      "data-mining-quiz2-013": "clustering",
+      "data-mining-quiz2-014": "clustering",
+      "data-mining-quiz2-015": "clustering",
+      "data-mining-quiz2-016": "clustering",
+      "data-mining-quiz2-017": "clustering"
+    }
   };
 })();
