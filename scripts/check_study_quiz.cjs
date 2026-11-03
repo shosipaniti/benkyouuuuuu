@@ -31,7 +31,7 @@ async function checkCurrentAnswer(page, question) {
   await page.locator("#answerButton").click();
   const feedback = await page.locator("#feedback").innerText();
   assert(feedback.startsWith(question.type === "free" ? "模範解答" : "正解"), `${question.id}: ${feedback}`);
-  if (["database-prediction", "data-mining-prediction", "database-quiz", "data-mining-quiz"].includes(question.category)) {
+  if (["database-prediction", "data-mining-prediction", "database-quiz", "data-mining-quiz", "physics-advanced"].includes(question.category)) {
     assert.equal(await page.locator("#feedback .feedback-guide-toggle").count(), 1, question.id);
   }
 }
@@ -62,6 +62,7 @@ async function checkDetailedGuide(page, category, questionKey) {
     render();
   }, questionKey);
   assert.equal(await page.locator("#feedback .feedback-guide-toggle").count(), 0);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   const question = await page.evaluate(() => filtered()[state.index]);
   await checkCurrentAnswer(page, question);
   const guide = await page.evaluate((key) => window.SECOND_SEMESTER_STUDY_GUIDES[key], category);
@@ -83,6 +84,7 @@ async function checkDetailedGuide(page, category, questionKey) {
     assert.equal(await page.locator("#detailed-guide-panel ol").count(), guide.tabs[index].sections.filter((section) => section.steps).length);
     assert.deepEqual(await page.locator(".feedback-guide-code code").allTextContents(), guide.tabs[index].sections.filter((section) => section.code).map((section) => section.code));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${category}/${guide.tabs[index].id}`);
+    if (category === "physics-advanced") await page.locator(".feedback-guide").screenshot({ path: path.join(root, `output/physics-guide-${guide.tabs[index].id}-${innerWidthLabel(page.viewportSize())}.png`) });
   }
   await selected.press("Home");
   assert.equal(await selected.innerText(), guide.tabs[0].label);
@@ -426,9 +428,13 @@ async function run() {
       const feedback = await page.locator("#feedback").innerText();
       assert(feedback.includes(question.slideReference), question.id);
       for (const term of question.requiredTerms) assert(feedback.includes(term), question.id);
+      await checkGuideDefault(page, question);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
       if (question.type === "free") await page.screenshot({ path: path.join(root, `output/physics-lecture${question.lecture}-mobile.png`), fullPage: true });
     }
+    await page.setViewportSize({ width: 320, height: 740 });
+    await checkDetailedGuide(page, "physics-advanced", "physics-advanced-04-004");
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.locator("#filterDetails summary").click();
     for (const lecture of [4, 5, 6]) {
       await page.locator("#sourceFilter").selectOption(physicsQuestions.find((q) => q.lecture === lecture).source);
@@ -437,6 +443,7 @@ async function run() {
     await page.locator("#sourceFilter").selectOption("all");
     await page.locator("#filterDetails summary").click();
     await page.setViewportSize({ width: 1280, height: 900 });
+    await checkDetailedGuide(page, "physics-advanced", "physics-advanced-06-004");
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     await page.screenshot({ path: path.join(root, "output/physics-desktop.png"), fullPage: true });
     await page.reload();
@@ -447,6 +454,8 @@ async function run() {
     await page.waitForSelector("#prompt");
     assert.equal(await page.evaluate(() => filtered().length), 12);
     await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+    await page.locator("#feedback .feedback-guide-toggle").click();
+    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 6);
     await context.setOffline(false);
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#archiveActiveSetButton").click();
@@ -500,7 +509,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 12 physics answers, all quiz and lecture-6 guide defaults, all 19 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline reload in all five sets.");
+    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 12 physics answers, all quiz, lecture-6 and physics guide defaults, all 25 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all five sets.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
