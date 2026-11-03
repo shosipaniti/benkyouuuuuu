@@ -149,6 +149,9 @@ async function run() {
   vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_prediction_questions.js"), "utf8"), data);
   const miningPredictions = data.window.DATA_MINING_PREDICTED_QUESTION_DATA;
   assert.equal(miningPredictions.length, 167);
+  vm.runInNewContext(await fs.readFile(path.join(root, "physics_questions.js"), "utf8"), data);
+  const physicsQuestions = data.window.PHYSICS_ADVANCED_QUESTION_DATA;
+  assert.equal(physicsQuestions.length, 12);
 
   const server = http.createServer(async (request, response) => {
     try {
@@ -175,7 +178,7 @@ async function run() {
     await page.goto(url);
     await page.waitForSelector("#setList .set-card");
     assert.equal(await page.locator("#secondSemesterTab").getAttribute("aria-selected"), "true");
-    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データベース 予想問題", "データマイニング 小テスト", "データマイニング 予想問題"]);
+    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データベース 予想問題", "データマイニング 小テスト", "データマイニング 予想問題", "物理の世界と先端技術 講義内課題"]);
     await startSet(page, "データベース 小テスト");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 小テスト");
     assert.equal(await page.evaluate(() => filtered().length), 28);
@@ -216,13 +219,13 @@ async function run() {
 
     await page.locator("#listMode").click();
     await page.locator("#toggleCategoryEditorButton").click();
-    assert.equal(await page.locator("[data-category-row]").count(), 4);
+    assert.equal(await page.locator("[data-category-row]").count(), 5);
     await page.locator("[data-category-name='database-quiz']").fill("データベース 後期");
     await page.locator("#saveCategoryNamesButton").click();
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 後期");
     await page.locator("#toggleCategoryEditorButton").click();
     await page.locator("#toggleDeleteModeButton").click();
-    assert.equal(await page.locator("#categoryDeleteList button").count(), 4);
+    assert.equal(await page.locator("#categoryDeleteList button").count(), 5);
     await page.locator("#selectVisibleButton").click();
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#deleteSelectedButton").click();
@@ -412,7 +415,47 @@ async function run() {
       .getByRole("button", { name: "戻して始める", exact: true }).click();
     assert.equal(await page.evaluate(() => filtered().length), 167);
 
+    await page.locator("#changeSetButton").click();
+    await startSet(page, "物理の世界と先端技術 講義内課題");
+    assert.equal(await page.evaluate(() => filtered().length), 12);
+    for (let index = 0; index < physicsQuestions.length; index += 1) {
+      await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
+      const question = await page.evaluate(() => filtered()[state.index]);
+      if (question.type === "single") assert.equal(await page.locator("#choices select option").count(), 4);
+      await checkCurrentAnswer(page, question);
+      const feedback = await page.locator("#feedback").innerText();
+      assert(feedback.includes(question.slideReference), question.id);
+      for (const term of question.requiredTerms) assert(feedback.includes(term), question.id);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
+      if (question.type === "free") await page.screenshot({ path: path.join(root, `output/physics-lecture${question.lecture}-mobile.png`), fullPage: true });
+    }
+    await page.locator("#filterDetails summary").click();
+    for (const lecture of [4, 5, 6]) {
+      await page.locator("#sourceFilter").selectOption(physicsQuestions.find((q) => q.lecture === lecture).source);
+      assert.equal(await page.evaluate(() => filtered().length), 4);
+    }
+    await page.locator("#sourceFilter").selectOption("all");
+    await page.locator("#filterDetails summary").click();
+    await page.setViewportSize({ width: 1280, height: 900 });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.screenshot({ path: path.join(root, "output/physics-desktop.png"), fullPage: true });
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.locator("#activeSetName").innerText(), "物理の世界と先端技術 講義内課題");
+    await context.setOffline(true);
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.evaluate(() => filtered().length), 12);
+    await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+    await context.setOffline(false);
+    await page.evaluate(() => { window.confirm = () => true; });
+    await page.locator("#archiveActiveSetButton").click();
+    assert(!(await page.locator("#setList h3").allTextContents()).includes("物理の世界と先端技術 講義内課題"));
+    await page.locator("#archivedSetList .set-card").filter({ has: page.getByRole("heading", { name: "物理の世界と先端技術 講義内課題", exact: true }) })
+      .getByRole("button", { name: "戻して始める", exact: true }).click();
+    assert.equal(await page.evaluate(() => filtered().length), 12);
     await page.locator("#firstSemesterTab").click();
+    assert(!(await page.locator("#setList h3").allTextContents()).includes("物理の世界と先端技術 講義内課題"));
     for (const name of ["経済学 期末 予想問題", "音声工学 期末 過去問", "人間中心設計 期末 過去問"]) {
       if (!(await page.locator("#setList").isVisible())) await page.locator("#changeSetButton").click();
       await startSet(page, name);
@@ -457,7 +500,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction answers, all 54 quiz and 22 lecture-6 guide defaults, all 19 shared detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all four sets.");
+    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 12 physics answers, all quiz and lecture-6 guide defaults, all 19 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline reload in all five sets.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
