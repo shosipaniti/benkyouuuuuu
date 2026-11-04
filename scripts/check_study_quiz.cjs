@@ -89,7 +89,8 @@ async function checkDetailedGuide(page, category, questionKey) {
       const headings = await page.locator("#detailed-guide-panel h4").allTextContents();
       assert.deepEqual(headings.map((heading) => heading.split(" ")[0]), Array.from({ length: 6 }, (_, i) => `第${i + 1}回`));
       assert.deepEqual(await page.locator(".feedback-guide-section .feedback-guide-source").allTextContents(), guide.tabs[index].sections.map((section) => section.source));
-      await page.locator(".feedback-guide").screenshot({ path: path.join(root, `output/database-slide-summary-${innerWidthLabel(page.viewportSize())}.png`) });
+      const subject = category.replace(/-(quiz|prediction)$/, "");
+      await page.locator(".feedback-guide").screenshot({ path: path.join(root, `output/${subject}-slide-summary-${innerWidthLabel(page.viewportSize())}.png`) });
     }
   }
   await selected.press("Home");
@@ -363,7 +364,9 @@ async function run() {
     assert.equal(await page.evaluate(() => filtered().length), 26);
     await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
     await page.locator("#feedback .feedback-guide-toggle").click();
-    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 8);
+    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 9);
+    await page.getByRole("tab", { name: "スライドまとめ", exact: true }).click();
+    assert.equal(await page.locator("#detailed-guide-panel h4").count(), 6);
     await context.setOffline(false);
 
     await page.locator("#changeSetButton").click();
@@ -413,7 +416,7 @@ async function run() {
     assert.equal(await page.evaluate(() => filtered().length), 167);
     await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
     await page.locator("#feedback .feedback-guide-toggle").click();
-    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 8);
+    assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 9);
     await context.setOffline(false);
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#archiveActiveSetButton").click();
@@ -515,7 +518,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 12 physics answers, all quiz, lecture-6 and physics guide defaults, all 26 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all five sets.");
+    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 12 physics answers, all quiz, lecture-6 and physics guide defaults, all 27 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all five sets.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
