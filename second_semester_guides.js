@@ -302,6 +302,15 @@
     ], { 1: "statistics", 2: "charts", 3: "clustering", 4: "pca", 5: "charts" })
   };
   const guides = window.SECOND_SEMESTER_STUDY_GUIDES;
+  if (window.DATA_MINING_COMPACT_QUESTION_DATA) {
+    const miningGuide = guides["data-mining-prediction"];
+    guides["data-mining-compact"] = {
+      ...miningGuide,
+      questionTabIds: Object.fromEntries(window.DATA_MINING_COMPACT_QUESTION_DATA.map((q) => [
+        q.id, miningGuide.questionTabIds[q.sourceQuestionId] || "slides"
+      ]))
+    };
+  }
   guides["database-quiz"] = {
     ...guides["database-prediction"],
     questionTabIds: {

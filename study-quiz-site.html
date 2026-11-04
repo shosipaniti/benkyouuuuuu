@@ -1123,6 +1123,7 @@
     <script src="database_prediction_questions.js"></script>
     <script src="data_mining_questions.js"></script>
     <script src="data_mining_prediction_questions.js"></script>
+    <script src="data_mining_compact_questions.js"></script>
     <script src="physics_questions.js"></script>
     <script src="human_centered_final_guide.js"></script>
     <script src="economics_final_guide.js"></script>
@@ -1149,8 +1150,9 @@
       defaultCategoryLabels["database-prediction"] = "データベース 予想問題";
       defaultCategoryLabels["data-mining-quiz"] = "データマイニング 小テスト";
       defaultCategoryLabels["data-mining-prediction"] = "データマイニング 予想問題";
+      defaultCategoryLabels["data-mining-compact"] = "データマイニング 要点30問";
       defaultCategoryLabels["physics-advanced"] = "物理の世界と先端技術 講義内課題";
-      const secondSemesterCategories = ["database-quiz", "database-prediction", "data-mining-quiz", "data-mining-prediction", "physics-advanced"];
+      const secondSemesterCategories = ["database-quiz", "database-prediction", "data-mining-quiz", "data-mining-compact", "data-mining-prediction", "physics-advanced"];
       defaultCategoryOrder.unshift(...secondSemesterCategories);
       const defaultCategorySemesters = Object.fromEntries(defaultCategoryOrder.map((category) => [category, secondSemesterCategories.includes(category) ? "second" : "first"]));
       let categoryLabels = loadCategoryLabels();
@@ -1164,11 +1166,12 @@
       const databasePredictedQuestions = normalize(window.DATABASE_PREDICTED_QUESTION_DATA || [], "database-prediction");
       const dataMiningQuestions = normalize(window.DATA_MINING_QUESTION_DATA || [], "data-mining-quiz");
       const dataMiningPredictedQuestions = normalize(window.DATA_MINING_PREDICTED_QUESTION_DATA || [], "data-mining-prediction");
+      const dataMiningCompactQuestions = normalize(window.DATA_MINING_COMPACT_QUESTION_DATA || [], "data-mining-compact");
       const physicsQuestions = normalize(window.PHYSICS_ADVANCED_QUESTION_DATA || [], "physics-advanced");
       let importedQuestions = loadImportedQuestions();
       let questionEdits = loadQuestionEdits();
       let deletedQuestionIds = new Set(loadDeletedQuestionIds());
-      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...physicsQuestions, ...importedQuestions]));
+      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...dataMiningCompactQuestions, ...physicsQuestions, ...importedQuestions]));
       let validationIssues = validate(allQuestions);
       let semesterActiveSets = loadSemesterActiveSets();
       const initialSemester = loadSemester();
@@ -1493,7 +1496,7 @@
       }
 
       function refreshQuestionData() {
-        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...physicsQuestions, ...importedQuestions]));
+        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...dataMiningCompactQuestions, ...physicsQuestions, ...importedQuestions]));
         validationIssues = validate(allQuestions);
         ensureActiveSet();
         applyCategoryOrderToQuestions();

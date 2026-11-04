@@ -31,7 +31,7 @@ async function checkCurrentAnswer(page, question) {
   await page.locator("#answerButton").click();
   const feedback = await page.locator("#feedback").innerText();
   assert(feedback.startsWith(question.type === "free" ? "模範解答" : "正解"), `${question.id}: ${feedback}`);
-  if (["database-prediction", "data-mining-prediction", "database-quiz", "data-mining-quiz", "physics-advanced"].includes(question.category)) {
+  if (["database-prediction", "data-mining-prediction", "data-mining-compact", "database-quiz", "data-mining-quiz", "physics-advanced"].includes(question.category)) {
     assert.equal(await page.locator("#feedback .feedback-guide-toggle").count(), 1, question.id);
   }
 }
@@ -47,7 +47,7 @@ async function checkGuideDefault(page, question) {
   assert.equal(await toggle.getAttribute("aria-expanded"), "false", question.id);
   await toggle.click();
   assert.equal(await page.locator(".feedback-guide-tabs [aria-selected=true]").innerText(), expected.label, question.id);
-  assert((await page.locator(".feedback-guide-source").innerText()).includes(expected.sources), question.id);
+  assert((await page.locator("#detailed-guide-panel > .feedback-guide-source").innerText()).includes(expected.sources), question.id);
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
   await toggle.click();
 }
@@ -158,6 +158,9 @@ async function run() {
   vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_prediction_questions.js"), "utf8"), data);
   const miningPredictions = data.window.DATA_MINING_PREDICTED_QUESTION_DATA;
   assert.equal(miningPredictions.length, 167);
+  vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_compact_questions.js"), "utf8"), data);
+  const compactQuestions = data.window.DATA_MINING_COMPACT_QUESTION_DATA;
+  assert.equal(compactQuestions.length, 30);
   vm.runInNewContext(await fs.readFile(path.join(root, "physics_questions.js"), "utf8"), data);
   const physicsQuestions = data.window.PHYSICS_ADVANCED_QUESTION_DATA;
   assert.equal(physicsQuestions.length, 12);
@@ -187,7 +190,7 @@ async function run() {
     await page.goto(url);
     await page.waitForSelector("#setList .set-card");
     assert.equal(await page.locator("#secondSemesterTab").getAttribute("aria-selected"), "true");
-    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データベース 予想問題", "データマイニング 小テスト", "データマイニング 予想問題", "物理の世界と先端技術 講義内課題"]);
+    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データベース 予想問題", "データマイニング 小テスト", "データマイニング 要点30問", "データマイニング 予想問題", "物理の世界と先端技術 講義内課題"]);
     await startSet(page, "データベース 小テスト");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 小テスト");
     assert.equal(await page.evaluate(() => filtered().length), 28);
@@ -228,13 +231,13 @@ async function run() {
 
     await page.locator("#listMode").click();
     await page.locator("#toggleCategoryEditorButton").click();
-    assert.equal(await page.locator("[data-category-row]").count(), 5);
+    assert.equal(await page.locator("[data-category-row]").count(), 6);
     await page.locator("[data-category-name='database-quiz']").fill("データベース 後期");
     await page.locator("#saveCategoryNamesButton").click();
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 後期");
     await page.locator("#toggleCategoryEditorButton").click();
     await page.locator("#toggleDeleteModeButton").click();
-    assert.equal(await page.locator("#categoryDeleteList button").count(), 5);
+    assert.equal(await page.locator("#categoryDeleteList button").count(), 6);
     await page.locator("#selectVisibleButton").click();
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#deleteSelectedButton").click();
@@ -427,6 +430,63 @@ async function run() {
     assert.equal(await page.evaluate(() => filtered().length), 167);
 
     await page.locator("#changeSetButton").click();
+    await startSet(page, "データマイニング 要点30問");
+    const originalMiningProgress = await page.evaluate(() => Object.fromEntries(Object.entries(state.progress).filter(([id]) => id.startsWith("data-mining-pred-"))));
+    assert.equal(await page.evaluate(() => filtered().length), 30);
+    assert.equal(await page.evaluate(() => filtered().every((q) => q.category === "data-mining-compact")), true);
+    await page.setViewportSize({ width: 320, height: 740 });
+    for (let index = 0; index < compactQuestions.length; index += 1) {
+      await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
+      const question = await page.evaluate(() => filtered()[state.index]);
+      await checkCurrentAnswer(page, question);
+      await checkGuideDefault(page, question);
+      assert((await page.locator("#feedback").innerText()).includes(question.slideReference), question.id);
+      await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
+    }
+    assert.deepEqual(await page.evaluate(() => Object.fromEntries(Object.entries(state.progress).filter(([id]) => id.startsWith("data-mining-pred-")))), originalMiningProgress);
+    await page.locator("#filterDetails summary").click();
+    for (const lecture of [1, 2, 3, 4, 5, 6]) {
+      await page.locator("#sourceFilter").selectOption(compactQuestions.find((q) => q.lecture === lecture).source);
+      assert.equal(await page.evaluate(() => filtered().length), 5);
+    }
+    await page.locator("#sourceFilter").selectOption("all");
+    await page.locator("#filterDetails summary").click();
+    await checkDetailedGuide(page, "data-mining-compact", "樹形図のクラスタ数");
+    await page.screenshot({ path: path.join(root, "output/data-mining-compact-mobile.png"), fullPage: true });
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await checkDetailedGuide(page, "data-mining-compact", "回帰の用語");
+    await page.screenshot({ path: path.join(root, "output/data-mining-compact-desktop.png"), fullPage: true });
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.locator("#activeSetName").innerText(), "データマイニング 要点30問");
+    await context.setOffline(true);
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.evaluate(() => filtered().length), 30);
+    await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+    await page.locator("#feedback .feedback-guide-toggle").click();
+    await page.getByRole("tab", { name: "スライドまとめ", exact: true }).click();
+    assert.equal(await page.locator("#detailed-guide-panel h4").count(), 6);
+    await context.setOffline(false);
+    await page.evaluate(() => { window.confirm = () => true; });
+    await page.locator("#archiveActiveSetButton").click();
+    assert(!(await page.locator("#setList h3").allTextContents()).includes("データマイニング 要点30問"));
+    assert((await page.locator("#archivedSetList h3").allTextContents()).includes("データマイニング 要点30問"));
+    await page.locator("#archivedSetList .set-card").filter({ has: page.getByRole("heading", { name: "データマイニング 要点30問", exact: true }) })
+      .getByRole("button", { name: "戻して始める", exact: true }).click();
+    assert.equal(await page.evaluate(() => filtered().length), 30);
+    await page.locator("#listMode").click();
+    await page.locator("#toggleDeleteModeButton").click();
+    await page.locator("#selectVisibleButton").click();
+    await page.locator("#deleteSelectedButton").click();
+    assert.equal(await page.evaluate(() => allQuestions.filter((q) => q.category === "data-mining-compact").length), 0);
+    assert.equal(await page.evaluate(() => allQuestions.filter((q) => q.category === "data-mining-prediction").length), 167);
+    await page.evaluate(() => restoreDeletedQuestions());
+    await startSet(page, "データマイニング 要点30問");
+    assert.equal(await page.evaluate(() => filtered().length), 30);
+    await page.locator("#quizMode").click();
+    await page.locator("#changeSetButton").click();
     await startSet(page, "物理の世界と先端技術 講義内課題");
     assert.equal(await page.evaluate(() => filtered().length), 12);
     for (let index = 0; index < physicsQuestions.length; index += 1) {
@@ -518,7 +578,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 12 physics answers, all quiz, lecture-6 and physics guide defaults, all 27 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all five sets.");
+    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 30 compact + 12 physics answers, source progress isolation, all quiz, lecture-6 and physics guide defaults, all 27 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all six sets.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));
