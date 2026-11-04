@@ -2799,13 +2799,20 @@
           sectionElement.className = "feedback-guide-section";
           const sectionHeading = document.createElement("h4");
           sectionHeading.textContent = section.title;
+          sectionElement.append(sectionHeading);
+          if (section.source) {
+            const sectionSource = document.createElement("p");
+            sectionSource.className = "feedback-guide-source";
+            sectionSource.textContent = section.source;
+            sectionElement.append(sectionSource);
+          }
           const list = document.createElement(section.steps ? "ol" : "ul");
           (section.steps || section.points || []).forEach((point) => {
             const item = document.createElement("li");
             item.textContent = point;
             list.append(item);
           });
-          sectionElement.append(sectionHeading, list);
+          sectionElement.append(list);
           if (section.code) {
             const pre = document.createElement("pre");
             pre.className = "feedback-guide-code";
