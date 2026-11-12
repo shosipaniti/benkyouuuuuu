@@ -31,7 +31,7 @@ async function checkCurrentAnswer(page, question) {
   await page.locator("#answerButton").click();
   const feedback = await page.locator("#feedback").innerText();
   assert(feedback.startsWith(question.type === "free" ? "模範解答" : "正解"), `${question.id}: ${feedback}`);
-  if (["database-prediction", "data-mining-prediction", "data-mining-compact", "database-quiz", "data-mining-quiz", "physics-advanced"].includes(question.category)) {
+  if (["database-prediction", "database-fd-practice", "data-mining-prediction", "data-mining-compact", "database-quiz", "data-mining-quiz", "physics-advanced"].includes(question.category)) {
     assert.equal(await page.locator("#feedback .feedback-guide-toggle").count(), 1, question.id);
   }
 }
@@ -154,7 +154,10 @@ async function run() {
   assert.equal(miningAnswer("data-mining-quiz2-012"), assignments.join(" / "));
   vm.runInNewContext(await fs.readFile(path.join(root, "database_prediction_questions.js"), "utf8"), data);
   const databasePredictions = data.window.DATABASE_PREDICTED_QUESTION_DATA;
-  assert.equal(databasePredictions.length, 213);
+  assert.equal(databasePredictions.length, 205);
+  const fdPractice = data.window.DATABASE_FD_PRACTICE_QUESTION_DATA;
+  assert.equal(fdPractice.length, 8);
+  assert.equal(new Set([...databasePredictions, ...fdPractice].map((q) => q.id)).size, 213);
   vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_prediction_questions.js"), "utf8"), data);
   const miningPredictions = data.window.DATA_MINING_PREDICTED_QUESTION_DATA;
   assert.equal(miningPredictions.length, 167);
@@ -190,7 +193,7 @@ async function run() {
     await page.goto(url);
     await page.waitForSelector("#setList .set-card");
     assert.equal(await page.locator("#secondSemesterTab").getAttribute("aria-selected"), "true");
-    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データベース 予想問題", "データマイニング 小テスト", "データマイニング 要点30問", "データマイニング 予想問題", "物理の世界と先端技術 講義内課題"]);
+    assert.deepEqual(await page.locator("#setList h3").allTextContents(), ["データベース 小テスト", "データベース 予想問題", "FD・正規化 練習", "データマイニング 小テスト", "データマイニング 要点30問", "データマイニング 予想問題", "物理の世界と先端技術 講義内課題"]);
     await startSet(page, "データベース 小テスト");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 小テスト");
     assert.equal(await page.evaluate(() => filtered().length), 28);
@@ -231,13 +234,13 @@ async function run() {
 
     await page.locator("#listMode").click();
     await page.locator("#toggleCategoryEditorButton").click();
-    assert.equal(await page.locator("[data-category-row]").count(), 6);
+    assert.equal(await page.locator("[data-category-row]").count(), 7);
     await page.locator("[data-category-name='database-quiz']").fill("データベース 後期");
     await page.locator("#saveCategoryNamesButton").click();
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 後期");
     await page.locator("#toggleCategoryEditorButton").click();
     await page.locator("#toggleDeleteModeButton").click();
-    assert.equal(await page.locator("#categoryDeleteList button").count(), 6);
+    assert.equal(await page.locator("#categoryDeleteList button").count(), 7);
     await page.locator("#selectVisibleButton").click();
     await page.evaluate(() => { window.confirm = () => true; });
     await page.locator("#deleteSelectedButton").click();
@@ -275,13 +278,13 @@ async function run() {
 
     await page.locator("#changeSetButton").click();
     await startSet(page, "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 213);
+    assert.equal(await page.evaluate(() => filtered().length), 205);
     await page.setViewportSize({ width: 390, height: 844 });
     for (let index = 0; index < databasePredictions.length; index += 1) {
       await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
       const question = await page.evaluate(() => filtered()[state.index]);
       await checkCurrentAnswer(page, question);
-      if (question.lecture === 6 || question.source === "FD・正規化 練習") await checkGuideDefault(page, question);
+      if (question.lecture === 6) await checkGuideDefault(page, question);
       assert((await page.locator("#feedback").innerText()).includes(question.slideReference), question.id);
       await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
@@ -292,13 +295,7 @@ async function run() {
       await page.locator("#sourceFilter").selectOption(source);
       assert.equal(await page.evaluate(() => filtered().length), databasePredictions.filter((q) => q.source === source).length);
     }
-    await page.locator("#sourceFilter").selectOption("FD・正規化 練習");
-    assert.equal(await page.evaluate(() => filtered().length), 8);
-    await page.setViewportSize({ width: 320, height: 740 });
-    const fdQuestion = await page.evaluate(() => filtered()[state.index]);
-    await checkCurrentAnswer(page, fdQuestion);
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-    await page.screenshot({ path: path.join(root, "output/database-fd-practice-mobile.png"), fullPage: true });
+    assert.equal(await page.locator("#sourceFilter option[value='FD・正規化 練習']").count(), 0);
     await page.locator("#sourceFilter").selectOption("all");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => { state.index = filtered().findIndex((q) => q.images.length); state.revealed = false; render(); });
@@ -323,11 +320,34 @@ async function run() {
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 213);
+    assert.equal(await page.evaluate(() => filtered().length), 205);
     await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
     await page.locator("#feedback .feedback-guide-toggle").click();
     assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 12);
     await context.setOffline(false);
+
+    await page.locator("#changeSetButton").click();
+    await startSet(page, "FD・正規化 練習");
+    assert.deepEqual(await page.evaluate(() => filtered().map((q) => q.id)), Array.from(fdPractice, (q) => q.id));
+    await page.setViewportSize({ width: 320, height: 740 });
+    for (let index = 0; index < fdPractice.length; index += 1) {
+      await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
+      const question = await page.evaluate(() => filtered()[state.index]);
+      await checkCurrentAnswer(page, question);
+      assert((await page.locator("#feedback").innerText()).includes(question.slideReference), question.id);
+      await checkGuideDefault(page, question);
+    }
+    await page.screenshot({ path: path.join(root, "output/database-fd-practice-mobile.png"), fullPage: true });
+    await context.setOffline(true);
+    await page.reload();
+    await page.waitForSelector("#prompt");
+    assert.equal(await page.locator("#activeSetName").innerText(), "FD・正規化 練習");
+    assert.equal(await page.evaluate(() => filtered().length), 8);
+    await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
+    await page.locator("#feedback .feedback-guide-toggle").click();
+    assert.equal(await page.locator(".feedback-guide-tabs [aria-selected=true]").innerText(), "関数従属と分解");
+    await context.setOffline(false);
+    await page.setViewportSize({ width: 1280, height: 900 });
 
     await page.locator("#changeSetButton").click();
     await startSet(page, "データマイニング 小テスト");
@@ -560,9 +580,12 @@ async function run() {
       if (localStorage.getItem("test-seeded")) return;
       localStorage.setItem("test-seeded", "yes");
       localStorage.setItem("study-quiz-active-set-v1", "knowledge-final");
-      localStorage.setItem("study-quiz-standalone-progress-v1", JSON.stringify({ "knowledge-final-2020-001": "known" }));
+      localStorage.setItem("study-quiz-standalone-progress-v1", JSON.stringify({ "knowledge-final-2020-001": "known", "database-pred-06-023": "review" }));
       localStorage.setItem("study-quiz-standalone-category-labels-v1", JSON.stringify({ "knowledge-final": "以前の知識工学" }));
-      localStorage.setItem("study-quiz-standalone-edits-v1", JSON.stringify({ "knowledge-final-2020-001": { prompt: "保存していた問題文" } }));
+      localStorage.setItem("study-quiz-standalone-edits-v1", JSON.stringify({
+        "knowledge-final-2020-001": { prompt: "保存していた問題文" },
+        "database-pred-06-023": { category: "database-prediction", prompt: "保存していたFD問題文" }
+      }));
       localStorage.setItem("study-quiz-archived-sets-v1", JSON.stringify(["audio"]));
     });
     await legacyPage.goto(url);
@@ -584,8 +607,14 @@ async function run() {
     await legacyPage.locator("#firstSemesterTab").click();
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
+    await legacyPage.locator("#secondSemesterTab").click();
+    await legacyPage.locator("#changeSetButton").click();
+    await startSet(legacyPage, "FD・正規化 練習");
+    assert.equal(await legacyPage.evaluate(() => filtered().length), 8);
+    assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していたFD問題文");
+    assert.equal(await legacyPage.evaluate(() => state.progress[filtered()[0].id]), "review");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 213 database-prediction + 26 data-mining + 167 data-mining-prediction + 30 compact + 12 physics answers, source progress isolation, all quiz, FD practice, lecture-6 and physics guide defaults, all 27 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all six sets.");
+    console.log("PASS: 28 database + 205 database-prediction + 8 FD practice + 26 data-mining + 167 data-mining-prediction + 30 compact + 12 physics answers, source progress isolation, FD set migration, guide defaults, all 27 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all seven sets.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

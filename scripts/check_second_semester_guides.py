@@ -13,13 +13,13 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 data = json.loads(subprocess.check_output([
     os.environ.get("NODE_BINARY", "node"), "-e",
-    'global.window={};require("./database_prediction_questions.js");require("./data_mining_prediction_questions.js");require("./database_questions.js");require("./data_mining_questions.js");require("./second_semester_guides.js");console.log(JSON.stringify({guides:window.SECOND_SEMESTER_STUDY_GUIDES,db:window.DATABASE_PREDICTED_QUESTION_DATA,dm:window.DATA_MINING_PREDICTED_QUESTION_DATA,dbQuiz:window.DATABASE_QUESTION_DATA,dmQuiz:window.DATA_MINING_QUESTION_DATA,fixtures:window.DATABASE_PREDICTION_FIXTURES}));',
+    'global.window={};require("./database_prediction_questions.js");require("./data_mining_prediction_questions.js");require("./database_questions.js");require("./data_mining_questions.js");require("./second_semester_guides.js");console.log(JSON.stringify({guides:window.SECOND_SEMESTER_STUDY_GUIDES,db:window.DATABASE_PREDICTED_QUESTION_DATA,fd:window.DATABASE_FD_PRACTICE_QUESTION_DATA,dm:window.DATA_MINING_PREDICTED_QUESTION_DATA,dbQuiz:window.DATABASE_QUESTION_DATA,dmQuiz:window.DATA_MINING_QUESTION_DATA,fixtures:window.DATABASE_PREDICTION_FIXTURES}));',
 ], cwd=ROOT))
 page_counts = {"database-prediction": {1: 71, 2: 56, 3: 85, 4: 56, 5: 72, 6: 67, 8: 66}, "data-mining-prediction": {1: 68, 2: 51, 3: 42, 4: 63, 5: 49, 6: 56}}
 questions = {"database-prediction": data["db"], "data-mining-prediction": data["dm"]}
 quiz_questions = {"database-quiz": data["dbQuiz"], "data-mining-quiz": data["dmQuiz"]}
 quiz_coverage = []
-assert len(data["guides"]) == 4
+assert len(data["guides"]) == 5
 for category, items in quiz_questions.items():
     guide = data["guides"][category]
     prediction = data["guides"][category.replace("-quiz", "-prediction")]
@@ -116,9 +116,11 @@ for topic, expected in {"第6回の作成と挿入の順序": "sqlite", "合否�
     q = next(q for q in data["db"] if q["topic"] == topic)
     assert data["guides"]["database-prediction"]["questionTabIds"][q["id"]] == expected, topic
 
-fd_practice = [q for q in data["db"] if q["source"] == "FD・正規化 練習"]
+fd_practice = data["fd"]
 assert len(fd_practice) == 8
-assert all(data["guides"]["database-prediction"]["questionTabIds"][q["id"]] == "dependencies" for q in fd_practice)
+fd_guide = data["guides"]["database-fd-practice"]
+assert fd_guide["tabs"] == data["guides"]["database-prediction"]["tabs"]
+assert fd_guide["questionTabIds"] == {q["id"]: "dependencies" for q in fd_practice}
 
 quiz_routes = {
     "database-quiz": {"database-quiz1-003": "relations", "database-quiz1-010": "select", "database-quiz1-011": "join", "database-quiz2-004": "join", "database-quiz2-005": "join", "database-quiz2-009": "design", "database-quiz2-013": "relations", "database-quiz2-015": "sqlite"},
@@ -128,9 +130,9 @@ for category, cases in quiz_routes.items():
     for question_id, expected in cases.items():
         assert data["guides"][category]["questionTabIds"][question_id] == expected, question_id
 
-lines = ["# 後期予想問題と小テストの詳しい解説", "", "データベース予想問題213問と小テスト28問、データマイニング予想問題167問と小テスト26問の計434問から詳しい解説を開ける。問題に対応するテーマを初期表示し、他のテーマへも移動できる。既存問題の問題文と正解は変更しない。", "", "小テストと予想問題は科目ごとに同じ解説を共有する。小テストにはtopicやlectureがないため、問題IDで関連テーマを明示する。", "", "講義の第1〜5回と演習、第6回データベース演習を基礎に、用語の区別、手順を追った例、SQLやRコード、間違えやすい条件を収録した。参照ページはPDF先頭を1とした番号。データベースとデータマイニングの「スライドまとめ」は、各科目の第1〜6回の要点を講義順に収録する。データベース第6回のテーマ別解説にはスライドと演習課題の両方を記す。", "", f"## 計算例の検証\n\nSQL {sql_cases}例をSQLite、R {len(r_cases)}例を実Rで実行した。実行に必要な練習データは既存問題のfixtureまたは各例の検証用setupから作る。コードをアプリの閲覧時に実行する機能ではない。", "", "SQLiteのNULL、結合、集計、更新の仕様とRの分散、k-means、主成分分析の出力も公式資料を補助に確認した。FDと無損失分解はDatabase System Conceptsの著者公開資料も補助に確認した。", "", "- https://www.sqlite.org/lang_select.html", "- https://www.sqlite.org/lang_update.html", "- https://www.db-book.com/slides-dir/PDF-dir/ch7.pdf", "- https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.html", "- https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html", "- https://stat.ethz.ch/R-manual/R-devel/library/stats/html/princomp.html", "", "## 予想問題のテーマと出典", "", "| 科目 | テーマ | 最初に表示する問題数 | 講義資料 |", "| --- | --- | --- | --- |"]
+lines = ["# 後期予想問題と小テストの詳しい解説", "", "データベース予想問題205問、小テスト28問、独立したFD・正規化の練習8問、データマイニング予想問題167問と小テスト26問の計434問から詳しい解説を開ける。問題に対応するテーマを初期表示し、他のテーマへも移動できる。既存問題の問題文と正解は変更しない。", "", "小テストと予想問題は科目ごとに同じ解説を共有する。小テストにはtopicやlectureがないため、問題IDで関連テーマを明示する。", "", "講義の第1〜5回と演習、第6回データベース演習を基礎に、用語の区別、手順を追った例、SQLやRコード、間違えやすい条件を収録した。参照ページはPDF先頭を1とした番号。データベースとデータマイニングの「スライドまとめ」は、各科目の第1〜6回の要点を講義順に収録する。データベース第6回のテーマ別解説にはスライドと演習課題の両方を記す。", "", f"## 計算例の検証\n\nSQL {sql_cases}例をSQLite、R {len(r_cases)}例を実Rで実行した。実行に必要な練習データは既存問題のfixtureまたは各例の検証用setupから作る。コードをアプリの閲覧時に実行する機能ではない。", "", "SQLiteのNULL、結合、集計、更新の仕様とRの分散、k-means、主成分分析の出力も公式資料を補助に確認した。FDと無損失分解はDatabase System Conceptsの著者公開資料も補助に確認した。", "", "- https://www.sqlite.org/lang_select.html", "- https://www.sqlite.org/lang_update.html", "- https://www.db-book.com/slides-dir/PDF-dir/ch7.pdf", "- https://stat.ethz.ch/R-manual/R-devel/library/stats/html/cor.html", "- https://stat.ethz.ch/R-manual/R-devel/library/stats/html/kmeans.html", "- https://stat.ethz.ch/R-manual/R-devel/library/stats/html/princomp.html", "", "## 予想問題のテーマと出典", "", "| 科目 | テーマ | 最初に表示する問題数 | 講義資料 |", "| --- | --- | --- | --- |"]
 lines.extend(f'| {"データベース" if category == "database-prediction" else "データマイニング"} | {label} | {count} | {source} |' for category, label, count, source in coverage)
 lines.extend(["", "## 小テストの初期表示", "", "| 科目 | テーマ | 問題数 |", "| --- | --- | --- |"])
 lines.extend(f'| {"データベース" if category == "database-quiz" else "データマイニング"} | {label} | {count} |' for category, label, count in quiz_coverage)
 (ROOT / "docs/second-semester-guides.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-print(f"PASS: {sum(len(q) for q in questions.values())} predictions + {sum(len(q) for q in quiz_questions.values())} quiz questions; 19 topic tabs and two 6-lecture slide summaries; {sql_cases} SQL and {len(r_cases)} R worked examples; source pages, exercise references and topic boundaries.")
+print(f"PASS: {sum(len(q) for q in questions.values())} predictions + {sum(len(q) for q in quiz_questions.values())} quiz questions + {len(fd_practice)} FD practice questions; 19 topic tabs and two 6-lecture slide summaries; {sql_cases} SQL and {len(r_cases)} R worked examples; source pages, exercise references and topic boundaries.")

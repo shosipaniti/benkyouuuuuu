@@ -278,7 +278,7 @@
   }
   window.SECOND_SEMESTER_STUDY_GUIDES = {
     "database-prediction": guide("データベースの基礎とSQL", databaseTabs, window.DATABASE_PREDICTED_QUESTION_DATA || [], [
-      ["dependencies", /^FD練習：|関数従属|無損失|受注|貸出/],
+      ["dependencies", /関数従属|無損失|受注|貸出/],
       ["cd", /CD|作曲|作詞|ボーカル|本人名義|演奏|複合外部キーのSQL/],
       ["outer", /外部結合|内部結合|4種の結合|結合相手|NULLの比較/],
       ["aggregate", /COUNT|AVG|MAX|MIN|GROUP BY|HAVING|集約|集計|最大値|最小値|グループ平均|都道府県別の人口平均|財布の総額|紙幣硬貨/],
@@ -303,6 +303,10 @@
     ], { 1: "statistics", 2: "charts", 3: "clustering", 4: "pca", 5: "charts" })
   };
   const guides = window.SECOND_SEMESTER_STUDY_GUIDES;
+  guides["database-fd-practice"] = {
+    ...guides["database-prediction"],
+    questionTabIds: Object.fromEntries((window.DATABASE_FD_PRACTICE_QUESTION_DATA || []).map((q) => [q.id, "dependencies"]))
+  };
   if (window.DATA_MINING_COMPACT_QUESTION_DATA) {
     const miningGuide = guides["data-mining-prediction"];
     guides["data-mining-compact"] = {

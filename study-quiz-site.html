@@ -1148,11 +1148,12 @@
       const defaultCategoryOrder = ["quiz", "prediction", "economics-final", "economics-final-prediction", "audio", "audio-prediction", "audio-final", "audio-final-prediction", "acoustics-final", "acoustics-final-prediction", "human-centered-final", "knowledge", "knowledge-review", "knowledge-quiz", "knowledge-prediction", "knowledge-final", "knowledge-final-quiz", "machine-learning", "machine-learning-prediction", "machine-learning-final"];
       defaultCategoryLabels["database-quiz"] = "データベース 小テスト";
       defaultCategoryLabels["database-prediction"] = "データベース 予想問題";
+      defaultCategoryLabels["database-fd-practice"] = "FD・正規化 練習";
       defaultCategoryLabels["data-mining-quiz"] = "データマイニング 小テスト";
       defaultCategoryLabels["data-mining-prediction"] = "データマイニング 予想問題";
       defaultCategoryLabels["data-mining-compact"] = "データマイニング 要点30問";
       defaultCategoryLabels["physics-advanced"] = "物理の世界と先端技術 講義内課題";
-      const secondSemesterCategories = ["database-quiz", "database-prediction", "data-mining-quiz", "data-mining-compact", "data-mining-prediction", "physics-advanced"];
+      const secondSemesterCategories = ["database-quiz", "database-prediction", "database-fd-practice", "data-mining-quiz", "data-mining-compact", "data-mining-prediction", "physics-advanced"];
       defaultCategoryOrder.unshift(...secondSemesterCategories);
       const defaultCategorySemesters = Object.fromEntries(defaultCategoryOrder.map((category) => [category, secondSemesterCategories.includes(category) ? "second" : "first"]));
       let categoryLabels = loadCategoryLabels();
@@ -1164,6 +1165,7 @@
       const extraQuestions = normalize(window.STUDY_EXTRA_QUESTION_DATA || [], "quiz");
       const databaseQuestions = normalize(window.DATABASE_QUESTION_DATA || [], "database-quiz");
       const databasePredictedQuestions = normalize(window.DATABASE_PREDICTED_QUESTION_DATA || [], "database-prediction");
+      const databaseFdPracticeQuestions = normalize(window.DATABASE_FD_PRACTICE_QUESTION_DATA || [], "database-fd-practice");
       const dataMiningQuestions = normalize(window.DATA_MINING_QUESTION_DATA || [], "data-mining-quiz");
       const dataMiningPredictedQuestions = normalize(window.DATA_MINING_PREDICTED_QUESTION_DATA || [], "data-mining-prediction");
       const dataMiningCompactQuestions = normalize(window.DATA_MINING_COMPACT_QUESTION_DATA || [], "data-mining-compact");
@@ -1171,7 +1173,7 @@
       let importedQuestions = loadImportedQuestions();
       let questionEdits = loadQuestionEdits();
       let deletedQuestionIds = new Set(loadDeletedQuestionIds());
-      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...dataMiningCompactQuestions, ...physicsQuestions, ...importedQuestions]));
+      let allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...databaseFdPracticeQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...dataMiningCompactQuestions, ...physicsQuestions, ...importedQuestions]));
       let validationIssues = validate(allQuestions);
       let semesterActiveSets = loadSemesterActiveSets();
       const initialSemester = loadSemester();
@@ -1363,7 +1365,10 @@
         return questions.map((question) => {
           const edit = questionEdits[question.id];
           if (!edit) return question;
-          return normalize([{ ...question, ...edit, id: question.id }], edit.category || question.category)[0];
+          // Older FD edits saved the previous set even when only the text changed.
+          const legacyFdCategory = question.category === "database-fd-practice" && edit.category === "database-prediction" && !edit.baseCategory;
+          const category = legacyFdCategory ? question.category : edit.category || question.category;
+          return normalize([{ ...question, ...edit, id: question.id, category }], category)[0];
         });
       }
 
@@ -1496,7 +1501,7 @@
       }
 
       function refreshQuestionData() {
-        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...dataMiningCompactQuestions, ...physicsQuestions, ...importedQuestions]));
+        allQuestions = visibleQuestions(applyQuestionEdits([...quizQuestions, ...predictedQuestions, ...extraQuestions, ...databaseQuestions, ...databasePredictedQuestions, ...databaseFdPracticeQuestions, ...dataMiningQuestions, ...dataMiningPredictedQuestions, ...dataMiningCompactQuestions, ...physicsQuestions, ...importedQuestions]));
         validationIssues = validate(allQuestions);
         ensureActiveSet();
         applyCategoryOrderToQuestions();
@@ -3035,6 +3040,7 @@
             images: fieldList(images.value)
           }], category.value)[0];
           questionEdits[question.id] = {
+            baseCategory: question.category,
             source: edited.source,
             category: edited.category,
             number: edited.number,

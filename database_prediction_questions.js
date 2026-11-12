@@ -372,7 +372,7 @@
   }
   const practiceSource = "FD・正規化 練習";
   let practiceNumber = 0;
-  const practice = (mode, details) => ({ source: practiceSource, number: ++practiceNumber, verification: { mode, ...details } });
+  const practice = (mode, details) => ({ category: "database-fd-practice", source: practiceSource, number: ++practiceNumber, verification: { mode, ...details } });
   const enrollment = { columns: "SCNTG", fds: ["S→N", "C→T", "SC→G"] };
   const enrollmentRules = "履修表R(S, C, N, T, G)を考える。S=学籍番号、C=科目コード、N=学生名、T=科目名、G=成績。\n学籍番号ごとに学生名、科目コードごとに科目名が1つ決まる。学生と科目の組ごとに成績が1つ決まる。同姓同名や同名の科目はあり得る。これらのルール以外にFDを追加しない。";
   const alternateKeys = { columns: "ABC", fds: ["AB→C", "C→B"] };
@@ -423,5 +423,6 @@
   }
   window.DATABASE_PREDICTION_EXERCISE_COVERAGE = exerciseCoverage;
   window.DATABASE_PREDICTION_FIXTURES = fixtures;
-  window.DATABASE_PREDICTED_QUESTION_DATA = questions;
+  window.DATABASE_PREDICTED_QUESTION_DATA = questions.filter((q) => q.category === "database-prediction");
+  window.DATABASE_FD_PRACTICE_QUESTION_DATA = questions.filter((q) => q.category === "database-fd-practice");
 })();

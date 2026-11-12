@@ -13,9 +13,12 @@ ROOT = Path(__file__).resolve().parents[1]
 NODE = os.environ.get("NODE_BINARY", "node")
 data = json.loads(subprocess.check_output([
     NODE, "-e",
-    'global.window={};require("./database_prediction_questions.js");console.log(JSON.stringify({questions:window.DATABASE_PREDICTED_QUESTION_DATA,fixtures:window.DATABASE_PREDICTION_FIXTURES,exercises:window.DATABASE_PREDICTION_EXERCISE_COVERAGE}));',
+    'global.window={};require("./database_prediction_questions.js");console.log(JSON.stringify({questions:window.DATABASE_PREDICTED_QUESTION_DATA,practice:window.DATABASE_FD_PRACTICE_QUESTION_DATA,fixtures:window.DATABASE_PREDICTION_FIXTURES,exercises:window.DATABASE_PREDICTION_EXERCISE_COVERAGE}));',
 ], cwd=ROOT))
-questions = data["questions"]
+assert len(data["questions"]) == 205 and len(data["practice"]) == 8
+assert all(q["category"] == "database-prediction" for q in data["questions"])
+assert all(q["category"] == "database-fd-practice" for q in data["practice"])
+questions = data["questions"] + data["practice"]
 fixtures = data["fixtures"]
 exercises = data["exercises"]
 
@@ -115,7 +118,7 @@ sql_checked = 0
 practice_checked = 0
 for question in questions:
     label = question["id"]
-    assert question["category"] == "database-prediction" and question["semester"] == "second", label
+    assert question["semester"] == "second", label
     assert question["prompt"] and question["answer"] and question["explanation"] and question["topic"], label
     if question["lecture"] == 6 and question.get("exerciseTasks"):
         assert question["pages"] == [] and question["exerciseTasks"], label
@@ -136,7 +139,8 @@ for question in questions:
     for image in question["images"]:
         assert (ROOT / image).is_file(), (label, image)
     case = question.get("verification")
-    if question["source"] == "FD・正規化 練習":
+    if question["category"] == "database-fd-practice":
+        assert question["source"] == "FD・正規化 練習", label
         assert case and question["lecture"] in {6, 8}, label
         assert practice_answers(case, choices) == question["answer"].split(" / "), label
         practice_checked += 1
@@ -251,13 +255,13 @@ for lecture, count in {1: 27, 2: 31, 3: 30, 4: 17, 5: 48}.items():
 assert len([q for q in questions if q["lecture"] == 6]) == 26
 assert len([q for q in questions if q["lecture"] == 8]) == 4
 assert practice_checked == 8
-assert [q["number"] for q in questions if q["source"] == "FD・正規化 練習"] == list(range(1, 9))
+assert [q["number"] for q in data["practice"]] == list(range(1, 9))
 with connect("exerciseExamCorrected") as connection:
     assert connection.execute("SELECT AVG(score) FROM exam_results WHERE faculty='X学部'").fetchone()[0] == 80.5
     assert connection.execute("SELECT MAX(score) FROM exam_results WHERE id>=1236").fetchone()[0] == 93
     assert connection.execute("SELECT AVG(score) FROM exam_results WHERE faculty='X学部' AND grade=2").fetchone()[0] == 90.5
 
-lines = ["# データベース予想問題の範囲対応", "", "第1〜5回の学習内容と第6回の演習に加え、第6・8回スライドに基づくFD・正規化の練習8問を収録する。ガイダンスの出席・成績規則や、OSのインストール手順は出題範囲に含めない。資料中の同じ例の段階的な説明は、テーマ単位で統合した。", "", "知識工学の過去問から参照した形式：用語選択、穴埋め対応、順序・分類、数値や実行結果、短文記述。内容と解答根拠はデータベースの資料に基づく。", "", "SQLは問題文中に示したデータで検証する。講義のsample.db全件の値を暗記させる問題ではない。記述は同義の正解を認めるため自己採点とする。", ""]
+lines = ["# データベース予想問題とFD・正規化練習の範囲対応", "", "予想問題は第1〜5回の学習内容と第6回の演習の205問。第6・8回スライドに基づくFD・正規化の練習8問は、問題IDを変えず別セットへ移した。ガイダンスの出席・成績規則や、OSのインストール手順は出題範囲に含めない。資料中の同じ例の段階的な説明は、テーマ単位で統合した。", "", "知識工学の過去問から参照した形式：用語選択、穴埋め対応、順序・分類、数値や実行結果、短文記述。内容と解答根拠はデータベースの資料に基づく。", "", "SQLは問題文中に示したデータで検証する。講義のsample.db全件の値を暗記させる問題ではない。記述は同義の正解を認めるため自己採点とする。", ""]
 for lecture in page_counts:
     items = [q for q in questions if q["lecture"] == lecture]
     lines.extend([f"## 第{lecture}回（{len(items)}問）", "", "| 問題ID | テーマ | 参照ページ | 形式 |", "| --- | --- | --- | --- |"])
