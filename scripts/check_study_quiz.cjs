@@ -154,7 +154,7 @@ async function run() {
   assert.equal(miningAnswer("data-mining-quiz2-012"), assignments.join(" / "));
   vm.runInNewContext(await fs.readFile(path.join(root, "database_prediction_questions.js"), "utf8"), data);
   const databasePredictions = data.window.DATABASE_PREDICTED_QUESTION_DATA;
-  assert.equal(databasePredictions.length, 205);
+  assert.equal(databasePredictions.length, 213);
   vm.runInNewContext(await fs.readFile(path.join(root, "data_mining_prediction_questions.js"), "utf8"), data);
   const miningPredictions = data.window.DATA_MINING_PREDICTED_QUESTION_DATA;
   assert.equal(miningPredictions.length, 167);
@@ -275,13 +275,13 @@ async function run() {
 
     await page.locator("#changeSetButton").click();
     await startSet(page, "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 205);
+    assert.equal(await page.evaluate(() => filtered().length), 213);
     await page.setViewportSize({ width: 390, height: 844 });
     for (let index = 0; index < databasePredictions.length; index += 1) {
       await page.evaluate((value) => { state.index = value; state.revealed = false; render(); }, index);
       const question = await page.evaluate(() => filtered()[state.index]);
       await checkCurrentAnswer(page, question);
-      if (question.lecture === 6) await checkGuideDefault(page, question);
+      if (question.lecture === 6 || question.source === "FD・正規化 練習") await checkGuideDefault(page, question);
       assert((await page.locator("#feedback").innerText()).includes(question.slideReference), question.id);
       await page.waitForFunction(() => [...document.querySelectorAll("#images img")].every((img) => img.complete && img.naturalWidth > 0));
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, question.id);
@@ -290,8 +290,15 @@ async function run() {
     for (const lecture of [1, 2, 3, 4, 5, 6]) {
       const source = databasePredictions.find((q) => q.lecture === lecture).source;
       await page.locator("#sourceFilter").selectOption(source);
-      assert.equal(await page.evaluate(() => filtered().length), databasePredictions.filter((q) => q.lecture === lecture).length);
+      assert.equal(await page.evaluate(() => filtered().length), databasePredictions.filter((q) => q.source === source).length);
     }
+    await page.locator("#sourceFilter").selectOption("FD・正規化 練習");
+    assert.equal(await page.evaluate(() => filtered().length), 8);
+    await page.setViewportSize({ width: 320, height: 740 });
+    const fdQuestion = await page.evaluate(() => filtered()[state.index]);
+    await checkCurrentAnswer(page, fdQuestion);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await page.screenshot({ path: path.join(root, "output/database-fd-practice-mobile.png"), fullPage: true });
     await page.locator("#sourceFilter").selectOption("all");
     await page.setViewportSize({ width: 390, height: 844 });
     await page.evaluate(() => { state.index = filtered().findIndex((q) => q.images.length); state.revealed = false; render(); });
@@ -316,7 +323,7 @@ async function run() {
     await page.reload();
     await page.waitForSelector("#prompt");
     assert.equal(await page.locator("#activeSetName").innerText(), "データベース 予想問題");
-    assert.equal(await page.evaluate(() => filtered().length), 205);
+    assert.equal(await page.evaluate(() => filtered().length), 213);
     await checkCurrentAnswer(page, await page.evaluate(() => filtered()[state.index]));
     await page.locator("#feedback .feedback-guide-toggle").click();
     assert.equal(await page.locator(".feedback-guide-tabs [role=tab]").count(), 12);
@@ -578,7 +585,7 @@ async function run() {
     assert.equal(await legacyPage.locator("#activeSetName").innerText(), "以前の知識工学");
     assert.equal(await legacyPage.locator("#prompt").innerText(), "保存していた問題文");
     assert.deepEqual(errors, []);
-    console.log("PASS: 28 database + 205 database-prediction + 26 data-mining + 167 data-mining-prediction + 30 compact + 12 physics answers, source progress isolation, all quiz, lecture-6 and physics guide defaults, all 27 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all six sets.");
+    console.log("PASS: 28 database + 213 database-prediction + 26 data-mining + 167 data-mining-prediction + 30 compact + 12 physics answers, source progress isolation, all quiz, FD practice, lecture-6 and physics guide defaults, all 27 detailed-guide tabs, keyboard navigation, old guide compatibility, numeric-equivalence checks, source references, written-answer reveal, matching, semester isolation, migration, progress, filters, edits, deletion, archive/restore, import, mobile layout and offline guides in all six sets.");
   } finally {
     if (browser) await browser.close();
     await new Promise((resolve) => server.close(resolve));

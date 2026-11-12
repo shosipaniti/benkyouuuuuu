@@ -370,6 +370,53 @@
       exerciseCoverage.push({ lecture: Number(lecture), task: Number(task), questionIds: items.map((q) => q.id) });
     }
   }
+  const practiceSource = "FD・正規化 練習";
+  let practiceNumber = 0;
+  const practice = (mode, details) => ({ source: practiceSource, number: ++practiceNumber, verification: { mode, ...details } });
+  const enrollment = { columns: "SCNTG", fds: ["S→N", "C→T", "SC→G"] };
+  const enrollmentRules = "履修表R(S, C, N, T, G)を考える。S=学籍番号、C=科目コード、N=学生名、T=科目名、G=成績。\n学籍番号ごとに学生名、科目コードごとに科目名が1つ決まる。学生と科目の組ごとに成績が1つ決まる。同姓同名や同名の科目はあり得る。これらのルール以外にFDを追加しない。";
+  const alternateKeys = { columns: "ABC", fds: ["AB→C", "C→B"] };
+  const booking = { columns: "ABC", fds: ["A→B", "B→C"] };
+  const bookingRules = "予約表R(A, B, C)を考える。A=予約番号、B=顧客番号、C=顧客の地域。業務上のFDはA→B、B→Cと、それらから導けるものだけとする。";
+  const nfChoices = ["第1正規形", "第2正規形", "第3正規形", "ボイス・コッド正規形"];
+  const normal = (topic, pages, rules, answer, explanation, schema) =>
+    single(8, topic, pages, rules + "\n各セルには1つの値が入る。選択肢の中で、満たす最も高い正規形を選びなさい。", answer, nfChoices.filter((choice) => choice !== answer), explanation, practice("fd-normal", schema));
+
+  single(6, "FD練習：表から成立する向きを選ぶ", [56, 58],
+    "次の4行だけを対象に、成立するFDを選びなさい。\nR(A, B, C)\n(a, 1, x)\n(a, 1, y)\n(b, 2, x)\n(c, 2, x)",
+    "A→B", ["B→A", "B→C", "C→B"],
+    "A=aの2行ではBがどちらも1なので、A→Bはこの表で成立します。B=2にはbとc、B=1にはxとy、C=xには1と2が対応し、他の3つには反例があります。現在の表で成立しても、将来も成立する業務ルールとは限りません。",
+    practice("fd-rows", { columns: "ABC", rows: [["a", 1, "x"], ["a", 1, "y"], ["b", 2, "x"], ["c", 2, "x"]] }));
+  multi(6, "FD練習：履修のルールから決める", [56, 58, 64],
+    enrollmentRules + "\nSCはSとCの組を表す。業務ルールから成立するFDを全て答えなさい。",
+    ["S→N", "C→T", "SC→G"], ["S→G", "N→S"],
+    "学生名は学生ごと、科目名は科目ごと、成績は学生と科目の組ごとに決まります。学生だけでは科目ごとの成績を区別できません。同姓同名があるので学生名から学籍番号は決まりません。",
+    practice("fd-implication", enrollment));
+  single(6, "FD練習：左辺に足りない属性を探す", [58, 62, 63],
+    "R(A, B, C, D, E)の業務ルールはA→B、BC→D、D→Eと、そこから導けるFDだけとする。ABなどは属性の組を表す。成立するFDを選びなさい。",
+    "AC→E", ["A→E", "C→E", "AB→E"],
+    "AからBを得ると、ACからBCがそろいます。BCからD、DからEが決まるのでAC→Eが成立します。AやABだけではCが得られず、CだけではBが得られません。",
+    practice("fd-implication", { columns: "ABCDE", fds: ["A→B", "BC→D", "D→E"] }));
+  multi(6, "FD練習：候補キーをすべて選ぶ", [51, 52, 58],
+    "R(A, B, C)の業務ルールはAB→C、C→Bと、そこから導けるFDだけとする。ABはAとBの組を表す。候補キーを選択肢から全て答えなさい。",
+    ["AB", "AC"], ["ABC", "C"],
+    "ABにCが加わり、ACにBが加わるので、どちらも全属性を決めます。A・B・Cのどれか1つだけでは全属性は決まりません。ABCは全属性を決めますが、余分な属性があるため候補キーではありません。",
+    practice("fd-candidates", alternateKeys));
+
+  normal("FD練習：部分従属と第2正規形", [28, 39, 47, 48], enrollmentRules, "第1正規形",
+    "候補キーはSCです。S→NとC→Tは候補キーの一部だけで非キー属性が決まる部分従属なので、2NFを満たしません。SC→Gは成績を決めるのに両方が必要なため、ここでは部分従属ではありません。", enrollment);
+  normal("FD練習：推移従属と第3正規形", [39, 42, 44], bookingRules, "第2正規形",
+    "候補キーはAだけなので、この例では部分従属がありません。一方、予約番号Aから顧客番号B、Bから地域Cが決まります。B→Cは非キー属性への推移従属を生むので、元の表は3NFを満たしません。", booking);
+  single(8, "FD練習：推移従属を分解する", [19, 42, 44, 52],
+    bookingRules + "\n各値は原子的とする。全属性を残し、自然結合で元に戻せて、A→BとB→Cを分解後の表で確認できる正規化を選びなさい。",
+    "R1(A, B) と R2(B, C)", ["R1(A, B) と R2(A, C)", "R1(A, C) と R2(B, C)", "R1(A, B) と R2(B)"],
+    "予約ごとに顧客番号を持たせ、顧客ごとの地域は別表へ移します。共通属性BがR2の全属性を決めるため無損失です。A→BはR1、B→CはR2で確認できます。Aで分ける案ではB→Cが片方の表だけでは確認できません。",
+    practice("fd-decomposition", booking));
+  normal("FD練習：3NFとBCNFの境界", [46, 50],
+    "R(A, B, C)の業務ルールはAB→C、C→Bと、そこから導けるFDだけとする。ABはAとBの組を表す。",
+    "第3正規形",
+    "候補キーはABとACです。C→Bの左辺CはAを決められないためスーパーキーではなく、BCNFを満たしません。右辺Bは候補キーABの構成要素なので、3NFではこのFDが許されます。", alternateKeys);
+
   for (const q of questions.filter((q) => q.exerciseTasks)) {
     q.exerciseReference = `第${q.lecture}回 演習課題提出シート 課題${q.exerciseTasks.join(", ")}（関連する練習を含む）`;
     q.slideReference = q.pages.length ? `${q.slideReference} ／ ${q.exerciseReference}` : `データベース工学 ${q.exerciseReference}`;
